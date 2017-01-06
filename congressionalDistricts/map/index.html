@@ -642,7 +642,7 @@ function everythingelse(us, congress, reps, awards_0, ids){
 					  )*/
 					  .data(function(d) {
 							  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,""))];}
+							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,"")),d.FBO_or_PPPs,d.PPP_Project_Name];}
 						  )	  
 					  .enter()
 					  .append("td")
