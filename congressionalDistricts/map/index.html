@@ -336,11 +336,11 @@ var popup = d3.select("body").append("div")
 			
 //load data
 queue()
-    .defer(d3.json, "us.json")
-    .defer(d3.json, "us-congress-114.json")
-	.defer(d3.json, "reps2.json")
-	.defer(d3.json, "awards_USAID_latest.json")
-	.defer(d3.json, "state_ids2.json")
+    .defer(d3.json, "../us.json")
+    .defer(d3.json, "../us-congress-114.json")
+	.defer(d3.json, "../reps2.json")
+	.defer(d3.json, "../awards_USAID_latest.json")
+	.defer(d3.json, "../state_ids2.json")
     .await(ready);
 
 function ready(error, us, congress, reps, awards, ids) {
