@@ -311,6 +311,8 @@ var popup = d3.select("body").append("div")
 	var fType_0 = "Filter by Vendor Type";
 	var fPship_0 = "Filter by PPP/FBO";
 	var fState_0 = "Filter by State";
+	
+	var prevK = 1;
 
 			
 //load data
@@ -918,13 +920,15 @@ function zoomed(){
 	//console.log("k: "+d3.event.transform.k);
 	
 //smooth this out
-	if(d3.event.transform.k > 1.25){
+	if(prevK < 1.25 && d3.event.transform.k >= 1.25){
     d3.selectAll(".state-boundaries").style("stroke-width", ".4px");
 	d3.selectAll(".district-boundaries").style("stroke-width", ".15px");
-	}else if(d3.event.transform.k < 1.25){
+	}else if(prevK > 1.25 && d3.event.transform.k <= 1.25){
     d3.selectAll(".state-boundaries").style("stroke-width", "1px");
 	d3.selectAll(".district-boundaries").style("stroke-width", ".4px");
 	}
+	
+	prevK = d3.event.transform.k;
 	
 }
 
