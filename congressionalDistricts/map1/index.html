@@ -176,7 +176,7 @@ div.button{
 }
 
 #chart1 {
-	background:#FAFAFA;
+	background:#FFF;
 }
 
 .banner {
@@ -225,7 +225,7 @@ var dispatch = d3.dispatch("load", "statechange");
 
 //"#f0f0f0";
 //"#ccc"; 
-var cl = "#ccc"; 
+var cl = "#e6e6e6"; 
 //"#d9d9d9";
 //"#e6e6e6";//"#bbb";//"#ccc";
 
@@ -340,7 +340,7 @@ queue()
     .defer(d3.json, "us-congress-114.json")
 	.defer(d3.json, "reps2.json")
 	.defer(d3.json, "awards_USAID_latest.json")
-	.defer(d3.json, "state_ids.json")
+	.defer(d3.json, "state_ids2.json")
     .await(ready);
 
 function ready(error, us, congress, reps, awards, ids) {
@@ -568,8 +568,8 @@ function everythingelse(us, congress, reps, awards_0, ids){
 		choropleth = d3.scaleLog()
 		.domain([1000000,maxDollars]) //temp fix - start at 1000000
 	    //.domain([100,5600])
-		//.range(['#a1dab4', '#253494']);
-		.range(['#eff3ff', '#08519c']);
+		.range(['#c6dbef', '#084594']);
+		//.range(['#eff3ff', '#08519c']);
 
 	  svg.append("defs").append("path")
 	      .attr("id", "land")
@@ -639,7 +639,7 @@ function everythingelse(us, congress, reps, awards_0, ids){
 					  )*/
 					  .data(function(d) {
 							  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,""))];}
+							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,"")),d.FBO_or_PPPs,d.PPP_Project_Name];}
 						  )	  
 					  .enter()
 					  .append("td")
@@ -939,18 +939,18 @@ function everythingelse(us, congress, reps, awards_0, ids){
 	svg.attr("transform", d3.event.transform);
 }*/
 
-function zoomed(){
-	
-	
+function zoomed(){	
 	svg.attr("transform", d3.event.transform);
 	//console.log("k: "+d3.event.transform.k);
 	
 	//do this later
-	/*if(d3.event.transform.k > 1.25){
-    d3.selectAll(".state-boundaries").style("stroke-width", ".75px");
-	d3.selectAll(".district-boundaries").style("stroke-width", ".5px");
-	}*/
-	
+	if(d3.event.transform.k > 1.25){
+    d3.selectAll(".state-boundaries").style("stroke-width", ".5px");
+	d3.selectAll(".district-boundaries").style("stroke-width", ".25px");
+	}else if(d3.event.transform.k < 1.25){
+    d3.selectAll(".state-boundaries").style("stroke-width", "1px");
+	d3.selectAll(".district-boundaries").style("stroke-width", ".4px");
+	}	
 }
 
 function reset() {
