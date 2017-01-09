@@ -737,7 +737,10 @@ function everythingelse(us, congress, reps, awards_0, ids){
 	      .range([0, 200]);	
 		  
 		  
-		  chart.attr("overflow", "none"); 	  
+		  chart.attr("overflow", "none"); 	
+		  
+		 chart.selectAll("g").remove();
+		    
     var bchart = chart.selectAll("g")
 		  //.data(data);
 		  .data(data, function(d){return d;});  
@@ -804,7 +807,7 @@ function everythingelse(us, congress, reps, awards_0, ids){
 			  }	
 		  })
 		   
-		   bchart.exit().remove();	 
+		   //bchart.exit().remove();	 
 	  	  
 		  /*dispatch.on("statechange.chart", function(state) {
 			  //console.log("changed chart!"+state);
@@ -830,11 +833,14 @@ function everythingelse(us, congress, reps, awards_0, ids){
 	      .domain([min, max])
 	      .range([0, 200]);	
 		   	  
-   //console.log(data);
+  // console.log(data);
+   
+   //feel like this could be done using exit().remove() but I can't figure it out...
+   chart.selectAll("g").remove();
 
     var bchart = chart.selectAll("g")
 		  //.data(data);	  
-		  .data(data, function(d){ 
+		  .data(data, function(d){ console.log(d);
 			  return (d);});    
 		  
 		bchart.enter()
@@ -888,7 +894,7 @@ function everythingelse(us, congress, reps, awards_0, ids){
 		  })
 		   
 
-		   bchart.exit().remove();
+		   //bchart.exit().remove();
 		   //console.log(bchart);
 		   
 		   //bchart.exit().remove();	 
