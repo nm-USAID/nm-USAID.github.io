@@ -387,11 +387,16 @@ function ready(error, us, congress, reps, awards, ids) {
   .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated.replace(/,/g,""));}); })
   .sortKeys(d3.ascending)
   .entries(awards);
+  
   awardsByVendorType_0 = d3.nest()
   .key(function(d){return d.Vendor_Category;})
   //.rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated.replace(/,/g,""));}); })
   .sortKeys(d3.ascending)
   .entries(awards);
+  
+  
+  awardsByYear_0 = awardsByYear_0.filter(function(d){return d.key != "null" && d.key != "";});
+  awardsByElement_0 = awardsByElement_0.filter(function(d){return d.key != "null" && d.key != "";});
   
   
   //these are data being pulled
