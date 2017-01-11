@@ -203,7 +203,7 @@ div.button{
 	<div class="header" id="dropdowns">
 	</div>
 	<div class="vis">
-	<div class="button"><button>&#127968;</button></div>
+	<div class="button"><button id="b_reset">&#127968;</button><button id="cb">close popup</button></div>
 	<div class="container" id="chart1">
 	</div>
 	<div class="container" id="chart2">
@@ -218,7 +218,7 @@ div.button{
 
 <script>
 
-d3.select("button").on("click", reset);
+d3.select("#b_reset").on("click", reset);
 
 var dispatch = d3.dispatch("load", "statechange");
 
@@ -304,15 +304,31 @@ var pTotal = pic.append("text")
   //.attr("width", 50)
   //.attr("height", 75); 	
   
-	
+d3.select("#cb").style("opacity",0);	
 	//popup divs
 
 var popup = d3.select("body").append("div")	
     .attr("class", "popup")	
-    .style("opacity", 0);	
+    .style("opacity", 0);
+
+popup.append("button")
+.attr("id","cb")
+.text("close popup");
+
+/*var popup = d3.select("#popup")
+	.style("opacity", 0);*/
+  
+  
+  var exit_popup;
+  //var cb; //button
+  /*.on("mouseover", function(){
+	  console.log("clicked!");
+	  d3.select(this).style("fill","blue");
+  });*/
 	
 	
 	var popupOn = false;
+	var popupId = 0;
 	var awardsTotalByDistId_0;
 	var awardsTotalByDistId_2;//temp
 	var awardsTotalByState_0;
@@ -595,6 +611,7 @@ function everythingelse(us, congress, reps, awards_0, ids){
 	      .attr("xlink:href", "#land");  
 	
 		//join data
+		  
 
 	  var dd = svg.append("g")
 		  .attr("class", "districts")
@@ -605,6 +622,7 @@ function everythingelse(us, congress, reps, awards_0, ids){
 		  .enter().append("path")
 		  .attr("d", path)
 		  .attr("id", function(d){return "district"+d.id;})
+		  .attr("active","true")
 		  .attr("basecolor", function(d){
 			  var c = getVal(d.id);
 			  if(c == 0){
@@ -617,50 +635,68 @@ function everythingelse(us, congress, reps, awards_0, ids){
 		  })
 		  .style("fill", function(d){return d3.select("#district"+d.id).attr("basecolor");})
 		  .on("click", function(d,i){
-			  if(getVal(d.id) != undefined){	  
+			  d.active = (d.active != undefined) ? d.active:false;
+			  if(getVal(d.id) != undefined && popupOn==d.active){ //&& (!popupOn && (d.active==true || d.active == undefined))	  
 			  var obj = congress.objects.districts.geometries[i].rep;
 		  
 			  		  d.active = !d.active;
 			  		  var active  = d.active ? true : false,
 			  		  op = active ? 1 : 0;  
+					  
+					  
 			  		  popup.transition()		
 			  		  .duration(400)		
 			  		  .style("opacity", op)
 			  		  .style("left", (width/2)-350+"px")		
 			  		  .style("top", (height/2)-150+"px");
+					  
+					  
+					  //start listener for exit button
+					  /*if(active){
+						  eb_listen(d.id);
+					  }*/
 				  
-					  popup.html(obj.State +" - "+obj.District + "<br/>" 
-					  + obj.Representative +" ("+ obj.Party 
-					  + ")"+"<br/>"+"$"+formatNumber(getVal(d.id))+"<br/>"+"<br/>");
+				  //add back here
+	popup.html(obj.State +" - "+obj.District + "<br/>" 
+						  + obj.Representative +" ("+ obj.Party 
+						  + ")"+"<br/>"+"$"+formatNumber(getVal(d.id))+"<br/>"+"<br/>");
+					  
 				  
-					  var datT = awardsByDist.filter(function(v){
-						  return v.key == ""+d.id+"";})[0]['values'];		 
-					  var awards = popup.append("div")
-					  .attr("class","awards");
+						  var datT = awardsByDist.filter(function(v){
+							  return v.key == ""+d.id+"";})[0]['values'];
+						  		 
+						  var awards = popup.append("div")
+						  .attr("class","awards");
 				  
-					  var rows = awards.selectAll("text")
-					  .data(datT)
-					  .enter()
-					  .append("tr");
-					  //.attr("class","rows");
-					  //.attr("style", "background: #cccc");
+						  var rows = awards.selectAll("text")
+						  .data(datT)
+						  .enter()
+						  .append("tr");
+
 				  
-					  var cells = rows.selectAll("td")
-					  /*.data(["FY","Element","Vendor Name","Vendor Type","Obligation"].concat(function(d) {
-						  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-						  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,""))];});
-					  )*/
-					  .data(function(d) {
-							  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,"")),d.FBO_or_PPPs,d.PPP_Project_Name];}
-						  )	  
-					  .enter()
-					  .append("td")
-					  .attr("class","rows")
-					  //.attr("style", "padding: 3px")
-					  .html(function(d) { return d; });
+						  var cells = rows.selectAll("td")
+						  .data(function(d) {
+								  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
+								  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,"")),d.FBO_or_PPPs,d.PPP_Project_Name];}
+							  )	  
+						  .enter()
+						  .append("td")
+						  .attr("class","rows")
+							  .html(function(d) { return d; });
+					  
+					//end section  
+				  
+						  d3.select("#cb").style("opacity",op);
 				  
 					  popupOn = d.active;
+					  
+					  if(popupOn){
+						  popupId = d.id;
+					  }else{
+						  popupId = 0;
+					  }
+					  
+					  //console.log(popupOn+" "+d.active+" "+active);
 				  
 					  if(popupOn){
 						  tooltip.transition()
@@ -703,7 +739,6 @@ function everythingelse(us, congress, reps, awards_0, ids){
 				  }	
 			  });		  
 	  
-
 	  svg.append("path")
 	      .attr("class", "district-boundaries")
 	      .datum(topojson.mesh(congress, congress.objects.districts, function(a, b) { 
@@ -713,8 +748,40 @@ function everythingelse(us, congress, reps, awards_0, ids){
 	  svg.append("path")
 	      .attr("class", "state-boundaries")
 	      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-	      .attr("d", path); 	    
+	      .attr("d", path);
+		  
+		  //d3.select("button#exit_popup").on("click",function(){console.log("please");})
+		  	  
+		  //console.log(congress.objects.districts);
+		  
+ 	  /*svg.selectAll("text")
+		  .data(topojson.feature(congress, congress.objects.districts).features)
+		  .enter()
+		  .append("text")
+		  .text(function(d){
+			  var c = ids.filter(function(v){ return v.value == d.id;});
+			  c = (c[0] != undefined) ? c[0].key: null;
+			  return c;
+		  })
+		  .attr("x",function(d){return path.centroid(d)[0];})
+		  .attr("y",function(d){return path.centroid(d)[1];})
+		  .attr("text-anchor","middle")
+		  .style("font","9px sans-serif");*/
+		  
+		 
+		  
+		  
+		  d3.select("#cb").on("click",function(){	  
+			  if(popupOn){
+				  d3.select("#district"+popupId).style("fill", d3.select("#district"+popupId).attr("basecolor"));
+				  d3.select("#district"+popupId).dispatch("click");
+		  		}
+		  });
+		  
+		  
 	}
+  
+	
 	
 	function updateMap(){
 		dists.each(function(){
