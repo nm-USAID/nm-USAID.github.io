@@ -231,7 +231,7 @@ div.button{
 
 d3.select("button").on("click", reset);
 
-var dispatch = d3.dispatch("load", "statechange");
+var dispatch = d3.dispatch("load", "statechange", "versionchange");
 
 
 //"#f0f0f0";
@@ -333,15 +333,18 @@ var popup = d3.select("body").append("div")
 	var awardsByDist_0;	
 	var choropleth;
 	var dists;
+	var states;
 	var formatNumber = d3.format(",.2f");
 	var barchart = d3.select("body").select("#chart2").append("div");	
 	
+	var fVersion = "Funding by State";
 	var fYear = "Filter by Year";
 	var fElement = "Filter by Program Element";
 	var fType = "Filter by Vendor Type";
 	var fPship = "Filter by PPP/FBO";
 	var fState = "Filter by State";
 	
+	var fVersion_0 = "Funding by State";
 	var fYear_0 = "Filter by Year";
 	var fElement_0 = "Filter by Program Element";
 	var fType_0 = "Filter by Vendor Type";
@@ -489,6 +492,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	function loadMenu(){
 		//console.log("load menu");
 	  	  /*********dropdown menus************/
+		//var version_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fVersion = this.value; dispatch.call("versionchange", this, awards_0);});
 	  	var year_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fYear = this.value; dispatch.call("statechange", this, awards_0);});
 	  	var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
 	  	var vendor_type_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fType = this.value; dispatch.call("statechange", this, awards_0);});
@@ -496,6 +500,12 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		var state_filter = d3.select("body").select("#stateMenu").append("select").on("change", function() { fState = this.value; dispatch.call("statechange", this, awards_0);});
 	
 	  	
+		/*version_filter.selectAll("option")
+	  	.data([{key: "Funding by State", value: "state"},{key: "Funding by Congressional District", value: "district"} ]) 
+	  	.enter().append("option")
+	  	.attr("value",function(d){return d['key'];})
+	  	.text(function(d){return d['key'];});*/
+		
 		year_filter.selectAll("option")
 	  	.data([{key: "Filter by Year", value: 10000}].concat(awardsByYear)) 
 	  	.enter().append("option")
@@ -528,7 +538,16 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	  	.text(function(d){return d['key'];});
 	  	/***********/
 		  
-	    dispatch.on("statechange.menu", function(awards_init) {
+	    /*dispatch.on("versionchange.menu", function(awards_init) {
+	    	if(fVersion != fVersion_0){
+	    		loadDistMap();
+	    	}else{
+	    		loadStateMap();
+	    	}
+			
+	    });*/
+		
+		dispatch.on("statechange.menu", function(awards_init) {
 		  		  //console.log("changed menu!"+state);
 		  		  var awards_tmp = awards_init;
 				  
@@ -579,14 +598,21 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					    .entries(awards_tmp)
 					    .sort(function(a, b){ return d3.descending(a.value.total, b.value.total); });	
 							
-		  	  
 	  
 						if(fState != fState_0){
 			  loadDistChart(awardsTotalByDistId);
 		  }else{
 			  loadChart(awardsTotalByState);
 		  }
-		  	  updateMap();
+		  
+		  if(fVersion != fVersion_0){
+			  updateDistMap();
+			  //loadDistMap();
+		  	
+		  }else{
+		  	  updateStateMap();
+			  //loadStateMap()
+		  }
 	  
 		  	  });
 		
@@ -610,7 +636,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  //.attr("class","states")
 		  .selectAll("path");
 		  
-		  var states = ss.data(us_states.features)
+		  states = ss.data(us_states.features)
 		  .enter().append("path")
 		  .attr("d", path)
 		  .attr("id",function(d){//console.log(d.id); 
@@ -665,7 +691,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  //.attr("style","font-size:10px");		    
 	}
 	
-	function loadMap(){
+	function loadDistMap(){
 		
 		//console.log("load map");
 	//choropleth = d3.scaleLog()
@@ -809,7 +835,24 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	      .attr("d", path); 	    
 	}
 	
-	function updateMap(){
+	function updateStateMap(){
+		states.each(function(){
+			d3.select(this).attr("basecolor", function(d){
+				//console.log(d.id);
+  			  var c = getStateVal(d.id);
+			  if(c == 0){
+				  return "#e0f3db";//"#a8ddb5";//"#fff";
+			  }else if(c != undefined){
+  				  return choropleth(c);
+  			  }else{
+  				  return cl;
+  			  }
+			})
+			.style("fill", function(d){return d3.select("#state"+d.id).attr("basecolor");})
+		});
+	}
+	
+	function updateDistMap(){
 		dists.each(function(){
 			d3.select(this).attr("basecolor", function(d){
 				//console.log(d.id);
@@ -860,7 +903,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  //.text(function(d){return "$"+formatNumber(d.value);})
 		  .text(function(d){return d.key;})// + " $"+formatNumber(d.value);})
 		  .on("mouseover",function(d){
-			  //console.log(d.key);
+			  //console.log(d.key+":"+this.id);
 			  d3.select(this)
 			  .style("background-color","orange");
 			  
