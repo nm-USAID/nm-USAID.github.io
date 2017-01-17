@@ -604,7 +604,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							//indicated version switch
 							schange = 0;
 						if(fState != fState_0){
-							var n = awardsTotalByState[0]
+							var n = awardsTotalByState[0];
 							  
 							if(n != undefined){
 								n = n.value.stateId;
@@ -618,10 +618,24 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							var dy = d3.select("#text"+n).attr("centroidY");
 							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(1.5).translate(-dx,-dy));
 							}
-						}else if(fState == fState_0){
+							
+							loadDistMap();
+							updateDistMap();
+							
+						}else{
 							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity);
+							loadStateMap();
+							updateStateMap();
 						}
-					}
+					}else{
+						
+											if(fState != fState_0){								
+												  updateDistMap();
+											  }else{
+												  updateStateMap();
+											  }
+						
+										}
 								
 		if(fState != fState_0){								
 			  loadDistChart(awardsTotalByDistId);
@@ -629,14 +643,14 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			  loadChart(awardsTotalByState);
 		  }
 		  
-		  if(fVersion != fVersion_0){
+		  /*if(fVersion != fVersion_0){
 			  updateDistMap();
 			  //loadDistMap();
 		  	
 		  }else{
 		  	  updateStateMap();
 			  //loadStateMap()
-		  }
+		  }*/
 	  
 		  	  });
 		
