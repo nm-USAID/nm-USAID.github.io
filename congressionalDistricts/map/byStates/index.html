@@ -352,6 +352,7 @@ var popup = d3.select("body").append("div")
 	var fState_0 = "Filter by State";
 	
 	var prevK = 1;
+	var schange = 0;
 
 			
 //load data
@@ -497,7 +498,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	  	var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
 	  	var vendor_type_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fType = this.value; dispatch.call("statechange", this, awards_0);});
 	  	var pship_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fPship = this.value; dispatch.call("statechange", this, awards_0);});
-		var state_filter = d3.select("body").select("#stateMenu").append("select").on("change", function() { fState = this.value; dispatch.call("statechange", this, awards_0);});
+		var state_filter = d3.select("body").select("#stateMenu").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
 	
 	  	
 		/*version_filter.selectAll("option")
@@ -599,7 +600,30 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					    .sort(function(a, b){ return d3.descending(a.value.total, b.value.total); });	
 							
 	  
+						if(schange == 1){
+							//indicated version switch
+							schange = 0;
 						if(fState != fState_0){
+							var n = awardsTotalByState[0]
+							  
+							if(n != undefined){
+								n = n.value.stateId;
+								if(n < 10){
+									n = "0"+n;
+								}else{
+									n = ""+n;
+								}
+								
+							var dx = d3.select("#text"+n).attr("centroidX");
+							var dy = d3.select("#text"+n).attr("centroidY");
+							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(1.5).translate(-dx,-dy));
+							}
+						}else if(fState == fState_0){
+							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity);
+						}
+					}
+								
+		if(fState != fState_0){								
 			  loadDistChart(awardsTotalByDistId);
 		  }else{
 			  loadChart(awardsTotalByState);
@@ -653,14 +677,32 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  })  
 		  .style("fill", function(d){return d3.select("#state"+d.id).attr("basecolor");})
 		  .on("mouseover", function(d,i){
+			  
 			  if(getStateVal(d.id) != undefined){
 		  	d3.select(this).style("fill", "orange");
 			}
+			
+			//highlight
+		   	var c = ids.filter(function(v){ return v.value == d.id;});
+		   	if(c[0] != undefined){
+				//console.log("bar"+c[0].key);
+			   	d3.select("#bar"+c[0].key).style("background-color","orange");
+		   	}
+			
 		  })
 			  .on("mouseout",function(d,i){
 				  if(getStateVal(d.id) != undefined){ 
 			  	d3.select(this).style("fill", function(d){return d3.select("#state"+d.id).attr("basecolor");});
 			}
+			
+			   //de-highlight bar
+		   	var c = ids.filter(function(v){ return v.value == d.id;});
+		   	if(c[0] != undefined){
+				//console.log("bar"+c[0].key);
+			   	d3.select("#bar"+c[0].key).style("background-color","steelblue");
+		   	}
+			
+			
 			  });
 			  
 			  //.text(function(d){ return d.id;});
@@ -673,17 +715,24 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
 	      .attr("class", "state-boundaries")
 		  .attr("d", path);
- 
+
  svg.selectAll("text")
 		  .data(us_states.features)
 		  .enter()
 		  .append("text")
+		  .attr("id",function(d){return "text"+d.id;})
+		  .attr("centroidX",function(d){return path.centroid(d)[0];})
+		  .attr("centroidY",function(d){return path.centroid(d)[1];})
 		  .text(function(d){
 			  var c = ids.filter(function(v){ return v.value == d.id;});
 			  c = (c[0] != undefined) ? c[0].key: null;
 			  return c;
 		  })
-		  .attr("x",function(d){return path.centroid(d)[0];})
+		  .attr("x",function(d){ 
+			  //console.log(+"2");
+			  //console.log(path.centroid(d)[0]+" "+d3.format(d3.select("#text"+d.id).attr("centroidX")));
+			  return +d3.select("#text"+d.id).attr("centroidX");})
+			  //return path.centroid(d)[0];})
 		  .attr("y",function(d){return path.centroid(d)[1];})
 		  .attr("text-anchor","middle")
 		  .style("font","9px sans-serif");
@@ -991,7 +1040,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 
     var bchart = chart.selectAll("g")
 		  //.data(data);	  
-		  .data(data, function(d){ console.log(d);
+		  .data(data, function(d){ //console.log(d);
 			  return (d);});    
 		  
 		bchart.enter()
