@@ -572,7 +572,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			});
 			
 			//state_stuff.map(function(feature){return path.centroid(feature);});	
-			console.log(centroids.get("01"));
+			//console.log(centroids.get("01"));
 		
 		dispatch.on("statechange.menu", function(awards_init) {
 		  		  //console.log("changed menu!"+state);
@@ -888,6 +888,11 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .attr("id", function(d){//console.log(d); 
 			  return "district"+d.id;})
 		  .attr("basecolor", function(d){
+//			  console.log(Math.floor(d.id/100)+" "+s_id);
+			  			  if(Math.floor(d.id/100)!=s_id){
+							  //console.log("yep");
+				  return "#ccc";
+			  }else{
 			  var c = getVal(d.id);
 			  if(c == 0){
 				  return "#e0f3db"; //"#a8ddb5";//"#fff";
@@ -896,6 +901,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			  }else{
 				  return cl;
 			  }
+		  }
 		  })
 		  .style("fill", function(d){return d3.select("#district"+d.id).attr("basecolor");})
 		  .on("click", function(d,i){
@@ -1051,7 +1057,12 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		dists.each(function(){
 			d3.select(this).attr("basecolor", function(d){
 				//console.log(d.id);
-  			  var c = getVal(d.id);
+  			  
+  			  if(Math.floor(d.id/100)!=s_id){
+				  //console.log("yep");
+	  return "#ccc";
+  }else{
+			  var c = getVal(d.id);
 			  if(c == 0){
 				  return "#e0f3db";//"#a8ddb5";//"#fff";
 			  }else if(c != undefined){
@@ -1059,6 +1070,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
   			  }else{
   				  return cl;
   			  }
+		  }
 			})
 			.style("fill", function(d){return d3.select("#district"+d.id).attr("basecolor");});
 		});
