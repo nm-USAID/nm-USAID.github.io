@@ -220,7 +220,7 @@ div.button{
 	<div class="header" id="dropdowns">
 	</div>
 	<div class="vis">
-	<div class="button"><button>&#127968;</button></div>
+	<div class="button"><button>&#127968;</button><button id="cb">close popup</button></div>
 	<div class="container" id="chart1">
 	</div>
 	<div class="container" id="chart2">
@@ -324,15 +324,20 @@ var pTotal = pic.append("text")
   //.attr("width", 50)
   //.attr("height", 75); 	
   
-	
+	d3.select("#cb").style("opacity",0);
 	//popup divs
 
 var popup = d3.select("body").append("div")	
     .attr("class", "popup")	
     .style("opacity", 0);	
 	
+	popup.append("button")
+	.attr("id","cb")
+	.text("close popup");
+	
 	
 	var popupOn = false;
+	var popupId = 0;
 	var awardsTotalByDistId_0;
 	var awardsTotalByDistId_2;//temp
 	var awardsTotalByState_0;
@@ -646,7 +651,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							
 							svg.call(zoom.transform,d3.zoomIdentity);
 							
-							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(1.5).translate(-dx,-dy));
+							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(2).translate(-dx,-dy));
 							}
 							
 							svg.selectAll("*").remove(); 
@@ -936,7 +941,16 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  //.attr("style", "padding: 3px")
 					  .html(function(d) { return d; });
 				  
+					  
+					  d3.select("#cb").style("opacity",op);
+					  
 					  popupOn = d.active;
+					  
+					  if(popupOn){
+						  popupId = d.id;
+					  }else{
+						  popupId = 0;
+					  }
 				  
 					  if(popupOn){
 						  tooltip.transition()
@@ -1006,7 +1020,12 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .attr("text-anchor","middle")
 		  .style("font","7px sans-serif");	  
 		  
-		  
+		  d3.select("#cb").on("click",function(){	  
+			  if(popupOn){
+				  d3.select("#district"+popupId).style("fill", d3.select("#district"+popupId).attr("basecolor"));
+				  d3.select("#district"+popupId).dispatch("click");
+		  		}
+		  });
 		      
 	}
 	
