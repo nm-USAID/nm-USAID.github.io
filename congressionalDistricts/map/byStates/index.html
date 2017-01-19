@@ -875,13 +875,14 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  
 		  var f = topojson.feature(congress, congress.objects.districts).features;
 		  var f2 = f.filter(function(d){return Math.floor(d.id/100)==s_id;});
+		  var f3 = topojson.feature(congress, congress.objects.districts).features;
 		  //console.log(f);
 		  //console.log(f2);
 		  //var filt = congress.filter(function(d){return Math.floor(d.objects.districts.geometries.id/100) == 27; })
 		  //console.log(congress.objects.districts.geometries);
 		  
 		 //dists = dd.data(topojson.feature(congress, congress.objects.districts).features)
-		  dists = dd.data(f2)
+		  dists = dd.data(f3)
 		  .enter().append("path")
 		  .attr("d", path)
 		  .attr("id", function(d){//console.log(d); 
