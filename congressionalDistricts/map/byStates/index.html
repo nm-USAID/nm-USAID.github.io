@@ -204,6 +204,12 @@ div.button{
 	line-height:8pt;
 }
 
+.labelLine {
+  fill: none;
+  stroke: black;
+  stroke-width: 0.25px;
+}
+
 
 </style>
 <body>
@@ -240,6 +246,9 @@ var cl = "e6e6e6";
     //"#f0f0f0"; 
 //"#d9d9d9";
 //"#e6e6e6";//"#bbb";//"#ccc";
+
+//for lables
+var crowded = ["25","44","09","34","10","24","11"];
 
 var width = 800,
     height = 600;			
@@ -353,6 +362,8 @@ var popup = d3.select("body").append("div")
 	
 	var prevK = 1;
 	var schange = 0;
+	var s_id = 1;
+	var centroids;
 
 			
 //load data
@@ -547,6 +558,16 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	    	}
 			
 	    });*/
+			
+		//generate centroids
+			centroids = d3.map();
+			us_states.features.forEach(function(d){
+				//console.log(d.id + " "+path.centroid(d));
+				centroids.set(d.id,path.centroid(d));
+			});
+			
+			//state_stuff.map(function(feature){return path.centroid(feature);});	
+			console.log(centroids.get("01"));
 		
 		dispatch.on("statechange.menu", function(awards_init) {
 		  		  //console.log("changed menu!"+state);
@@ -613,9 +634,18 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 								}else{
 									n = ""+n;
 								}
+							
+							//set global variable - this could cause trouble
+								s_id = n;	
 								
-							var dx = d3.select("#text"+n).attr("centroidX");
-							var dy = d3.select("#text"+n).attr("centroidY");
+							//var dx = d3.select("#text"+n).attr("centroidX");
+							//var dy = d3.select("#text"+n).attr("centroidY");
+							
+							var dx = centroids.get(n)[0];
+							var dy = centroids.get(n)[1];
+							
+							svg.call(zoom.transform,d3.zoomIdentity);
+							
 							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(1.5).translate(-dx,-dy));
 							}
 							
@@ -745,16 +775,66 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .text(function(d){
 			  var c = ids.filter(function(v){ return v.value == d.id;});
 			  c = (c[0] != undefined) ? c[0].key: null;
+			  //console.log(c+" "+d.id);
 			  return c;
 		  })
-		  .attr("x",function(d){ 
+		  .attr("x",function(d){
+			  var g = crowded.indexOf(d.id);
+			  if(g != -1){
+			  	//return +d3.select("#text"+d.id).attr("centroidX")+30;
+				return +d3.select("#text25").attr("centroidX")+40;
+			  }else{
 			  //console.log(+"2");
 			  //console.log(path.centroid(d)[0]+" "+d3.format(d3.select("#text"+d.id).attr("centroidX")));
-			  return +d3.select("#text"+d.id).attr("centroidX");})
+			  return +d3.select("#text"+d.id).attr("centroidX");}
+		  })
 			  //return path.centroid(d)[0];})
-		  .attr("y",function(d){return path.centroid(d)[1];})
+		  .attr("y",function(d){
+			  var g = crowded.indexOf(d.id);
+			  if(g != -1){
+			  	return +d3.select("#text25").attr("centroidY")+2+12*g;
+			  }else{
+			  return path.centroid(d)[1];
+		  }
+		  })
 		  .attr("text-anchor","middle")
 		  .style("font","9px sans-serif");
+		  
+		  var labelLine = d3.line()
+		  //.x(function(d){return +d3.select("#text"+d.id).attr("centroidX");})
+		  //.y(function(d){return +d3.select("#text"+d.id).attr("centroidY");})
+		  .x(function (d) { return d.x; })
+		  .y(function (d) { return d.y; });
+		  /*.x(function(d){if(crowded.indexOf(d.id)!=-1){
+			  return +d3.select("#text"+d.id).attr("centroidX");}
+		  })
+		  .y(function(d){if(crowded.indexOf(d.id)!=-1){
+			  return +d3.select("#text"+d.id).attr("centroidY");}
+		  });*/
+		  
+/*var lineData = [{"x": 55, "y": 65},
+            {"x": 63, "y": 57},
+            {"x": 157, "y": 57},
+            {"x": 165, "y": 65}];*/
+			  
+	   crowded.forEach(function(d,i){
+		   //console.log(d);
+		   var d2 = d3.select("#text"+d);
+		   var x2 = +d3.select("#text25").attr("centroidX");
+		   var y2 = +d3.select("#text25").attr("centroidY");
+	  	 svg.append("path")
+	 	  .attr("class","labelLine")
+	 	  .attr("d", labelLine(
+		   [{"x": +d2.attr("centroidX"), "y": +d2.attr("centroidY")},
+			 // {"x": x2+20-i*5, "y": y2+30+12*i-2},
+			  {"x": x2-5+i*2, "y": +d2.attr("centroidY")},
+			  {"x": x2+30, "y": y2+12*i}
+			  //{"x": x2+30-i*5, "y": y2+30+12*i-2}
+		  ]));
+	   });	  
+		  
+		
+		  
 		  //.style("fill","grey");
 		  //.attr("style","font-size:10px");		    
 	}
@@ -788,10 +868,19 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .attr("clip-path", "url(#clip-land)")
 		  .selectAll("path");
 		  
-		 dists = dd.data(topojson.feature(congress, congress.objects.districts).features)
+		  var f = topojson.feature(congress, congress.objects.districts).features;
+		  var f2 = f.filter(function(d){return Math.floor(d.id/100)==s_id;});
+		  //console.log(f);
+		  //console.log(f2);
+		  //var filt = congress.filter(function(d){return Math.floor(d.objects.districts.geometries.id/100) == 27; })
+		  //console.log(congress.objects.districts.geometries);
+		  
+		 //dists = dd.data(topojson.feature(congress, congress.objects.districts).features)
+		  dists = dd.data(f2)
 		  .enter().append("path")
 		  .attr("d", path)
-		  .attr("id", function(d){return "district"+d.id;})
+		  .attr("id", function(d){//console.log(d); 
+			  return "district"+d.id;})
 		  .attr("basecolor", function(d){
 			  var c = getVal(d.id);
 			  if(c == 0){
@@ -902,9 +991,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
 	      .attr("d", path); 	
 		  
-		  
  svg.selectAll("text")
-		  .data(us_states.features)
+		  .data(us_states.features.filter(function(d){return d.id == s_id;}))
 		  .enter()
 		  .append("text")
 		  .attr("id",function(d){return "text"+d.id;})
@@ -916,7 +1004,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .attr("x",function(d){return path.centroid(d)[0];})
 		  .attr("y",function(d){return path.centroid(d)[1];})
 		  .attr("text-anchor","middle")
-		  .style("font","9px sans-serif");	  
+		  .style("font","7px sans-serif");	  
 		  
 		  
 		      
