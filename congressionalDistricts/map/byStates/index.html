@@ -797,7 +797,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .attr("y",function(d){
 			  var g = crowded.indexOf(d.id);
 			  if(g != -1){
-			  	return +d3.select("#text25").attr("centroidY")+2+12*g;
+			  	return +d3.select("#text25").attr("centroidY")+40+12*g;
 			  }else{
 			  return path.centroid(d)[1];
 		  }
@@ -832,8 +832,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	 	  .attr("d", labelLine(
 		   [{"x": +d2.attr("centroidX"), "y": +d2.attr("centroidY")},
 			 // {"x": x2+20-i*5, "y": y2+30+12*i-2},
-			  {"x": x2-5+i*2, "y": +d2.attr("centroidY")},
-			  {"x": x2+30, "y": y2+12*i}
+			  {"x": x2+10-i*2, "y": +d2.attr("centroidY")},
+			  {"x": x2+30, "y": y2+38+12*i}
 			  //{"x": x2+30-i*5, "y": y2+30+12*i-2}
 		  ]));
 	   });	  
