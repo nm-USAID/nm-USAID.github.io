@@ -649,9 +649,10 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							var dx = centroids.get(n)[0];
 							var dy = centroids.get(n)[1];
 							
+							//rather than two calls do from one point to the next
 							svg.call(zoom.transform,d3.zoomIdentity);
 							
-							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(2).translate(-dx,-dy));
+							svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(2).translate(-dx,-dy));
 							}
 							
 							svg.selectAll("*").remove(); 
@@ -891,7 +892,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 //			  console.log(Math.floor(d.id/100)+" "+s_id);
 			  			  if(Math.floor(d.id/100)!=s_id){
 							  //console.log("yep");
-				  return "#ccc";
+				  return "#b2b2b2";
 			  }else{
 			  var c = getVal(d.id);
 			  if(c == 0){
