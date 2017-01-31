@@ -17,21 +17,26 @@ path {
 
 div.barchart {
   font: 9px sans-serif;
-  background-color: steelblue;
   text-align: left;
   text-indent: 15px;
   padding: 3px;
   margin: 1px;
-  margin-left:10px;
-  height:10px;
-  width:50px;
-  color: "#bbb";
+  width:100px;
+}
+
+.bchart_rect{
+	border-style: solid;
+	border-width: 0.5px;	
+    border-color: grey;		
+    border-radius: 3px;			
+    pointer-events: none;	
 }
 
 .barchart_labels {
 	font: 10px sans-serif;
 	text-align: left;
 	color: black;
+	margin-left: 5px;
 }
 
 .state_labels {
@@ -230,6 +235,16 @@ div.button{
 	</div>
 </div>
 
+
+<svg class="patternFill"><defs><pattern id="pathPattern" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
+<rect x="0" y="0" width="100%" height="100%" fill="#7da6cf"/>
+<path d="M 0 0 L 2 2" stroke="#24435c" stroke-width="0.4px"/></pattern></defs></svg>
+
+<svg class="patternFill_lg"><defs><pattern id="pathPattern_lg" x="0" y="0" width="5" height="5" patternUnits="userSpaceOnUse">
+<rect x="0" y="0" width="100%" height="100%" fill="#7da6cf"/>
+<path d="M 0 0 L 5 5" stroke="#24435c" stroke-width="0.6px"/></pattern></defs></svg>
+
+
 <script src="//d3js.org/d3.v4.min.js"></script>
 <script src="//d3js.org/queue.v1.min.js"></script>
 <script src="//d3js.org/topojson.v1.min.js"></script>
@@ -237,11 +252,15 @@ div.button{
 
 <script>
 
+//stroke="#145aa1"
+
 d3.select("button").on("click", reset);
 
 var dispatch = d3.dispatch("load", "statechange", "versionchange");
-
-
+var stateColor = "#7da6cf";//"#91b6d4";
+var distColor = "url(#pathPattern)";//"url(#diagonal-stripe-1)";//"#145aa1";
+var distColorChart = "url(#pathPattern_lg)"; //for barchart
+var state_notSelected = "e6e6e6";
 //"#f0f0f0";
 //"#ccc"; 
 var cl = "e6e6e6"; 
@@ -351,7 +370,9 @@ var popup = d3.select("body").append("div")
 	var dists;
 	var states;
 	var formatNumber = d3.format(",.2f");
-	var barchart = d3.select("body").select("#chart2").append("div");	
+	var barchart = d3.select("body").select("#chart2").append("div");
+	
+	//barchart.attr("fill", distColor);	
 	
 	var fVersion = "Funding by State";
 	var fYear = "Filter by Year";
@@ -516,7 +537,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	  	var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
 	  	//var vendor_type_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fType = this.value; dispatch.call("statechange", this, awards_0);});
 	  	//var pship_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fPship = this.value; dispatch.call("statechange", this, awards_0);});
-		var state_filter = d3.select("body").select("#stateMenu").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
+		var state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
 	
 	  	
 		/*version_filter.selectAll("option")
@@ -683,6 +704,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		if(fState != fState_0){								
 			  loadDistChart(awardsTotalByDistId);
 		  }else{
+			  chart.selectAll("g").remove();
+			  //barchart.selectAll("*").remove();
 			  //loadChart(awardsTotalByState);
 		  }
 		  
@@ -725,7 +748,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .attr("basecolor",function(d){
 			  var c = getStateVal(d.id);
 			 if(c != undefined){
-				  return "steelblue";
+				  return stateColor;
 			  }else{
 				  return cl;
 			  }
@@ -754,7 +777,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		   	var c = ids.filter(function(v){ return v.value == d.id;});
 		   	if(c[0] != undefined){
 				//console.log("bar"+c[0].key);
-			   	d3.select("#bar"+c[0].key).style("background-color","steelblue");
+			   	d3.select("#bar"+c[0].key).style("background-color",distColor);
+				d3.select("#bar"+c[0].key).style("fill",distColor);
 		   	}
 			
 			
@@ -892,13 +916,13 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			  //			  console.log(Math.floor(d.id/100)+" "+s_id);
 			  			  			  if(Math.floor(d.id/100)!=s_id){
 			  							  //console.log("yep");
-			  				  return "#b2b2b2";
+			  				  return state_notSelected;//"#b2b2b2";
 			  			  }else{
 			  			  var c = getVal(d.id);
 			  			  if(c != undefined){
-			  				  return "#b6cee2";//"#325d81";
+			  				  return distColor;//"#b6cee2";//"#325d81";
 			  			  }else{
-			  				  return "steelblue";
+			  				  return stateColor;
 			  			  }
 			  		  }
 			  		  })
@@ -1040,7 +1064,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			d3.select(this).attr("basecolor",function(d){
 			  var c = getStateVal(d.id);
 			 if(c != undefined){
-				  return "steelblue";
+				  return stateColor;
 			  }else{
 				  return cl;
 			  }
@@ -1055,13 +1079,13 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			  //			  console.log(Math.floor(d.id/100)+" "+s_id);
 			  			  			  if(Math.floor(d.id/100)!=s_id){
 			  							  //console.log("yep");
-			  				  return "#b2b2b2";
+			  				  return state_notSelected;//"#b2b2b2";
 			  			  }else{
 			  			  var c = getVal(d.id);
 			  			  if(c != undefined){
-			  				  return "#b6cee2";//"#325d81";
+			  				  return distColor;//"#b6cee2";//"#325d81";
 			  			  }else{
-			  				  return "steelblue";
+			  				  return stateColor;
 			  			  }
 			  		  }
 			  		  })
@@ -1185,6 +1209,9 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	      .range([0, 200]);	
 		   	  
   // console.log(data);
+  /*chart.append("text")
+  .text(fState)
+  .attr("class","barchart_labels");*/
    
    //feel like this could be done using exit().remove() but I can't figure it out...
    chart.selectAll("g").remove();
@@ -1194,11 +1221,12 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .data(data, function(d){ //console.log(d);
 			  return (d);});    
 		  
-		bchart.enter()
+		  bchart.enter()
 		  .append("g")
 		  //.attr("id",function(d){return "bar"+d.key;})
 		  .append("div")
-		  .attr("class","barchart")
+		  .attr("class","barchart")  
+		  //.attr("class","barchart")
 		  .attr("id",function(d){return "bar"+d.key;})
 		  //.style("width","30px")
 		  /*.style("width", function(d){ //console.log(d.key); 
@@ -1206,11 +1234,21 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .style("text-indent", "-45px")
 		  .style("margin-left", "50px")*/
 		  //.text(function(d){return "$"+formatNumber(d.value);})
-		  .text(function(d){return getDist(d.key,1);})
+		  //.text(function(d){return getDist(d.key,1);})
+		  .append("svg")
+		  .attr("width",10)
+		  .attr("height",10)		  
+		  .attr("x", 100)	
+		  .append("rect")
+		  .attr("width",10)
+		  .attr("height",10)	    
+		  .attr("fill",distColor)
+		  //.attr("style","background-color:steelblue")  	    
 		  .on("mouseover",function(d){
 			  //console.log(d.key);
 			  d3.select(this)
-			  .style("background-color","orange");
+			  .attr("fill","orange");
+			  //.style("background-color","orange");
 			  
 			  if(!popupOn){
 				  var value = d['value'];
@@ -1233,7 +1271,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  })
 		  .on("mouseout",function(d){
 			  d3.select(this)
-			  .style("background-color","steelblue");
+			  .attr("fill",distColor);
+			  //.style("background-color","steelblue");
 		  
 			  d3.select("#district"+d.key)
 			  .style("fill", function(v){return d3.select("#district"+d.key).attr("basecolor");});
@@ -1244,7 +1283,19 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  .style("opacity", 0);
 			  }	
 		  })
-		   
+		  
+		  var labels = chart.selectAll("g").selectAll("div").append("text")
+		  .attr("class", "barchart_labels")
+		  .text(function(d){return getDist(d.key,1);});
+		  //.text(function(d){console.log("hmm "+getDist(d.key,1)); return getDist(d.key,1);})
+		  //.style("fill","black");
+		  
+		  
+		  /*var labels = chart.selectAll("text")
+		  .data(data, function(d){ return (d);})   
+		  .enter()
+		  .append("text")
+		  .text(function(d){return getDist(d.key,1);});*/		   
 
 		   //bchart.exit().remove();
 		   //console.log(bchart);

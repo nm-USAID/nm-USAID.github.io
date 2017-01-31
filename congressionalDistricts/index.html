@@ -296,6 +296,7 @@ var popup = d3.select("body").append("div")
 	var awardsTotalByStateDist_0;
 	var awardsByDist_0;	
 	var choropleth;
+	var choroplethState;
 	var dists;
 	var formatNumber = d3.format(",.2f");
 	var barchart = d3.select("body").select("#chart2").append("div");	
@@ -346,9 +347,10 @@ function ready(error, us, congress, reps, awards, ids) {
   .key(function(d){return d.Vendor_State;})
   .rollup(function(v){ //return d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");})
 	  var t = [];
-	  v.forEach(function(e,i){if(t.indexOf(e.CD_ID) == -1){t.push(e.CD_ID)};});
-	  //console.log(t);
+	  var sId = 0;
+	  v.forEach(function(e,i){if(t.indexOf(e.CD_ID) == -1){t.push(e.CD_ID)};sId = e.State_ID});
 	  return{
+		  stateId : sId,
 		  ids: t, 
 	  total:d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");})
   };
@@ -428,8 +430,11 @@ function everythingelse(us, congress, reps, awards_0, ids){
      var minDollars = d3.min(awardsTotalByDistId, function(d){return d.value;});
      var maxDollars = d3.max(awardsTotalByDistId, function(d){return d.value;});
      var meanDollars = d3.mean(awardsTotalByDistId, function(d){return d.value;});
+	 
+	 var minState = d3.min(awardsTotalByState, function(d){return d.value.total;});
+	 var maxState = d3.max(awardsTotalByState, function(d){return d.value.total;});
   	 
-	 //console.log(minDollars+","+maxDollars);
+	 //console.log(minState+","+maxState);
 	
 	dispatch.on("load.menu", loadMenu());
 	dispatch.on("load.map", loadMap());
@@ -519,12 +524,13 @@ function everythingelse(us, congress, reps, awards_0, ids){
 					    .key(function(d){return d.Vendor_State;})
 					    .rollup(function(v){ //return d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");})
 					  	  var t = [];
-					  	  v.forEach(function(e,i){if(t.indexOf(e.CD_ID) == -1){t.push(e.CD_ID)};});
-					  	  //console.log(t);
-					  	  return{
-					  		  ids: t, 
-					  	  total:d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");})
-					    };
+						  var sId = 0;
+				  	  v.forEach(function(e,i){if(t.indexOf(e.CD_ID) == -1){t.push(e.CD_ID)};sId = e.State_ID});
+				  	  return{
+				  		  stateId : sId,
+				  		  ids: t, 
+				  	  total:d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");})
+				    };
 					    })
 					    .entries(awards_tmp)
 					    .sort(function(a, b){ return d3.descending(a.value.total, b.value.total); });	
@@ -547,11 +553,18 @@ function everythingelse(us, congress, reps, awards_0, ids){
 		//console.log("load map");
 	//choropleth = d3.scaleLog()
 		choropleth = d3.scaleLog()
-		.domain([1000000,maxDollars]) //temp fix - start at 1000000
+		//.domain([1000000,maxDollars]) //temp fix - start at 1000000
 	    //.domain([100,5600])
 		//.range(['#a1dab4', '#253494']);
+		.domain([1000000,maxDollars])
 		.range(['#c6dbef', '#08519c']);
 		//.range(['#eff3ff', '#08519c']);
+		
+		
+		choroplethState = d3.scaleLog()
+		.domain([1000000,maxState])
+		.range(['#c6dbef', '#08519c']);
+		
 
 	  svg.append("defs").append("path")
 	      .attr("id", "land")
@@ -576,9 +589,11 @@ function everythingelse(us, congress, reps, awards_0, ids){
 		  .attr("id", function(d){return "district"+d.id;})
 		  .attr("basecolor", function(d){
 			  var c = getVal(d.id);
+			  //var c = getStateVal(d.id);
 			  if(c == 0){
-				  return "#fff";
+				  return "#e0f3db";
 			  }else if(c != undefined){
+				  //return choroplethState(c);
 				  return choropleth(c);
 			  }else{
 				  return cl;
@@ -667,11 +682,11 @@ function everythingelse(us, congress, reps, awards_0, ids){
 			  });		  
 	  
 
-	  svg.append("path")
+	  /*svg.append("path")
 	      .attr("class", "district-boundaries")
 	      .datum(topojson.mesh(congress, congress.objects.districts, function(a, b) { 
 			  return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0); }))
-	      .attr("d", path);
+	      .attr("d", path);*/
 
 	  svg.append("path")
 	      .attr("class", "state-boundaries")
@@ -684,8 +699,12 @@ function everythingelse(us, congress, reps, awards_0, ids){
 			d3.select(this).attr("basecolor", function(d){
 				//console.log(d.id);
   			  var c = getVal(d.id);
-  			  if(c != undefined){
-  				  return choropleth(c);
+			  //var c = getStateVal(d.id);
+			  if(c == 0){
+				  return "#e0f3db";
+			  }else if(c != undefined){
+  				  //return choroplethState(c);
+				  return choropleth(c);
   			  }else{
   				  return cl;
   			  }
@@ -807,7 +826,9 @@ function everythingelse(us, congress, reps, awards_0, ids){
     var bchart = chart.selectAll("g")
 		  //.data(data);	  
 		  .data(data, function(d){ 
-			  return (d);});    
+			  return (d);});  
+			  
+			  bchart.remove().exit();  
 		  
 		bchart.enter()
 		  .append("g")
@@ -899,7 +920,16 @@ function everythingelse(us, congress, reps, awards_0, ids){
 			  var c = (result[0] != undefined) ? result[0]['value'] : null;	
 			  return c;
 		  }
-	  	function getStateId(v){
+		  
+	  	function getStateVal(v){
+	  			  var k = ""+v+"";
+	  			  var result = awardsTotalByState.filter(function(d){ return d.value.stateId == Math.floor(v/100);});
+				  console.log(result);
+	  			  var c = (result[0] != undefined) ? result[0]['value'].total : null;	
+	  			  return c;
+	  		  }	  
+	  	
+		function getStateId(v){
 	  			  var k = ""+v+"";
 	  			  var result = ids.filter(function(d){ return d.key == k;});
 	  			  var c = (result[0] != undefined) ? result[0]['value'] : null;	
@@ -927,16 +957,17 @@ function zoomed(){
     d3.selectAll(".state-boundaries").style("stroke-width", "1px");
 	d3.selectAll(".district-boundaries").style("stroke-width", ".4px");
 	}
-	
 	prevK = d3.event.transform.k;
 	
 }
 
 function reset() {
-	  svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+	  //svg.transition().duration(750).call(zoom.transform, d3.zoomIdentity);
+	  
+	  svg.call(zoom.transform, d3.zoomIdentity);
 	  //svg.attr("transform", d3.zoomIdentity);
 	  //console.log("k: "+d3.event.transform.k);
-	  console.log("svg: "+svg.attr("transform")); 
+	  //console.log("svg: "+svg.attr("transform")); 
 }
 
 
