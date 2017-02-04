@@ -59,6 +59,7 @@ div.chart {
 	height: 570px;
 	margin-top: 10px;
 	margin-right: 10px;
+	overflow:scroll;
 }
 
 .district-boundaries {
@@ -376,7 +377,7 @@ queue()
     .defer(d3.json, "../../us.json")
     .defer(d3.json, "../../us-congress-114.json")
 	.defer(d3.json, "../../reps2.json")
-	.defer(d3.json, "../../awards_USAID_latest.json")
+	.defer(d3.json, "../../awards_USAID_Feb2017.json")
 	.defer(d3.json, "../../state_ids2.json")
 	.defer(d3.json, "../../us-states.json")
     .await(ready);
@@ -392,8 +393,8 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
   //.filter(function(d){return d3.format(d.Obligated.replace(/,/g,"")) < 1000});
   
   awards = awards
-  .filter(function(d){return d.CD_ID!="1198"})
-  .filter(function(d){return d.Obligated.replace(/,/g,"") >= 1000 || d.Obligated.replace(/,/g,"") == 0});
+  //.filter(function(d){return d.CD_ID!="1198"})
+  .filter(function(d){return d.Obligated >= 1000 || d.Obligated == 0});
   
   //awards = awards.filter(function(d){return d.Original_FY == "2010"});
   
@@ -409,7 +410,8 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
 	  return{
 		  stateId : sId,
 		  ids: t, 
-	  total:d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");})
+	  total:d3.sum(v,function(d){return d.Obligated;})
+		  //d.Obligated.replace(/,/g,"")
   };
   })
   .entries(awards)
@@ -419,12 +421,12 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
   //console.log(JSON.stringify(awardsTotalByState));
   awardsByYear_0 = d3.nest()
   .key(function(d){return d.Original_FY;})
-  .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated.replace(/,/g,""));}); })
+  .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated);}); })
   .sortKeys(d3.ascending)
   .entries(awards);
   awardsByElement_0 = d3.nest()
   .key(function(d){return d.PROGRAM_ELEMENT;})
-  .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated.replace(/,/g,""));}); })
+  .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated);}); })
   .sortKeys(d3.ascending)
   .entries(awards);
   
@@ -447,13 +449,13 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
   awardsTotalByStateDist_0 = d3.nest()
   .key(function(d){return d.Vendor_State;})
   .key(function(d){return d.CD_ID;})
-  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");}); })
+  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
   .map(awards);
   //console.log(JSON.stringify(awardsTotalByDist));
   awardsTotalByDistId_0 = d3.nest()
   //.key(function(d){return d.Original_FY;})
   .key(function(d){return d.CD_ID;})
-  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");}); })
+  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
   .entries(awards)
   .sort(function(a, b){ return d3.descending(a.value, b.value); });  
   /*****end******/
@@ -599,7 +601,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				 //recompile data (there must be a more efficient way, but this seems to work fine...)
 				 awardsTotalByDistId = d3.nest()
 					  .key(function(d){return d.CD_ID;})
-					  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");}); })
+					  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
 					  .entries(awards_tmp)
 					  .sort(function(a, b){ return d3.descending(a.value, b.value); }); 
 				  
@@ -619,7 +621,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  	  return{
 							  stateId : sId,
 					  		  ids: t, 
-					  	  total:d3.sum(v,function(d){return d.Obligated.replace(/,/g,"");})
+					  	  total:d3.sum(v,function(d){return d.Obligated;})
 					    };
 					    })
 					    .entries(awards_tmp)
@@ -702,7 +704,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		//console.log(us_states.features);
 		
 		choropleth = d3.scaleLog()
-		.domain([1000000,maxState])
+		.domain([minState,maxState])
 		.range(['#c6dbef', '#08519c']);
 
 	  svg.append("path")
@@ -941,7 +943,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  )*/
 					  .data(function(d) {
 							  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,"")),d.FBO_or_PPPs,d.PPP_Project_Name];}
+							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated),d.FBO_or_PPPs,d.PPP_Project_Name];}
 						  )	  
 					  .enter()
 					  .append("td")
