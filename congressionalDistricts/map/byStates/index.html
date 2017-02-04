@@ -569,7 +569,6 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		//generate centroids
 			centroids = d3.map();
 			us_states.features.forEach(function(d){
-				//console.log(d.id + " "+path.centroid(d));
 				centroids.set(d.id,path.centroid(d));
 			});
 			
