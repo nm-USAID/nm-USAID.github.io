@@ -377,7 +377,7 @@ queue()
 	.defer(d3.json, "../reps2.json")
 	.defer(d3.json, "../awards_USAID_Feb2017.json")
 	.defer(d3.json, "../state_ids2.json")
-	.defer(d3.json, "../../us-states.json")
+	.defer(d3.json, "../us-states.json")
     .await(ready);
 
 function ready(error, us, congress, reps, awards, ids, us_states) {
