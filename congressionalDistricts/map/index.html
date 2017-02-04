@@ -376,8 +376,8 @@ function ready(error, us, congress, reps, awards, ids) {
   //.filter(function(d){return d3.format(d.Obligated.replace(/,/g,"")) < 1000});
   
   awards = awards
-  .filter(function(d){return d.CD_ID!="1198"})
-  .filter(function(d){return d.Obligated.replace(/,/g,"") >= 1000 || d.Obligated.replace(/,/g,"") == 0});
+  .filter(function(d){return d.CD_ID!="1198"});
+  //.filter(function(d){return d.Obligated.replace(/,/g,"") >= 1000 || d.Obligated.replace(/,/g,"") == 0});
   
   //awards = awards.filter(function(d){return d.Original_FY == "2010"});
   
