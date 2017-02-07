@@ -646,6 +646,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  awardsByState = d3.nest()
 					    .key(function(d){return d.Vendor_State;})
 						.key(function(d){return d.Vendor_Name;})
+						.key(function(d){return d.PROGRAM_ELEMENT;})
 						.entries(awards_tmp);	
 						
 						
