@@ -62,7 +62,7 @@ text-align:left;
 }*/
 
 div.chart {
-	width: 400px;
+	width: auto;
 	height: 570px;
 	margin-top: 10px;
 	margin-right: 10px;
@@ -172,7 +172,7 @@ div.awards {
 
 div.awards_state {
 	width: 100%;
-	height: 80%;
+	height: 90%;
 	border: solid;
 	border-width: 1px;
 	border-color: #ccc;
@@ -401,7 +401,8 @@ var popup = d3.select("body").append("div")
 	var awardsByElement_0;
 	var awardsTotalByStateDist_0;
 	var awardsByDist_0;
-	var awardsByState_0;	
+	var awardsByState_0;
+	var awardsByState_ag_0;	
 	var choropleth;
 	var dists;
 	var states;
@@ -502,7 +503,20 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
   //these are data being pulled
   awardsByState_0 = d3.nest()
   .key(function(d){return d.Vendor_State;})
+  .key(function(d){return d.Vendor_Name;})
+  .key(function(d){return d.PROGRAM_ELEMENT;})
   .entries(awards);
+  
+  /*awardsByState_ag_0 = [];
+  awardsByState_0.forEach(function(d,i){
+	  var state = d.key
+	  state.values.forEach(e,i){
+	  var vendor = d;
+	  vendor.values.forEach(function(v,i){ awardsByState_ag_0.push({key:vendor.key,values:v.key});});
+     }
+  });*/
+  
+  
   awardsByDist_0 = d3.nest()
   .key(function(d){return d.CD_ID;})
   .entries(awards);
@@ -517,8 +531,8 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
   //.key(function(d){return d.Original_FY;})
   .key(function(d){return d.CD_ID;})
   .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
-  .entries(awards)
-  .sort(function(a, b){ return d3.descending(a.value, b.value); });  
+  .entries(awards);
+  //.sort(function(a, b){ return d3.descending(a.value, b.value); });  //not for public version
   /*****end******/
   
   
@@ -536,6 +550,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	var awardsByVendorType = awardsByVendorType_0;
 	var awardsByDist = awardsByDist_0;
 	var awardsByState = awardsByState_0;
+	//var awardsByState_ag = awardsByState_ag_0;
 	
 	//var awards = awards_0.filter(function(d){return d.state == "NY"});
 	var awardsTotalByDistId = awardsTotalByDistId_0;
@@ -621,7 +636,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  .key(function(d){return d.CD_ID;})
 					  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
 					  .entries(awards_tmp)
-					  .sort(function(a, b){ return d3.descending(a.value, b.value); }); 
+					  .sort(function(a, b){ return d3.ascending(a.key, b.key); }); 
 				  
 		  
 		  		  awardsByDist = d3.nest()
@@ -630,7 +645,18 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							
 				  awardsByState = d3.nest()
 					    .key(function(d){return d.Vendor_State;})
-						.entries(awards_tmp);		
+						.key(function(d){return d.Vendor_Name;})
+						.entries(awards_tmp);	
+						
+						
+						//console.log(awardsByState);
+					//tricky because of all the nesting	
+				   /*awardsByState_ag = [];
+					    awardsByState.forEach(function(d,i){
+					  	  var vendor = d;
+					  	  vendor.values.forEach(function(v,i){ awardsByState_ag.push({key:vendor.key,values:v.key});});
+					    });*/	
+							
 						
 				  awardsTotalByState = d3.nest()
 					    .key(function(d){return d.Vendor_State;})
@@ -774,36 +800,41 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  
 				  popupState.html(d.properties.name+ "<br/>");
 				  
+				  //console.log(awardsByState_ag);
+				  
 				  var datT = awardsByState.filter(function(v){return getStateId(v.key) == d.id;})[0]['values'];
 				  
-				  var awards = popupState.append("awards");
+				  var awards = popupState.append("div");
 				  awards.attr("class","awards_state");
 				  
 		          thead = awards.append("thead"),
 		          tbody = awards.append("tbody");
-				  
-			
-				  
+				 
+				  var datT_ag = [];
+				  datT.forEach(function(d,i){
+					  var vendor = d;
+					  vendor.values.forEach(function(v,i){ datT_ag.push({key:vendor.key,values:v.key});});
+				  });
+				  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
 				  
 		  		var rows = tbody.selectAll("tr")
-		          .data(datT)
+		          .data(datT_ag)
 		          .enter()
 		          .append("tr")
 				  .attr("overflow","scroll");
 			  
-				  /*var rows = awards.selectAll("text")
-				  .data(datT)
-				  .enter()
-				  .append("tr");*/
-				  
+
 				  var cells = rows.selectAll("td")
 				  .data(function(d) {
-						  return [d.Original_FY, d.PROGRAM_ELEMENT, d.Vendor_Name];}
+					  return [d.key,d.values];
+					  	}
 					  )	  
 				  .enter()
 				  .append("td")
 				  .attr("class","rows")
-				  .html(function(d) { return d; });
+				  .html(function(d) {return d; });
+				  //.html(function(d,i) {console.log(d); return d; });
+				  //console.log(cells.data());
 				   
 				   
 				  popupStateOn = d.active;
@@ -1005,10 +1036,18 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  
 					  var datT = awardsByDist.filter(function(v){
 						  return v.key == ""+d.id+"";})[0]['values'];		 
-					  var awards = popup.append("div")
-					  .attr("class","awards");
+					  
+						  var awards = popup.append("div");
+						  awards.attr("class","awards");
 				  
-					  var rows = awards.selectAll("text")
+				          thead = awards.append("thead"),
+				          tbody = awards.append("tbody");
+					  
+					  
+					  //var awards = popup.append("div")
+					  //.attr("class","awards");
+				  
+					  var rows = tbody.selectAll("text")
 					  .data(datT)
 					  .enter()
 					  .append("tr");
@@ -1022,7 +1061,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  )*/
 					  .data(function(d) {
 							  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated),d.FBO_or_PPPs,d.PPP_Project_Name];}
+							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,d.FBO_or_PPPs,d.PPP_Project_Name];}
 						  )	  
 					  .enter()
 					  .append("td")
