@@ -519,6 +519,8 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
   
   awardsByDist_0 = d3.nest()
   .key(function(d){return d.CD_ID;})
+  .key(function(d){return d.Vendor_Name;})
+  .key(function(d){return d.PROGRAM_ELEMENT;})
   .entries(awards);
   //console.log(awardsByDist);
   awardsTotalByStateDist_0 = d3.nest()
@@ -641,6 +643,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  
 		  		  awardsByDist = d3.nest()
   						.key(function(d){return d.CD_ID;})
+					    .key(function(d){return d.Vendor_Name;})
+					    .key(function(d){return d.PROGRAM_ELEMENT;})
   						.entries(awards_tmp);
 							
 				  awardsByState = d3.nest()
@@ -1043,7 +1047,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 
 					  pDist.text(obj.State +" - "+obj.District);
 					  pRep.text(obj.Representative);
-					  pTotal.text("$"+formatNumber(getVal(d.id)));
+					  //pTotal.text("$"+formatNumber(getVal(d.id)));
 					  //img.attr("xlink:href", "/imgs/Nancy_Pelosi.jpg") 
 					  
 					  
@@ -1104,6 +1108,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	}
 	
 	function popupDist(d){
+		//.filter(function(v){return v.key == 602;})
 				  
 				  if(getVal(d.id) != undefined){	  
 				  //var obj = congress.objects.districts.geometries[i].rep;
@@ -1123,7 +1128,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  
 						  popup.html(obj.State +" - "+obj.District + "<br/>" 
 						  + obj.Representative +" ("+ obj.Party 
-						  + ")"+"<br/>"+"$"+formatNumber(getVal(d.id))+"<br/>"+"<br/>");
+						  + ")");//+"<br/>"+"$"+formatNumber(getVal(d.id))+"<br/>"+"<br/>");
 				  
 						  var datT = awardsByDist.filter(function(v){
 							  return v.key == ""+d.id+"";})[0]['values'];		 
@@ -1133,17 +1138,27 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  
 					          thead = awards.append("thead"),
 					          tbody = awards.append("tbody");
+							  
+							  
+							  var datT_ag = [];
+							  datT.forEach(function(d,i){
+								  var vendor = d;
+								  vendor.values.forEach(function(v,i){ datT_ag.push({key:vendor.key,values:v.key});});
+							  });
+							  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
+
+							  
 					 
 				  
 						  var rows = tbody.selectAll("text")
-						  .data(datT)
+						  .data(datT_ag)
 						  .enter()
 						  .append("tr");
 
 				  
 						  var cells = rows.selectAll("td")
 						  .data(function(d) {
-								  return [d.Original_FY, d.PROGRAM_ELEMENT, d.Vendor_Name, d.Vendor_Category, d.FBO_or_PPPs, d.PPP_Project_Name];}
+								  return [d.key, d.values];}
 							  )	  
 						  .enter()
 						  .append("td")
@@ -1320,7 +1335,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	      .domain([min, max])
 	      .range([0, 200]);	
 		   	  
-   console.log(data);
+   //console.log(data);
   /*chart.append("text")
   .text(fState)
   .attr("class","barchart_labels");*/
@@ -1363,7 +1378,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			  .attr("fill","orange");
 			  //.style("background-color","orange");
 			  
-			  if(!popupOn){
+			  /*if(!popupOn){
 				  var value = d['value'];
 				  
 				  //console.log(d);
@@ -1376,7 +1391,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  .style("top", (d3.event.pageY) + "px");	
 				  
 				  chart_tooltip.text(function(d){return "$"+formatNumber(value);});	 
-			  }
+			  }*/
 		  
 			  d3.select("#district"+d.key)
 			 //d3.select("#district"+"4823")
@@ -1390,11 +1405,11 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			  d3.select("#district"+d.key)
 			  .style("fill", function(v){return d3.select("#district"+d.key).attr("basecolor");});
 			  
-			  if(!popupOn){	
+			  /*if(!popupOn){	
 				  chart_tooltip.transition()		
 				  .duration(200)		
 				  .style("opacity", 0);
-			  }	
+			  }	*/
 		  })
 		  
 		  var labels = chart.selectAll("g").selectAll("div").append("text")
