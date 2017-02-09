@@ -167,16 +167,16 @@ div.awards {
 	border: solid;
 	border-width: 1px;
 	border-color: #ccc;
-	overflow:scroll;
+	overflow-y:scroll;
 }
 
 div.awards_state {
 	width: 100%;
-	height: 90%;
+	height: 275px;
 	border: solid;
 	border-width: 1px;
 	border-color: #ccc;
-	overflow:scroll;
+	overflow:auto;
 }
 
 div.mote {
@@ -841,6 +841,11 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  popupStateOn = d.active;
 				  /*var cc = active ? "orange":stateColor;
 				  d3.select(this).style("fill", cc);*/
+				  if(d.active){
+				  	svg.on('.zoom',null);
+				  }else{
+				  	svg.call(zoom);
+				  }
 				  
 				  }
 		  
@@ -852,7 +857,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  	d3.select(this).style("fill", "orange");
 			}
 			
-			//highlight
+			//highlight bar
 		   	var c = ids.filter(function(v){ return v.value == d.id;});
 		   	if(c[0] != undefined){
 				//console.log("bar"+c[0].key);
@@ -1018,77 +1023,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			  		  }
 			  		  })
 		  .style("fill", function(d){return d3.select("#district"+d.id).attr("basecolor");})
-		  .on("click", function(d,i){
-			  if(getVal(d.id) != undefined){	  
-			  var obj = congress.objects.districts.geometries[i].rep;
-		  
-			  		  d.active = !d.active;
-			  		  var active  = d.active ? true : false,
-			  		  op = active ? 1 : 0;  
-			  		  popup.transition()		
-			  		  .duration(400)		
-			  		  .style("opacity", op)
-			  		  .style("left", (width/2)-350+"px")		
-			  		  .style("top", (height/2)-150+"px");
-				  
-					  popup.html(obj.State +" - "+obj.District + "<br/>" 
-					  + obj.Representative +" ("+ obj.Party 
-					  + ")"+"<br/>"+"$"+formatNumber(getVal(d.id))+"<br/>"+"<br/>");
-				  
-					  var datT = awardsByDist.filter(function(v){
-						  return v.key == ""+d.id+"";})[0]['values'];		 
-					  
-						  var awards = popup.append("div");
-						  awards.attr("class","awards");
-				  
-				          thead = awards.append("thead"),
-				          tbody = awards.append("tbody");
-					  
-					  
-					  //var awards = popup.append("div")
-					  //.attr("class","awards");
-				  
-					  var rows = tbody.selectAll("text")
-					  .data(datT)
-					  .enter()
-					  .append("tr");
-					  //.attr("class","rows");
-					  //.attr("style", "background: #cccc");
-				  
-					  var cells = rows.selectAll("td")
-					  /*.data(["FY","Element","Vendor Name","Vendor Type","Obligation"].concat(function(d) {
-						  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-						  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,"$"+formatNumber(d.Obligated.replace(/,/g,""))];});
-					  )*/
-					  .data(function(d) {
-							  //return [d.contractactiontype,d.vendor_name,"$"+formatNumber(d.dollars_obligated), d.signed_date];
-							  return [d.Original_FY, d.PROGRAM_ELEMENT,d.Vendor_Name,d.Vendor_Category,d.FBO_or_PPPs,d.PPP_Project_Name];}
-						  )	  
-					  .enter()
-					  .append("td")
-					  .attr("class","rows")
-					  //.attr("style", "padding: 3px")
-					  .html(function(d) { return d; });
-				  
-					  
-					  d3.select("#cb").style("opacity",op);
-					  
-					  popupOn = d.active;
-					  
-					  if(popupOn){
-						  popupId = d.id;
-					  }else{
-						  popupId = 0;
-					  }
-				  
-					  if(popupOn){
-						  tooltip.transition()
-						  .duration(400)		
-						  .style("opacity", 0);
-					  }
-				  }
-		  
-		  })
+		  .on("click", function(d){popupDist(d);})
 		  .on("mouseover", function(d,i) {
 			  var g = getVal(d.id);
 				  if(!popupOn && g != undefined){// && getVal(d.id) > 0){
@@ -1111,6 +1046,12 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  pTotal.text("$"+formatNumber(getVal(d.id)));
 					  //img.attr("xlink:href", "/imgs/Nancy_Pelosi.jpg") 
 					  
+					  
+		  			//highlight bar chart
+		  		    d3.select("#bar"+d.id).select("svg").select("rect").attr("fill","orange");
+					
+					//.attr("fill",distColorChart)
+					  
 				  }	
 			  })					
 		  .on("mouseout", function(d) {	
@@ -1119,6 +1060,10 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  tooltip.transition()		
 					  .duration(200)		
 					  .style("opacity", 0);
+					  
+					  
+					  d3.select("#bar"+d.id).select("svg").select("rect").attr("fill",distColorChart);
+					  
 				  }	
 			  });		  
 	  
@@ -1157,6 +1102,74 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  });
 		      
 	}
+	
+	function popupDist(d){
+				  
+				  if(getVal(d.id) != undefined){	  
+				  //var obj = congress.objects.districts.geometries[i].rep;
+				  var obj = congress.objects.districts.geometries.filter(function(v){return v.id == d.id;});
+				  if(obj[0] != undefined){
+					  obj = obj[0].rep;
+				  }
+		  
+				  		  d.active = !d.active;
+				  		  var active  = d.active ? true : false,
+				  		  op = active ? 1 : 0;  
+				  		  popup.transition()		
+				  		  .duration(400)		
+				  		  .style("opacity", op)
+				  		  .style("left", (width/2)-350+"px")		
+				  		  .style("top", (height/2)-150+"px");
+				  
+						  popup.html(obj.State +" - "+obj.District + "<br/>" 
+						  + obj.Representative +" ("+ obj.Party 
+						  + ")"+"<br/>"+"$"+formatNumber(getVal(d.id))+"<br/>"+"<br/>");
+				  
+						  var datT = awardsByDist.filter(function(v){
+							  return v.key == ""+d.id+"";})[0]['values'];		 
+					  
+							  var awards = popup.append("div");
+							  awards.attr("class","awards");
+				  
+					          thead = awards.append("thead"),
+					          tbody = awards.append("tbody");
+					 
+				  
+						  var rows = tbody.selectAll("text")
+						  .data(datT)
+						  .enter()
+						  .append("tr");
+
+				  
+						  var cells = rows.selectAll("td")
+						  .data(function(d) {
+								  return [d.Original_FY, d.PROGRAM_ELEMENT, d.Vendor_Name, d.Vendor_Category, d.FBO_or_PPPs, d.PPP_Project_Name];}
+							  )	  
+						  .enter()
+						  .append("td")
+						  .attr("class","rows")
+						  //.attr("style", "padding: 3px")
+						  .html(function(d) { return d; });
+				  
+					  
+						  d3.select("#cb").style("opacity",op);
+					  
+						  popupOn = d.active;
+					  
+						  if(popupOn){
+							  popupId = d.id;
+						  }else{
+							  popupId = 0;
+						  }
+				  
+						  if(popupOn){
+							  tooltip.transition()
+							  .duration(400)		
+							  .style("opacity", 0);
+						  }
+					  }
+			  }
+			
 	
 	function updateStateMap(){
 		states.each(function(){
@@ -1307,7 +1320,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	      .domain([min, max])
 	      .range([0, 200]);	
 		   	  
-  // console.log(data);
+   console.log(data);
   /*chart.append("text")
   .text(fState)
   .attr("class","barchart_labels");*/
@@ -1342,7 +1355,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .attr("width",10)
 		  .attr("height",10)	    
 		  .attr("fill",distColorChart)
-		  //.attr("style","background-color:steelblue")  	    
+		  //.attr("style","background-color:steelblue")  
+		  .on("click",function(d){d3.select("#district"+d.key).dispatch("click");})	  	    
 		  .on("mouseover",function(d){
 			  //console.log(d.key);
 			  d3.select(this)

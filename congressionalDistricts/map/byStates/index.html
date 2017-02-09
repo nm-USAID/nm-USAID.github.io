@@ -738,10 +738,9 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  	d3.select(this).style("fill", "orange");
 			}
 			
-			//highlight
+			//highlight bar
 		   	var c = ids.filter(function(v){ return v.value == d.id;});
 		   	if(c[0] != undefined){
-				//console.log("bar"+c[0].key);
 			   	d3.select("#bar"+c[0].key).style("background-color","orange");
 		   	}
 			
@@ -850,8 +849,11 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		
 		//console.log("load map");
 	//choropleth = d3.scaleLog()
+		
+		
+		
 		choropleth = d3.scaleLog()
-		.domain([1000000,maxDollars]) //temp fix - start at 1000000
+		.domain([1000,maxDollars]) //temp fix - start at 1000000
 	    //.domain([100,5600])
 		//.range(['#a1dab4', '#253494']);
 		.range(['#c6dbef', '#08519c']);
@@ -971,7 +973,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  })
 		  .on("mouseover", function(d,i) {
 			  var g = getVal(d.id);
-				  if(!popupOn && g != undefined){// && getVal(d.id) > 0){
+				  if(!popupOn && g != undefined){
 			  
 					  //d3.select("#"+this.id).style("fill", "orange");
 					  d3.select(this).style("fill", "orange");		
@@ -991,6 +993,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  pTotal.text("$"+formatNumber(getVal(d.id)));
 					  //img.attr("xlink:href", "/imgs/Nancy_Pelosi.jpg") 
 					  
+					  d3.select("#bar"+d.id).style("background-color","orange");
+					  
 				  }	
 			  })					
 		  .on("mouseout", function(d) {	
@@ -999,6 +1003,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  tooltip.transition()		
 					  .duration(200)		
 					  .style("opacity", 0);
+					  
+					  d3.select("#bar"+d.id).style("background-color","steelblue");
 				  }	
 			  });		  
 	  
@@ -1215,12 +1221,15 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  .style("margin-left", "50px")
 		  //.text(function(d){return "$"+formatNumber(d.value);})
 		  .text(function(d){return getDist(d.key,1);})
+		  .on("click", function(d){ d3.select("#district"+d.key).dispatch("click"); })
 		  .on("mouseover",function(d){
 			  //console.log(d.key);
+			  if(!popupOn){
 			  d3.select(this)
 			  .style("background-color","orange");
+			  d3.select("#district"+d.key).style("fill","orange");
 			  
-			  if(!popupOn){
+			  //if(!popupOn){
 				  var value = d['value'];
 				  
 				  //console.log(d);
@@ -1235,22 +1244,23 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				  chart_tooltip.text(function(d){return "$"+formatNumber(value);});	 
 			  }
 		  
-			  d3.select("#district"+d.key)
-			 //d3.select("#district"+"4823")
-			  .style("fill","orange");
 		  })
 		  .on("mouseout",function(d){
+			  if(!popupOn){
 			  d3.select(this)
 			  .style("background-color","steelblue");
 		  
 			  d3.select("#district"+d.key)
 			  .style("fill", function(v){return d3.select("#district"+d.key).attr("basecolor");});
 			  
-			  if(!popupOn){	
+			  //if(!popupOn){	
 				  chart_tooltip.transition()		
 				  .duration(200)		
 				  .style("opacity", 0);
 			  }	
+			  chart_tooltip.transition()		
+			  .duration(200)		
+			  .style("opacity", 0);
 		  })
 		   
 
