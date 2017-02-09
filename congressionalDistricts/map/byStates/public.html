@@ -256,7 +256,7 @@ div.button{
 	<div class="header" id="dropdowns">
 	</div>
 	<div class="vis">
-	<div class="button"><button>&#127968;</button><button id="cb">close popup</button></div>
+	<div class="button" id="home"><button>&#127968;</button><button id="cb">close popup</button></div>
 	<div class="container" id="chart1">
 	</div>
 	<div class="container" id="chart2">
@@ -713,6 +713,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							
 							svg.selectAll("*").remove(); 
 							
+							
 							svg.on('.zoom',null);
 							
 							loadDistMap();
@@ -759,6 +760,9 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	}
 	
 	function loadStateMap(){
+		
+		d3.select("button").style("opacity",1);
+		d3.select("button").on("click", reset);
 		
 		//console.log(us_states.features);
 		
@@ -970,6 +974,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	}
 	
 	function loadDistMap(){
+		d3.select("button").style("opacity",0);
+		d3.select("button").on("click", null);
 		
 		//console.log("load map");
 	//choropleth = d3.scaleLog()
