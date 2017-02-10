@@ -74,7 +74,7 @@
 	{"source": 7, "target": 15, "value": 1, "conn":"For quant, internal validity is confidence that the cause-effect relationship has been established in the context of the particular research setting"},
 	{"source": 7, "target": 16, "value": 1, "conn":"For qual, internal validity is confidence that the findings reflect the realities of the people and context under study"},
 	{"source": 16, "target": 26, "value": 1, "conn":"applied is qual, but with underlying goal of impact through innovation and so inherently disruptive"},
-	{"source": 10, "target": 27, "value": 1, "conn":"Hypothesis generation and testing in (throughout) a study"},
+	{"source": 10, "target": 27, "value": 1, "conn":"Theoretical validity involves hypothesis generation and testing in (throughout) a study"},
 	{"source": 10, "target": 16, "value": 1, "conn":"Mostly related to qual studies"},
 	{"source": 10, "target": 15, "value": 1, "conn":"implicit in theory-driven quant studies"},
 	{"source": 1, "target": 5, "value": 1, "conn":"relevance is judged based on generalizability arguments"},
@@ -82,7 +82,7 @@
 	{"source": 9, "target": 15, "value": 1, "conn":"Important part of quant studies"},
 	{"source": 9, "target": 23, "value": 1, "conn":"In study design, goal is select a sample that is representative."},
 	{"source": 6, "target": 10, "value": 1, "conn":"Basis of most vis research generalizations."},
-	{"source": 10, "target": 33, "value": 1, "conn":"Providing evidence that supports (but cannot prove) a theory"},
+	{"source": 10, "target": 33, "value": 1, "conn":"Theoretical validity involves providing evidence that supports (but cannot prove) a theory"},
 	{"source": 8, "target": 30, "value": 2, "conn":"most commonly related to external validity"},
 	{"source": 8, "target": 31, "value": 2, "conn":"most commonly related to external validity"},
 	{"source": 8, "target": 32, "value": 2, "conn":"most commonly related to external validity"}
