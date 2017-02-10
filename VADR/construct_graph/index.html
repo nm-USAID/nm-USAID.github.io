@@ -34,7 +34,7 @@ div.tooltip {
 <script src="//d3js.org/d3.v4.0.0-alpha.49.min.js"></script>
 <script>
 
-var width = 960,
+var width = 1200,
     height = 700
 
 var div = d3.select("body").append("div")	
@@ -47,7 +47,7 @@ var svg = d3.select("body").append("svg")
 	
 	
 
-d3.json("constructs.json", function(error, json) {
+d3.json("constructs_updated.json", function(error, json) {
   if (error) throw error;
 
 
@@ -69,12 +69,14 @@ d3.json("constructs.json", function(error, json) {
                   .style("opacity", 0);	
           });
 		
+		  var scX = 0.9;
+		  var scY = 1.05;		
 		
 		
-	link.attr("x1", function(d) { return json.nodes[d.source].x; })
-        .attr("y1", function(d) { return json.nodes[d.source].y; })
-        .attr("x2", function(d) { return json.nodes[d.target].x; })
-        .attr("y2", function(d) { return json.nodes[d.target].y; })
+	link.attr("x1", function(d) { return json.nodes[d.source].x*scX; })
+        .attr("y1", function(d) { return json.nodes[d.source].y*scY; })
+        .attr("x2", function(d) { return json.nodes[d.target].x*scX; })
+        .attr("y2", function(d) { return json.nodes[d.target].y*scY; })
 		
 
   var node = svg.selectAll(".node")
@@ -82,7 +84,7 @@ d3.json("constructs.json", function(error, json) {
     .enter().append("g")
 	.attr("class", "node")
 	.attr("transform", function(d){
-		return "translate(" + d.x + "," + d.y + ")"});		
+		return "translate(" + d.x*scX + "," + d.y*scY + ")"});		
 	//.attr("transform", "translate(" + function(d){return d.x;} + "," + function(d){return d.y;} + ")");
 	
 	//.attr("x", function(d){ console.log(d); return d.x;})
@@ -91,8 +93,23 @@ d3.json("constructs.json", function(error, json) {
   node.append("circle")
       .attr("x", -8)
       .attr("y", -8)
-      .attr("r", 4)
+      .attr("r", function(d){return 4*d.group;})
 	  .attr("fill","steelblue")
+ 	.on("mouseover", function(d) {
+		d3.select(this).attr("fill","orange");		
+              div.transition()		
+                  .duration(200)		
+                  .style("opacity", 1);		
+              div	.html(d.def)	
+                  .style("left", (d3.event.pageX) + "px")		
+                  .style("top", (d3.event.pageY - 28) + "px");	
+              })					
+          .on("mouseout", function(d) {	
+			d3.select(this).attr("fill","steelblue");		
+              div.transition()		
+                  .duration(500)		
+                  .style("opacity", 0);	
+          });
 
   node.append("text")
       .attr("dx", 12)

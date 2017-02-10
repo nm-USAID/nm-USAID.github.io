@@ -65,6 +65,6 @@
 	{"source": 1, "target": 23, "value": 1, "conn":"(relevance) Strength of representative-ness bolsters confidence in generalization made based on results"},
 	{"source": 1, "target": 5, "value": 1, "conn":"Relevance is judged based on generalizability of arguments"},
 	{"source": 1, "target": 25, "value": 1, "conn":"Relevance is judged based on value"},
-	{"source": 7, "target": 12, "value": 1, "conn":"Internal validity adresses the credibility of design study and the results"}
+	{"source": 7, "target": 12, "value": 1, "conn":"Internal validity adresses the credibility of design study and the results"},
   ]
 }
