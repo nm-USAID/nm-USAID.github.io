@@ -170,7 +170,7 @@ div.popupState {
 
 div.awards {
 	width: 100%;
-	height: 80%;
+	height: 88%;
 	border: solid;
 	border-width: 1px;
 	border-color: #ccc;
@@ -179,7 +179,7 @@ div.awards {
 
 div.awards_state {
 	width: 100%;
-	height: 275px;
+	height: 88%;
 	border: solid;
 	border-width: 1px;
 	border-color: #ccc;
@@ -234,13 +234,17 @@ div.button{
 }
 
 .banner h1{
-	font-size:large;
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+	font-weight:bold;
+	font-size:16pt;
 	line-height:0pt;
 }
 .banner h2{
-	font-size:small;
-	font-weight:normal;
+	font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+	font-size:10pt;
+	font-weight:bold;
 	line-height:8pt;
+	color:#7da6cf;
 }
 
 .labelLine {
@@ -257,8 +261,8 @@ div.button{
 </style>
 <body>
 	<div class="banner">
-		<h1>Map of USAID Global Health Investments</h1>
-		<h2>Advancing American Institutions</h2>
+		<h1>MAP OF USAID GLOBAL HEALTH INVESTMENTS</h1>
+		<h2>ADVANCING AMERICAN INSTITUTIONS</h2>
 	</div>
 	<div class="header" id="dropdowns">
 	</div>
@@ -1056,7 +1060,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	  	  	  if(popupOn){
 	  	  		  d3.select("#district"+popupId).style("fill", d3.select("#district"+popupId).attr("basecolor"));
 				  d3.select("#bar"+popupId).select("svg").select("rect").attr("fill",distColorChart);
-	  	  		  d3.select("#district"+popupId).dispatch("click");
+				  d3.select("#district"+popupId).dispatch("click");
 	  	    		}
 	  	    });
 		  })
