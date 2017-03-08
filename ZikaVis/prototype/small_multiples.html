@@ -353,7 +353,7 @@ queue()
 //d3.json("countries.topojson",function(error,geodata) {
 //d3.json("world_less.json",function(error,geodata) {
 	
-function ready(error, admin0data, adm1data, SLVdata, /*urbandata,*/ countrydata, pop_pls, poverty){	
+function ready(error, admin0data, adm1data, SLVdata /*urbandata, countrydata, pop_pls, poverty*/){	
 //d3.json("countries_admin1.json",function(error,geodata) {
   if (error) throw error; //unknown error, check the console
   
@@ -525,7 +525,8 @@ function ready(error, admin0data, adm1data, SLVdata, /*urbandata,*/ countrydata,
 		max_cumulative: d3.max(v,function(f){return f.cum_cases;}),
 		max_new: max,
 		cum_ht: d3.max(v,function(f){return f.cum_cases;})/pop,
-		new_ht: max/pop  
+		new_ht: max/pop,
+		  _pop: pop    
 	  };
   })
   .entries(SLVdata);
@@ -728,6 +729,8 @@ var valueline2 = d3.line()
 	var regions;	
 	
 	var selection = false;
+	
+	console.log(totalByRegion);
   
 function buildRegions(){
   regions = features.selectAll("path")
