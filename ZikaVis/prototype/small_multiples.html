@@ -8,11 +8,11 @@ body {
 }
 
 .bar {
-  fill: steelblue;
+  /*fill: steelblue;*/
 }
 
 .bar:hover {
-  fill: tomato;
+  /*fill: tomato;*/
 }
 
 .axis--x path {
@@ -68,8 +68,14 @@ body {
 	
 }
 
+.region_sm {
+    stroke-width: 0.1px;
+    stroke: white;
+}
+
+
 .mapview path {
-  stroke-width: 0.5px;
+  stroke-width: 0.25px;
   stroke: white;
   fill: rgb(178, 214, 141);
   cursor: pointer;
@@ -78,7 +84,7 @@ body {
 
 .mapview path:hover, path.highlighted {
   fill: tomato;
-  stroke-width: 1px;
+  stroke-width: 0.25px;
 }
 
 .mapview{
@@ -87,6 +93,14 @@ body {
     border-color: grey;		
     border-radius: 3px;
 	background: rgba(70,130,180,0.25);
+}
+
+.pov_map{
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;		
+    border-radius: 3px;
+	/*background: rgba(70,130,180,0.25);*/
 }
 
 .chartview{
@@ -119,6 +133,11 @@ body {
 	font-size: 7px;
 }
 
+.date_labels{
+	font-size: 7px;
+	fill:grey;
+}
+
 .sm_mults {
     border-style: solid;
     border-width: 0.5px;	
@@ -144,7 +163,7 @@ body {
 
 #smview{
 	width:800px;
-	height:1500px;
+	height:400px;
 	overflow:scroll;
 }
 
@@ -562,21 +581,6 @@ var color_pov = d3.scaleThreshold()
     .attr("d",path_pop)
     .style("fill","rgba(220,220,220,1)");  
 
-/*var up = up_areas.selectAll("path")
-    //.data(adm1data.features) //generate features from TopoJSON
-    .data(el_salvador)
-	.enter()
-    .append("path")
-    .attr("id",function(d){return "country"+d.properties.ADM0_A3;})
-    //.attr("class","country_paths")
-  .attr("d",path_pop)
-  .style("fill", function(d){
-  	var latest = povertyByFips.filter(function(v){return v.key == d.properties.code_hasc;});
-	//console.log(latest[0].values[0].value.latest);
-	//console.log(d.properties.code_hasc);
-	return color_pov(x_pov(latest[0].values[0].value.latest));
-  })
-  .style("opacity", 0.5);*/
   //.style("fill","rgba(220,220,220,1)");  
   
   
@@ -714,21 +718,25 @@ var valueline2 = d3.line()
     .range(d3.schemeReds[9]);
     
   //Create a path for each map feature in the data
+	
 	buildRegions();
 	
 	povChart();
+	povMap();
 	countryChart();
 	
-	
 	var regions;	
+	
+	var selection = false;
   
 function buildRegions(){
   regions = features.selectAll("path")
     .data(el_salvador)
 	.enter()
     .append("path")
-    .attr("id",function(d){return "region"+d.properties.adm1_code;})
-    .attr("class","region_paths")
+    //.attr("id",function(d){return "region"+d.properties.adm1_code;})
+	.attr("id",function(d){return "region"+d.properties.code_hasc.replace(".","");})
+    .attr("class","region")
     .attr("d",path)
 	.attr("basecolor",function(d){
 		var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
@@ -744,9 +752,116 @@ function buildRegions(){
 			//return choropleth(x3(max[0].value.max_cumulative));
 		}
 	})
-	.style("fill", function(d){return d3.select("#region"+d.properties.adm1_code).attr("basecolor");})
+	.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");})
     .on("click", function(d){
 		d.selected = !d.selected;
+		var color = (d.selected) ? "tomato": d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");
+		d3.select(this).style("fill",color);
+		show_charts(d);
+		
+		//only allow one at a time? for now
+		selection = d.selected;
+  })
+	.on("mouseover",function(d){
+		if(!selection){
+		d3.select(this).style("fill","tomato");
+		//console.log(d.properties.code_hasc);
+		d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","tomato");
+		//charts_mover(d);
+		show_charts(d);
+		}
+	})
+	.on("mouseout",function(d){
+		if(!selection){
+		d3.select(this).style("fill",function(d){
+			return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");
+		})
+		d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","steelblue");
+		charts_mout(d);
+		}
+		//show_charts(d);
+	});
+}
+
+function charts_mover(d){
+		var dd = byRegion.filter(function(v){return v.key == d.properties.fips;});
+			
+		//scale domain		
+		var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});		
+			
+		//console.log(max);	
+		y.domain([0,max[0].value.max_cumulative+10]);	
+		
+		y2.domain([0,max[0].value.max_val+10]);	
+				
+		//linegraph.select("*").remove();
+		
+		svg_chart.selectAll("*").remove();
+		//svg_chart2.selectAll("*").remove();
+			
+		linegraph = svg_chart.selectAll("path")
+		.data(dd[0].values, function(d,i){return d.values;})
+		.enter()
+		.append("path")
+		.attr("class","line")
+		.style("stroke",function(d,i){return colors[i];})
+		.attr("d", function(d){ 
+			return valueline2(d.values);});
+			
+	linegraph.append("title")
+			.text(function(d){return d.key;});
+		
+		//show node on date
+		var nodes = svg_chart.selectAll("g")
+		.data(dd[0].values, function(d,i){return d.values;})
+		.enter()
+		.append("g")
+		.selectAll("circle")
+		.data(function(d,i){ return d.values;})
+		.enter()
+		.append("circle")
+  	  	.attr("r", 0.5)
+		.attr("class","graph_node")
+        .attr("cx", function(d) { return x(d.report_date); })
+        .attr("cy", function(d) { return y(d.cum_cases); });
+		
+		nodes.append("title")
+		.text(function(d){return d.report_date+": "+d.cum_cases})
+		
+  // Add the X Axis
+    var xaxis = svg_chart.append("g")
+		.attr("class","axis")	
+        .attr("transform", "translate(0,"+graph_height+")")
+		.call(d3.axisBottom(x))
+			.selectAll("text")	
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", function(d) {
+                return "rotate(-65)" 
+                });
+
+    // Add the Y Axis
+    var yaxis = svg_chart.append("g")
+		.attr("class","axis")
+        .call(d3.axisLeft(y));
+		
+    	  svg_chart.append("text")
+    	  .attr("class", "axis")
+    	  .attr("x",10)
+    	  .attr("y",10)
+    	  .text("weekly epi data for"+d.properties.fips);	
+}
+
+
+function charts_mout(d){
+	d.hover = false;
+	svg_chart.selectAll("*").remove();
+	
+}
+
+function show_charts(d){
+		//d.selected = !d.selected;
 		
 		var dd = byRegion.filter(function(v){return v.key == d.properties.fips;});
 			
@@ -796,7 +911,8 @@ function buildRegions(){
 	linegraph.append("title")
 			.text(function(d){return d.key;});
 		
-		/*var nodes = svg_chart.selectAll("g")
+		//show node on date
+		var nodes = svg_chart.selectAll("g")
 		.data(dd[0].values, function(d,i){return d.values;})
 		.enter()
 		.append("g")
@@ -807,10 +923,10 @@ function buildRegions(){
   	  	.attr("r", 0.5)
 		.attr("class","graph_node")
         .attr("cx", function(d) { return x(d.report_date); })
-        .attr("cy", function(d) { return y(d.new_cases); });
+        .attr("cy", function(d) { return y(d.cum_cases); });
 		
 		nodes.append("title")
-		.text(function(d){return d.report_date+": "+d.new_cases})*/
+		.text(function(d){return d.report_date+": "+d.cum_cases})
 		
   // Add the X Axis
     var xaxis = svg_chart.append("g")
@@ -829,9 +945,14 @@ function buildRegions(){
     var yaxis = svg_chart.append("g")
 		.attr("class","axis")
         .call(d3.axisLeft(y));
-
 		
-	
+  	  svg_chart.append("text")
+  	  .attr("class", "axis")
+  	  .attr("x",-10)
+  	  .attr("y",-5)
+  	  .text("weekly epi data for "+d.properties.gns_name);	
+	  
+	  //console.log(d);
 	
 // Add the X Axis
   /*var xaxis2 = svg_chart2.append("g")
@@ -850,37 +971,14 @@ function buildRegions(){
   var yaxis2 = svg_chart2.append("g")
 	.attr("class","axis")
       .call(d3.axisLeft(y2));*/
-
 	
-  })
-	.on("mouseover",function(d){
-		d3.select(this).style("fill","tomato");
-	})
-	.on("mouseout",function(d){
-		d3.select(this).style("fill",function(d){
-			return d3.select("#region"+d.properties.adm1_code).attr("basecolor");
-		})
-	});
 }
 
 function povChart(){
-/*var pov_chart_margin = {top: 10, right: 20, bottom: 75, left: 50},
-    pov_chart_width = 400 - pov_chart_margin.left - pov_chart_margin.right,
-    pov_chart_height = 200 - pov_chart_margin.top - pov_chart_margin.bottom;*/
-	
-/*var pov_chart = d3.select("body").select("#chartview").append("svg")
-    .attr("width", pov_chart_width + pov_chart_margin.left + pov_chart_margin.right)
-    .attr("height", pov_chart_height + pov_chart_margin.top + pov_chart_margin.bottom)
-  .append("g")
-    .attr("transform","translate(" + pov_chart_margin.left + "," + pov_chart_margin.top + ")");	*/
-		
-	var c_margin = {top: 20, right: 20, bottom: 30, left: 40},
-	c_width = 300 - c_margin.left - c_margin.right,
- 	c_height = 150 - c_margin.top - c_margin.bottom;	
- 	//c_width = +pov_chart.attr("width") - c_margin.left - c_margin.right,
- 	//c_height = +pov_chart.attr("height") - c_margin.top - c_margin.bottom;	
-	
-	//var pov_chart = d3.select("body").select("#chartview").append("svg")
+
+	var c_margin = {top: 40, right: 10, bottom: 80, left: 40},
+	c_width = 200 - c_margin.left - c_margin.right,
+ 	c_height = 200 - c_margin.top - c_margin.bottom;	
 	
 	
 var pov_chart = d3.select("body").select("#chartview").append("svg")
@@ -889,25 +987,20 @@ var pov_chart = d3.select("body").select("#chartview").append("svg")
 	 .append("g")
    .attr("transform",
       "translate(" + c_margin.left + "," + c_margin.top + ")");
-	
-	
+	  
+	  pov_chart.append("text")
+	  .attr("class", "axis")
+	  .attr("x",-20)
+	  .attr("y",-10)
+	  .text("% pop over national poverty line");
 	
 var x = d3.scaleBand().rangeRound([0, c_width]).padding(0.1),
     y = d3.scaleLinear().rangeRound([c_height, 0]);
 
-//var g = svg.append("g")
-    //.attr("transform", "translate(" + c_margin.left + "," + c_margin.top + ")");
-	
-	x.domain(povertyByFips.map(function(d) { return d.key; }));
-	y.domain([0, d3.max(povertyByFips, function(d) { return d.values[0].value.latest; })]);
-	
-	//x.domain(povertyByFips.map(function(d) { return d.letter; }));
-	//y.domain([0, d3.max(el_salvador_pov, function(d) { return d.frequency; })]);	
-	
-	/*pov_chart.append("g")
-      .attr("class", "axis")
-      .attr("transform", "translate(0," + c_height + ")")
-	.call(d3.axisBottom(x));*/
+	//filter out national numbers
+	x.domain(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));
+	y.domain([0, 100]);
+
 	  
 pov_chart.append("g")
       .attr("class", "axis")
@@ -916,23 +1009,58 @@ pov_chart.append("g")
       .attr("transform", "rotate(-90)")
       //.attr("y", 6)
       .attr("dy", "0.71em")
-      .attr("text-anchor", "end")
-      .text("");  
+	.attr("text-anchor", "end");  
 	
 	pov_chart.selectAll(".bar")
-	.data(povertyByFips)
+	.data(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}))
 	.enter().append("rect")
-	//.attr("id",)  
+	.attr("id",function(d){//console.log("bb"+d.key.replace(".","")); 
+		return "bb"+d.key.replace(".","");})  
 	.attr("x", function(d){return x(d.key);})
 	.attr("y", function(d){return y(d.values[0].value.latest)})
-	.attr("class","bar")
+	//.attr("class","bar")
+	.style("fill","steelblue")	
 	.attr("width", x.bandwidth())
-	.attr("height",function(d){return c_height - y(d.values[0].value.latest);});
+	.attr("height",function(d){return c_height - y(d.values[0].value.latest);})
+	.on("mouseover", function(d){ //console.log(this); 
+		if(!selection){
+		d3.select(this).style("fill","tomato");
+		d3.select("#region"+d.key.replace(".","")).dispatch("mouseover");//style("fill","tomato");
+		}
+	})
+	.on("mouseout", function(d){if(!selection){
+		d3.select(this).style("fill","steelblue");
+		d3.select("#region"+d.key.replace(".","")).dispatch("mouseout");
+		}
+	});	
+}
+
+function povMap(){
+
+	var c_margin = {top: 40, right: 40, bottom: 80, left: 10},
+	c_width = 200 - c_margin.left - c_margin.right,
+ 	c_height = 200 - c_margin.top - c_margin.bottom;	
 	
 	
+var pov_map = d3.select("body").select("#chartview").append("svg")
+   //.attr("class","pov_map")
+   .attr("width", c_width + c_margin.left + c_margin.right)
+   .attr("height", c_height + c_margin.top + c_margin.bottom)
+   .append("g")
+   .attr("transform",
+      "translate(" + c_margin.left + "," + c_margin.top + ")");	
 	
-	//console.log(povertyByFips);	
-	
+  pov_map.selectAll("path")
+    .data(el_salvador)
+  	.enter()
+    .append("path")
+    .attr("id",function(d){return "pov_map"+d.properties.ADM0_A3;})
+    .attr("d",path_pop)
+    .style("fill", function(d){
+    	var latest = povertyByFips.filter(function(v){return v.key.replace(".","") == d.properties.code_hasc.replace(".","");});
+  	return color_pov(x_pov(latest[0].values[0].value.latest));
+    });
+    //.style("opacity", 0.5);
 }
 
 function countryChart(){
@@ -1026,7 +1154,7 @@ function updateRegions(){
 				return choropleth3(max[0].value.max_cumulative);
 			}
 		})
-		.style("fill", function(d){return d3.select("#region"+d.properties.adm1_code).attr("basecolor");});
+		.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");});
 	})
 	
 }	
@@ -1093,11 +1221,19 @@ land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).t
 		.attr("width", 150)
 		.attr("height", 100);
 		
-		var labels = sm_multiples.selectAll("text")
-		.data(byDatebyRegion)
-		.enter().append("text")
-		.text("hello")
-		.style("fill","black");
+		//var parseDate = d3.timeParse("%m/%d/%y");
+		var formatDate = d3.timeFormat("%m/%e/%y");
+		//console.log(formatDate(parseDate("8/1/02")));
+		
+		//var d = new Date("Sat Dec 12 2015 00:00:00 GMT-0500 (EST)");
+		//console.log(formatDate(d));
+		
+		sm_multiples.append("text")
+		.attr("class","date_labels")
+		.attr("x",5)
+		.attr("y",95)
+		.text(function(d){ return formatDate(new Date(""+d.key+""));});
+		
 		//.append("Title")
 		//.text(function(d){return key;});
 		
@@ -1107,6 +1243,16 @@ land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).t
 		
 		//there's gotta be a better way!
 		
+		
+		/*var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
+		//console.log(max[0].value.max_cumulative);
+		if(ht){
+		return choropleth(max[0].value.cum_ht);
+		}else{		
+			return choropleth(max[0].value.max_cumulative);
+		}*/
+		
+		
 	var sm_maps = sm_multiples.selectAll("path")
 		.data(el_salvador, function(d,i,j){return d;})	
 		//.data(function(d){console.log({key:d.key, values:el_salvador});return el_salvador;})
@@ -1115,7 +1261,7 @@ land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).t
 		.attr("id",function(d,i,j){ //console.log(j[i].parentNode.id); 
 			return "sm_region"+d.properties.adm1_code+j[i].parentNode.id;})
 	    //.attr("id",function(d){return "region"+d.values.properties.adm1_code;})
-	    .attr("class","region_paths")
+	    .attr("class","region_sm")
 	    .attr("d",path_sm)
 		.attr("basecolor",function(d,i,j){
 			var c = +j[i].parentNode.id;
@@ -1126,22 +1272,24 @@ land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).t
 			//console.log(choropleth2(num));
 			return choropleth2(num);
 			//console.log(d3.stratify.parentId(d));
-			/*var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
-			//console.log(max[0].value.max_cumulative);
-			if(ht){
-			return choropleth(max[0].value.cum_ht);
-			}else{		
-				return choropleth(max[0].value.max_cumulative);
-			}*/
 		})
 		.style("fill", function(d,i,j){return d3.select("#sm_region"+d.properties.adm1_code+j[i].parentNode.id).attr("basecolor");})
 		.on("mouseover",function(d){
 			d3.select(this).style("fill","tomato");
+			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","tomato");
+			if(!selection){
+				show_charts(d); //add date
+			}
+			
 		})
 		.on("mouseout",function(d,i,j){
 			d3.select(this).style("fill",function(d){
 				return d3.select("#sm_region"+d.properties.adm1_code+j[i].parentNode.id).attr("basecolor");
 			})
+			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","steelblue");
+			if(!selection){
+				charts_mout(d);
+			}
 		});
 		
 		
