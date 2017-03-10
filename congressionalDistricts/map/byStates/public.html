@@ -99,6 +99,7 @@ div.chart {
 	font-weight:bold;
 	color:steelblue;
 	font-size:large;
+	text-transform:uppercase;
 }
 
 #cb{
@@ -467,14 +468,18 @@ var popup = d3.select("body").append("div")
 queue()
     .defer(d3.json, "../../us.json")
     .defer(d3.json, "../../us-congress-114.json")
-	.defer(d3.json, "../../reps2.json")
+	.defer(d3.json, "../../reps3.json")
 	.defer(d3.json, "../../awards_USAID_March2017.json")
 	.defer(d3.json, "../../state_ids2.json")
 	.defer(d3.json, "../../us-states.json")
+	//.defer(d3.json, "../../us-congress-115.json")
     .await(ready);
 
-function ready(error, us, congress, reps, awards, ids, us_states) {
+function ready(error, us, congress, reps, awards, ids, us_states/*, congress_115*/) {
   if (error) throw error;
+  
+  //console.log(congress_115);
+  //console.log(congress);
   
   /******* filter out nulls and non us ******/
   awards = awards
@@ -572,10 +577,10 @@ function ready(error, us, congress, reps, awards, ids, us_states) {
   
   
   dispatch.call("load");
-  everythingelse(us, congress, reps, awards, ids, us_states);
+  everythingelse(us, congress, reps, awards, ids, us_states/*, congress_115*/);
 }
 
-function everythingelse(us, congress, reps, awards_0, ids, us_states){
+function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress_115*/){
 	
 	//awards = awards.filter(function(d){return d.state == "NY"})
 	
@@ -600,9 +605,18 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
   		  return rep.CD_ID === district.id;
   	  });
   	  //if(result[0] == undefined){console.log(district.id)};
-	  
   	  district.rep = (result[0] != undefined) ? result[0] : null;
     });
+	
+    /*congress_115.objects.districts.geometries.forEach(function(district){
+  	  var result = reps.filter(function(rep){
+  		  return rep.CD_ID === +district.properties.GEOID;
+  	  });
+  	  //if(result[0] == undefined){console.log(district.id)};
+	  district.id = +district.properties.GEOID;
+	  
+  	  district.rep = (result[0] != undefined) ? result[0] : null;
+    });*/
 	
      var minDollars = d3.min(awardsTotalByDistId, function(d){return d.value;});
      var maxDollars = d3.max(awardsTotalByDistId, function(d){return d.value;});
