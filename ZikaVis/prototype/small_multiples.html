@@ -353,7 +353,7 @@ queue()
 //d3.json("countries.topojson",function(error,geodata) {
 //d3.json("world_less.json",function(error,geodata) {
 	
-function ready(error, admin0data, adm1data, SLVdata /*urbandata, countrydata, pop_pls, poverty*/){	
+	function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty){	
 //d3.json("countries_admin1.json",function(error,geodata) {
   if (error) throw error; //unknown error, check the console
   
@@ -725,8 +725,10 @@ var valueline2 = d3.line()
 	povChart();
 	povMap();
 	countryChart();
+	buildSmallMultiples();
 	
-	var regions;	
+	var regions;
+	var sm_maps;	
 	
 	var selection = false;
 	
@@ -748,11 +750,8 @@ function buildRegions(){
 			return choropleth3(max[0].value.cum_ht);
 			//return choropleth(x3(max[0].value.cum_ht));
 		}else{
-			//this actually is ineffective, because we need to see finer grain differences
+			//choropleth1 is actually is ineffective, because we need to see finer grain differences
 			return choropleth3(max[0].value.max_cumulative);
-			//console.log(x3(max[0].value.max_cumulative));		
-			//return choropleth(x3(max[0].value.max_cumulative));
-			//return choropleth(x3(max[0].value.max_cumulative));
 		}
 	})
 	.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");})
@@ -1134,6 +1133,7 @@ var tot = d3.select("body").append("button")
 	.on("click",function(){
 	ht = false;
 	updateRegions();
+	updateSMs();
  });
 	
 var pht = d3.select("body").append("button")
@@ -1141,6 +1141,7 @@ var pht = d3.select("body").append("button")
 .on("click",function(){
 ht = true;
 updateRegions();
+updateSMs();
 });
 
 
@@ -1158,6 +1159,23 @@ function updateRegions(){
 			}
 		})
 		.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");});
+	})
+	
+}	
+
+function updateSMs(){
+	sm_maps.each(function(){
+		d3.select(this).attr("basecolor",function(d,i,j){
+			var c = +j[i].parentNode.id;
+			var num = byDatebyRegion[c].values.filter(function(v){return v.key == d.properties.fips;})[0].values.filter(function(v){return v.key == "cumulative_suspected_total";})[0].values[0].value;
+			
+			if(ht){
+			return choropleth2(num);
+			}else{
+				choropleth3(num);
+			}
+		})
+		.style("fill", function(d,i,j){return d3.select("#sm_region"+d.properties.adm1_code+j[i].parentNode.id).attr("basecolor");});
 	})
 	
 }	
@@ -1214,7 +1232,8 @@ land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).t
 	//console.log(topojson.feature(geodata,geodata.objects.subunits).features);
 
 //small multiples //rollup by time
-	var sm_multiples = d3.select("body").select("#smview")
+	function buildSmallMultiples(){	
+	sm_multiples = d3.select("body").select("#smview")
 		.selectAll("svg")
 		.data(byDatebyRegion)
 		.enter()
@@ -1256,7 +1275,7 @@ land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).t
 		}*/
 		
 		
-	var sm_maps = sm_multiples.selectAll("path")
+	sm_maps = sm_multiples.selectAll("path")
 		.data(el_salvador, function(d,i,j){return d;})	
 		//.data(function(d){console.log({key:d.key, values:el_salvador});return el_salvador;})
 		.enter()
@@ -1294,6 +1313,7 @@ land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).t
 				charts_mout(d);
 			}
 		});
+	}
 		
 		
 		/*sm_maps.append("title")
