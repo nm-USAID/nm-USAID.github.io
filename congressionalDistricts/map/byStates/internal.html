@@ -1028,7 +1028,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		  // append the header row
 		      thead.append("tr")
 		          .selectAll("th")
-		          .data(["Partner", "Element"])
+		          .data(["Partner", "Element", "Award Number(s)"])
 		          .enter()
 		          .append("th")
 				  .attr("class","header")	  
@@ -1042,7 +1042,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 						  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
 
     				  var cells = rows.selectAll("td")
-    				  .data(function(d) { return [d.key,d.values.name];})	  
+    				  .data(function(d) { return [d.key,d.values.name,d.values.award_nums];})	  
     				  .enter()
     				  .append("td")
     				  .attr("class","rows")
@@ -1275,7 +1275,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 				  // append the header row
 				      thead.append("tr")
 				          .selectAll("th")
-				          .data(["Partner", "Element"])
+				          .data(["Partner", "Element", "Award Number(s)"])
 				          .enter()
 				          .append("th")
 						  .attr("class","header")	  
@@ -1293,7 +1293,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 				  
 						  var cells = rows.selectAll("td")
 						  .data(function(d) {
-								  return [d.key, d.values.name];}
+								  return [d.key, d.values.name, d.values.award_nums];}
 							  )	  
 						  .enter()
 						  .append("td")
