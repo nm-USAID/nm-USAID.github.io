@@ -276,6 +276,10 @@ div.button{
 	overflow-y:scroll;
 }
 
+tr {
+	vertical-align:top;
+}
+
 
 </style>
 <body>
@@ -1019,7 +1023,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		  // append the header row
 		      thead.append("tr")
 		          .selectAll("th")
-		          .data(["Partner", "Element", "Award Number"])
+		          .data(["Partner", "Element", "Award Number(s)"])
 		          .enter()
 		          .append("th")
 				  .attr("class","header")	  
@@ -1244,7 +1248,21 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 							  var datT_ag = [];
 							  datT.forEach(function(d,i){
 								  var vendor = d;
-								  vendor.values.forEach(function(v,i){ datT_ag.push({key:vendor.key,values:v.key});});
+								  vendor.values.forEach(function(v,i){ 
+									  var nums = [];
+									  v.values.forEach(function(e,j){
+										  if(nums.indexOf(e.Award_Number)==-1){
+											  if(nums.length>0){
+											  nums.push("</br>"+e.Award_Number);	
+											  }else{
+											  	nums.push(e.Award_Number);
+											  }
+									  	}
+									  })
+									  datT_ag.push({key:vendor.key,values:{name:v.key, award_nums:nums}});
+								  })									  
+									  
+									  //datT_ag.push({key:vendor.key,values:v.key});});
 							  });
 							  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
 
@@ -1252,11 +1270,11 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 				  // append the header row
 				      thead.append("tr")
 				          .selectAll("th")
-				          .data(["Partner", "Element"])
+				          .data(["Partner", "Element", "Award Number(s)"])
 				          .enter()
 				          .append("th")
 						  .attr("class","header")	  
-				              .text(function(d) { return d; });
+				          .text(function(d) { return d; });
 						  
 						  
 						  var rows = tbody.selectAll("text")
@@ -1270,7 +1288,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 				  
 						  var cells = rows.selectAll("td")
 						  .data(function(d) {
-								  return [d.key, d.values];}
+								  return [d.key, d.values.name, d.values.award_nums];}
 							  )	  
 						  .enter()
 						  .append("td")
