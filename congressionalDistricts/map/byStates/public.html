@@ -472,14 +472,14 @@ queue()
 	.defer(d3.json, "../../awards_USAID_March2017.json")
 	.defer(d3.json, "../../state_ids2.json")
 	.defer(d3.json, "../../us-states.json")
-	//.defer(d3.json, "../../us-congress-115.json")
+	.defer(d3.json, "../../us-congress-115.json")
     .await(ready);
 
-function ready(error, us, congress, reps, awards, ids, us_states/*, congress_115*/) {
+	function ready(error, us, congress, reps, awards, ids, us_states, congress_115) {
   if (error) throw error;
   
-  //console.log(congress_115);
-  //console.log(congress);
+  console.log(congress_115);
+  console.log(congress);
   
   /******* filter out nulls and non us ******/
   awards = awards
@@ -997,15 +997,29 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 					  
     				  datT.forEach(function(d,i){
     					  var vendor = d;
-    					  vendor.values.forEach(function(v,i){ datT_ag.push({key:vendor.key,values:v.key});});
+    					  vendor.values.forEach(function(v,i){ 
+							  var nums = [];
+							  v.values.forEach(function(e,j){
+								  if(nums.indexOf(e.Award_Number)==-1){
+									  if(nums.length>0){
+									  nums.push("</br>"+e.Award_Number);	
+									  }else{
+									  	nums.push(e.Award_Number);
+									  }
+							  	}
+							  })
+							  datT_ag.push({key:vendor.key,values:{name:v.key, award_nums:nums}});
+							  //datT_ag.push({key:vendor.key,values:{name:v.key, award_nums:v.values[0].Award_Number}});
+						  });
     				  });
     				  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
 	  
     		  		
+					  //console.log(datT);
 		  // append the header row
 		      thead.append("tr")
 		          .selectAll("th")
-		          .data(["Partner", "Element"])
+		          .data(["Partner", "Element", "Award Number"])
 		          .enter()
 		          .append("th")
 				  .attr("class","header")	  
@@ -1019,13 +1033,15 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 						  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
 
     				  var cells = rows.selectAll("td")
-    				  .data(function(d) { return [d.key,d.values];})	  
+    				  .data(function(d) { return [d.key,d.values.name,d.values.award_nums];})	  
     				  .enter()
     				  .append("td")
     				  .attr("class","rows")
 					  //.style("font-size","12px")
 					  //.style("color","black")	  	  	  
-    				  .html(function(d) {return d; });
+    				  .html(function(d) {
+						  return d; 
+					  });
 	   
     				  popupStateOn = d.active;
 
