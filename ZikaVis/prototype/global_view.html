@@ -162,10 +162,10 @@ var path_pop = d3.geoPath()
 	
 //Map projection
 var projection = d3.geoMercator()
-    .scale(450)
+    .scale(500)
 	//.scale(100)
     .center([0,0]) //projection center
-	.translate([width/2+600,height/2+100]) //translate to center the map in view	
+	.translate([width/2+700,height/2+100]) //translate to center the map in view	
 	//.translate([width/2,height/2]);
 
 //Generate paths based on projection
@@ -185,6 +185,10 @@ var land = svg.append("g")
 //Group for the map features
 var features = svg.append("g")
     .attr("class","features");	
+	
+var awards_shp = svg.append("g")
+	.attr("class","awards");	
+	
 	
 //for chartview
 	//var svg_chart = d3.select("body").select("#chartview").append("svg")
@@ -261,18 +265,22 @@ queue()
 	.defer(d3.json, "urban_areas.json")
 	.defer(d3.json, "countryData.json")
 	.defer(d3.json, "globalData.json")
+	.defer(d3.json, "usaidawards.json")
     .await(ready);
 
 //d3.json("countries.topojson",function(error,geodata) {
 //d3.json("world_less.json",function(error,geodata) {
 	
-function ready(error, admin0data, adm1data, SLVdata, urbandata, countrydata, globalData){	
+function ready(error, admin0data, adm1data, SLVdata, urbandata, countrydata, globalData, awards){	
 //d3.json("countries_admin1.json",function(error,geodata) {
   if (error) throw error; //unknown error, check the console
   
   //console.log(otherdata.features[5].properties.adm0_a3);
-  console.log(admin0data);
-  console.log(globalData);
+  //console.log(admin0data);
+  //console.log(globalData);
+  //console.log(awards);
+  //console.log(admin0data);
+  
   
   var parseTime = d3.timeParse("%m/%e/%Y");
   
@@ -406,7 +414,7 @@ var valueline2 = d3.line()
 	var mx_ht = d3.max(globalData,function(f){return f.autochthonous_cases_confirmed/f.pop_x_1000;});
 	var	mn_ht = d3.min(globalData,function(f){return f.autochthonous_cases_confirmed/f.pop_x_1000;});
 	
-	console.log(mn_ht,mx_ht);
+	//console.log(mn_ht,mx_ht);
 
 
 	choropleth_global = d3.scaleLog()
@@ -424,10 +432,22 @@ var valueline2 = d3.line()
   //Create a path for each map feature in the data
 	//buildRegions();
 	buildCountries();
+	//layerAwards();
 	//countryChart();
 	
 	var regions;
 	var countries;
+	var efforts;
+	
+	function layerAwards(){
+		efforts = awards_shp.selectAll("path")
+		.data(topojson.feature(awards,awards.objects.usaidawards).features)
+		.enter()
+		.append("path")
+		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
+		.attr("d",path)
+		.style("fill","steelblue");
+	}
 	
 	function buildCountries(){
 	  countries = land.selectAll("path")

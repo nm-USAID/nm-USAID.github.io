@@ -239,7 +239,8 @@ var projection = d3.geoMercator()
 
 //Generate paths based on projection
 var path = d3.geoPath()
-    .projection(projection);	
+    .projection(projection);
+		
 	
 d3.select("body").append("div")
 	.attr("class","container")
@@ -267,6 +268,11 @@ var land = svg.append("g")
 var features = svg.append("g")
     .attr("class","features");	
 	
+var awards_shp = svg.append("g")
+	.attr("class","awards_shp");
+	
+var clinics_pts = svg.append("g")
+	.attr("class","clinics");		
 //for chartview
 	//var svg_chart = d3.select("body").select("#chartview").append("svg")
 	//.attr("class","graph");	
@@ -335,7 +341,7 @@ var zoom = d3.zoom()
     .scaleExtent([0.3, Infinity])
     .on("zoom",zoomed);
 
-svg_up.call(zoom);
+//svg_up.call(zoom);
 
 
 //load data
@@ -348,12 +354,14 @@ queue()
 	.defer(d3.json, "countryData.json")
 	.defer(d3.json, "populated_places2.json")
 	.defer(d3.json, "poverty.json")
+	.defer(d3.json, "usaidawards.json")
+	.defer(d3.json,"IPPFClinics.json")
     .await(ready);
 
 //d3.json("countries.topojson",function(error,geodata) {
 //d3.json("world_less.json",function(error,geodata) {
 	
-	function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty){	
+	function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty, awards, IPPFclinics){	
 //d3.json("countries_admin1.json",function(error,geodata) {
   if (error) throw error; //unknown error, check the console
   
@@ -382,7 +390,16 @@ queue()
   
   var el_salvador_pov = poverty.filter(function(d){return d.Country_Code.indexOf("SLV") != -1;})
   
-  //console.log(el_salvador_pov);
+  
+  var el_salvador_awards = topojson.feature(awards,awards.objects.usaidawards).features.filter(function(d){return d.properties.ISO == "SLV";});
+  
+  //var el_salvador_awards = topojson.feature(awards,awards.objects.usaidawards).features;
+  
+  //console.log(awards.objects.usaidawards);
+  //topojson.feature(awards,awards.objects.usaidawards).features.filter(function(d){return d.properties.ISO == "SLV";});
+  
+  console.log(IPPFclinics);
+  //console.log(el_salvador_awards);
   
   //console.log(el_salvador_pop);
   //var max_pop = d3.max(el_salvador_pop.features,function(f){return f.properties.GN_POP;});
@@ -721,18 +738,68 @@ var valueline2 = d3.line()
   //Create a path for each map feature in the data
 	
 	buildRegions();
+	layerAwards();
 	
 	povChart();
 	povMap();
 	countryChart();
 	buildSmallMultiples();
+	layerClinics();
 	
 	var regions;
 	var sm_maps;	
+	var efforts;
+	var clinics;
 	
 	var selection = false;
 	
-	console.log(totalByRegion);
+	function layerAwards(){
+		efforts = awards_shp.selectAll("path")
+		.data(el_salvador_awards)
+		.enter()
+		.append("path")
+		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
+		.attr("d",path)
+		.style("stroke","none")
+		.style("fill",function(d){
+			if(d.properties.Partner == "STC"){
+				return "rgb(178, 214, 141)";
+			}else if(d.properties.Partner == "MCDI"){
+				return "blue";
+			}else if(d.properties.Partner == ""){
+				return "purple";
+			}else if(d.properties.ASSIST){
+				return "yellow";
+			}
+		})
+		//.style("opacity","0.5")
+		.on("click", function(d){
+			console.log(d);	
+		})
+		.on("mouseover",function(d){
+			d3.select(this).style("fill","tomato");
+		} )
+		.on("mouseout",function(d){
+			d3.select(this).style("fill","rgb(178, 214, 141)");
+		})
+	}
+	
+	function layerClinics(){
+	    clinics = clinics_pts.selectAll("path")
+	     .data(topojson.feature(IPPFclinics,IPPFclinics.objects.IPPFClinics).features)
+	     .enter()
+	     .append("path")
+	     .attr("d",path.pointRadius(0.2))
+	    .style("fill","rgb(0,0,0)")
+		.style("stroke","none")
+		.append("text")
+		.text("+");
+		
+		/*clinics.append("text")
+		.attr("class","clinic_cross")
+		.text("+")
+		.style("color","red");*/
+	}
   
 function buildRegions(){
   regions = features.selectAll("path")
@@ -1187,8 +1254,10 @@ function updateSMs(){
   var dx = path.centroid(centroid[0])[0];
   var dy = path.centroid(centroid[0])[1];
   
-features.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
-land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
+svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));  
+//features.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
+//land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
+//awards_shp.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
 							
 		
   
@@ -1339,7 +1408,14 @@ function zoomed() {
       .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );
 	  
   land.attr("transform", d3.event.transform)
+      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );
+	  
+	  
+  awards_shp.attr("transform", d3.event.transform)
       .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	
+	  
+  clinics_pts.attr("transform", d3.event.transform)
+      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );		  
 	
 	/*up_land.attr("transform", d3.event.transform)
       .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );*/  
