@@ -467,16 +467,15 @@ queue()
 	.defer(d3.json, "admin_0_countries.json")
 	.defer(d3.json, "admin_1_states_provinces.json")
     .defer(d3.json, "el_salvador_epi.json")
-	//.defer(d3.json, "countryData.json")
-	//.defer(d3.json, "populated_places2.json")
-	//.defer(d3.json, "poverty.json")
-	//.defer(d3.json, "usaidawards.json")
-	//.defer(d3.json,"IPPFClinics.json")
+	.defer(d3.json, "countryData.json")
+	.defer(d3.json, "populated_places2.json")
+	.defer(d3.json, "poverty.json")
+	.defer(d3.json, "usaidawards.json")
+	.defer(d3.json,"IPPFClinics.json")
     .await(ready);
 
 	
-	//function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty, awards, IPPFclinics){
-		function ready(error, admin0data, adm1data, SLVdata){	
+function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty, awards, IPPFclinics){	
   if (error) throw error; //unknown error, check the console
   
   //console.log(otherdata.features[5].properties.adm0_a3);
