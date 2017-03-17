@@ -176,8 +176,10 @@ body {
 #mapview{
 	float:left;
 	/*margin-top:25px;*/
-	width:600px;
+	width:640px;
 	height:500px;
+	overflow:scroll;
+	margin-top:115px;
 }
 
 #chartview{
@@ -249,7 +251,9 @@ body {
 	overflow:scroll;
 }
 
-
+.buttons {
+	position:absolute;
+}
 
 div.urbanPop {	
     position: absolute;			
@@ -264,8 +268,8 @@ div.urbanPop {
     border-color: grey;		
     border-radius: 3px;				
     pointer-events: none;
-	left: 390px;
-	top: 25px;		
+	left: 425px;
+	top: 10px;		
 }
 
 .patternFill{
@@ -351,34 +355,10 @@ var path = d3.geoPath()
 	
 
 //Create an SVG
-var svg = d3.select("body").select("#mapview").append("svg")
+/*var svg = d3.select("body").select("#mapview").append("svg")
 	.attr("class","mapview")
     .attr("width", "100%")
     .attr("height", "100%");	
-	
-//end mapview
-	
-//chartview
-/*d3.select("body").append("div")
-	.attr("class","container")
-	.attr("id","chartview");
-	
-d3.select("body").select("#chartview").append("div")
-	//.attr("class","countryD")
-	.attr("id","countryData");
-	
-d3.select("body").select("#chartview").append("div")
-	//.attr("class","districtD")
-	.attr("id","districtData");
-	
-d3.select("body").select("#chartview").append("div")
-	//.attr("class","awardD")
-	.attr("id","awardData");*/		
-	
-	
-/*d3.select("body").append("div")
-	.attr("class","container")
-	.attr("id","smview");*/		
 
 //Group for the map features
 var land = svg.append("g")
@@ -392,7 +372,7 @@ var awards_shp = svg.append("g")
 	.attr("class","awards_shp");
 	
 var clinics_pts = svg.append("g")
-	.attr("class","clinics");		
+	.attr("class","clinics");	*/	
 //for chartview
 	//var svg_chart = d3.select("body").select("#chartview").append("svg")
 	//.attr("class","graph");	
@@ -531,6 +511,25 @@ function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, pover
 	/*pop_range = d3.scaleLog()
 		.domain([min_pop, max_pop])
 		.range(['rgba(100,100,100,0.25)', 'rgba(100,100,100,1)']);*/
+  
+var tot = d3.select("body").append("button")
+    .attr("class","button")
+	.text("total cases")
+	.on("click",function(){
+	ht = false;
+	//updateRegions();
+	updateSMs();
+ });
+
+var pht = d3.select("body").append("button")
+ 	.attr("class","button")
+	.text("per H.T.") 
+.on("click",function(){
+ht = true;
+//updateRegions();
+updateSMs();
+});
+  
   
   var pop_range = d3.scaleLinear().domain([min_pop,max_pop]).range([0.2,1]);
   
@@ -801,14 +800,14 @@ var key = svg_up.append("g")
 	  	  
 
 
-var countries = land.selectAll("path")
+/*var countries = land.selectAll("path")
     .data(admin0data.features) //generate features from TopoJSON
 	.enter()
     .append("path")
     .attr("id",function(d){return "country"+d.properties.ADM0_A3;})
     .attr("class","country_paths")
   .attr("d",path)
-  .style("fill","rgba(220,220,220,1)");
+  .style("fill","rgba(220,220,220,1)");*/
   
   
 var graph2_margin = {top: 10, right: 20, bottom: 75, left: 50},
@@ -889,13 +888,13 @@ var valueline_dists = d3.line()
     
   //Create a path for each map feature in the data
 	
-	buildRegions();
-	layerAwards();
+	//buildRegions();
+	//layerAwards();
 	
 	buildCountryData();
 	
-	//buildSmallMultiples();
-	layerClinics();
+	buildSmallMultiples();
+	//layerClinics();
 	
 	
 	var regions;
@@ -1625,24 +1624,6 @@ function drawCountryLines(dd, x, y, graph3_height){
 	
 }
 
-
-var tot = d3.select("body").select("#mapview").append("button")
-	.text("total cases")
-	.on("click",function(){
-	ht = false;
-	updateRegions();
-	//updateSMs();
- });
-	
-var pht = d3.select("body").select("#mapview").append("button")
-	.text("per H.T.") 
-.on("click",function(){
-ht = true;
-updateRegions();
-//updateSMs();
-});
-
-
 function updateRegions(){
 	regions.each(function(){
 		d3.select(this).attr("basecolor",function(d){
@@ -1687,12 +1668,12 @@ function updateSMs(){
   var dx = path.centroid(centroid[0])[0];
   var dy = path.centroid(centroid[0])[1];
   
-svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));  
+//svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));  
 //features.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
 //land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
 //awards_shp.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
 							
-svg.call(zoom);		
+//svg.call(zoom);		
   
   //.on("mouseover",function(d){console.log(d);});
 	
@@ -1735,7 +1716,9 @@ svg.call(zoom);
 
 //small multiples //rollup by time
 	function buildSmallMultiples(){	
-	sm_multiples = d3.select("body").select("#smview")
+		
+		
+	sm_multiples = d3.select("body").select("#mapview")
 		.selectAll("svg")
 		.data(byDatebyRegion)
 		.enter()
@@ -1802,7 +1785,7 @@ svg.call(zoom);
 			d3.select(this).style("fill","tomato");
 			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","tomato");
 			if(!selection){
-				show_charts(d); //add date
+				show_charts2(d); //add date
 			}
 			
 		})
@@ -1812,7 +1795,7 @@ svg.call(zoom);
 			})
 			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","steelblue");
 			if(!selection){
-				charts_mout(d);
+				dists_charts_mout(d);
 			}
 		});
 	}
