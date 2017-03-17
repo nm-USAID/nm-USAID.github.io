@@ -464,16 +464,14 @@ var zoom = d3.zoom()
 
 //load data
 queue()
-	//.defer(d3.json, "countries.topojson")
 	.defer(d3.json, "admin_0_countries.json")
-	.defer(d3.json, "admin_1_states_provinces.json")
-    .defer(d3.json, "el_salvador_epi.json")
-	//.defer(d3.json, "urban_areas.json")
-	.defer(d3.json, "countryData.json")
-	.defer(d3.json, "populated_places2.json")
-	.defer(d3.json, "poverty.json")
-	.defer(d3.json, "usaidawards.json")
-	.defer(d3.json,"IPPFClinics.json")
+	//.defer(d3.json, "admin_1_states_provinces.json")
+    //.defer(d3.json, "el_salvador_epi.json")
+	//.defer(d3.json, "countryData.json")
+	//.defer(d3.json, "populated_places2.json")
+	//.defer(d3.json, "poverty.json")
+	//.defer(d3.json, "usaidawards.json")
+	//.defer(d3.json,"IPPFClinics.json")
     .await(ready);
 
 	
