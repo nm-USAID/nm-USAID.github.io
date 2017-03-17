@@ -75,7 +75,7 @@ body {
 
 
 .mapview path {
-  stroke-width: 0.25px;
+  stroke-width: 0.025px;
   stroke: white;
   fill: rgb(178, 214, 141);
   cursor: pointer;
@@ -84,7 +84,7 @@ body {
 
 .mapview path:hover, path.highlighted {
   fill: tomato;
-  stroke-width: 0.25px;
+  stroke-width: 0.025px;
 }
 
 .mapview{
@@ -169,8 +169,7 @@ body {
 
 
 
-div.urbanPop {	
-    position: absolute;			
+div.urbanPop {				
     text-align: left;		
     width: 200px;					
     height: 100px;					
@@ -182,13 +181,26 @@ div.urbanPop {
     border-color: grey;		
     border-radius: 3px;				
     pointer-events: none;
-	left: 490px;
+	left: 25px;
 	top: 25px;		
 }
 
+.patternFill{
+	stroke:white;
+	stroke-width:0.025;
+	fill:none;
+}
+
 </style>
-<body>
-</body>	
+<body>	
+</body>
+
+<svg class="patternFill"><defs><pattern id="diagonalHatch" width="0.2" height="0.2" patternUnits="userSpaceOnUse">
+  <path d="M-0.05,0.05 l0.1,-0.1
+           M0,0.2 l0.2,-0.2
+           M0.15,0.25 l0.1,-0.1"/>
+</pattern></defs></svg>
+
 	
 <script src="d3.min.js"></script>
 <script src="//d3js.org/queue.v1.min.js"></script>
@@ -240,22 +252,24 @@ var projection = d3.geoMercator()
 //Generate paths based on projection
 var path = d3.geoPath()
     .projection(projection);
+	
+	var clinicSymbol = d3.symbol().size(10).type(d3.symbolCross);	
 		
 	
+d3.select("body").append("div")
+	.attr("class","container")
+	.attr("id","smview");
+
 d3.select("body").append("div")
 	.attr("class","container")
 	.attr("id","mapview");
 
 d3.select("body").append("div")
 	.attr("class","container")
-	.attr("id","chartview");
-	
-d3.select("body").append("div")
-	.attr("class","container")
-	.attr("id","smview");		
+	.attr("id","chartview");		
 
-//Create an SVG
-var svg = d3.select("body").select("#mapview").append("svg")
+//Create countrie overview
+/*var svg = d3.select("body").select("#mapview").append("svg")
 	.attr("class","mapview")
     .attr("width", width)
     .attr("height", height);	
@@ -272,7 +286,8 @@ var awards_shp = svg.append("g")
 	.attr("class","awards_shp");
 	
 var clinics_pts = svg.append("g")
-	.attr("class","clinics");		
+	.attr("class","clinics");*/
+			
 //for chartview
 	//var svg_chart = d3.select("body").select("#chartview").append("svg")
 	//.attr("class","graph");	
@@ -311,10 +326,14 @@ var linegraph;
 var linegraph2;			
 
 //urban density popup
-var urbanPop = d3.select("body").append("div")
+/*var urbanPop = d3.select("body").select("#chartview").append("div")
 .attr("class","urbanPop");
 
 var svg_up = urbanPop.append("svg")
+.attr("width","100%")
+.attr("height","100%");*/
+
+var svg_up = d3.select("body").select("#chartview").append("svg")
 .attr("width","200px")
 .attr("height","100px");
 
@@ -398,7 +417,7 @@ queue()
   //console.log(awards.objects.usaidawards);
   //topojson.feature(awards,awards.objects.usaidawards).features.filter(function(d){return d.properties.ISO == "SLV";});
   
-  console.log(IPPFclinics);
+  //console.log(IPPFclinics);
   //console.log(el_salvador_awards);
   
   //console.log(el_salvador_pop);
@@ -590,11 +609,11 @@ var color_pov = d3.scaleThreshold()
   
 
   var up = up_land.selectAll("path")
-      .data(admin0data.features) //generate features from TopoJSON
-      //.data(el_salvador)
+      //.data(admin0data.features) //generate features from TopoJSON
+      .data(el_salvador)
   	.enter()
       .append("path")
-      .attr("id",function(d){return "country"+d.properties.ADM0_A3;})
+      .attr("id",function(d){return "country"+d.properties.fips;})
       //.attr("class","country_paths")
     .attr("d",path_pop)
     .style("fill","rgba(220,220,220,1)");  
@@ -678,17 +697,6 @@ var key = svg_up.append("g")
 
 //labels with min,max
 	    
-	  	  
-
-
-var countries = land.selectAll("path")
-    .data(admin0data.features) //generate features from TopoJSON
-	.enter()
-    .append("path")
-    .attr("id",function(d){return "country"+d.properties.ADM0_A3;})
-    .attr("class","country_paths")
-  .attr("d",path)
-  .style("fill","rgba(220,220,220,1)");
   
   
 // set the ranges
@@ -699,7 +707,9 @@ var y = d3.scaleLinear().range([graph_height, 0]);
 var x2 = d3.scaleTime().range([0, graph2_width]);
 var y2 = d3.scaleLinear().range([graph2_height, 0]);	
 
-//console.log(d3.max(SLVdata, function(v) { return v.value; }));
+
+var mx = d3.max(SLVdata, function(v) { return v.value; });
+//console.log(d3.min(SLVdata, function(v) { return v.value; }));
 
 x.domain(d3.extent(SLVdata, function(v) { return v.report_date; }));
 
@@ -722,9 +732,23 @@ var valueline2 = d3.line()
 	.domain([1,3000])
 	.range(['#fef0d9', '#b30000']);	
 	
-	choropleth3 = d3.scaleLog()
+	
+	choropleth3 = d3.scaleLinear()
+	.domain([1,mx])
+	//.range(['#feb24c','#bd0026']);
+	.range(['#fee8c8','#b30000']);
+	//.range(['#fff7ec','#b30000']);
+	//.range(['#fef0d9', '#b30000']);
+	
+	choropleth4 = d3.scaleLog()
+	.domain([1,mx])
+	//.range(['#feb24c','#bd0026']);
+	.range(['#fee8c8','#b30000'])
+	
+	
+	var scale_cases = d3.scaleLog()
 	.domain([10,2000])
-	.range(['#fef0d9', '#b30000']);
+	.rangeRound([0,1]);
 	
 	
 	var x3 = d3.scaleLinear()
@@ -737,14 +761,17 @@ var valueline2 = d3.line()
     
   //Create a path for each map feature in the data
 	
-	buildRegions();
-	layerAwards();
+	//buildRegions();
+	//layerAwards();
+	//buildCountries();
 	
 	povChart();
 	povMap();
 	countryChart();
 	buildSmallMultiples();
-	layerClinics();
+	
+	//layerClinics();
+	
 	
 	var regions;
 	var sm_maps;	
@@ -753,6 +780,19 @@ var valueline2 = d3.line()
 	
 	var selection = false;
 	
+	var STC_texture = "url(#pathPattern)";
+	
+	function buildCountries(){
+	  var countries = land.selectAll("path")
+	      .data(admin0data.features) //generate features from TopoJSON
+	  	.enter()
+	      .append("path")
+	      .attr("id",function(d){return "country"+d.properties.ADM0_A3;})
+	      .attr("class","country_paths")
+	    .attr("d",path)
+	    .style("fill","rgba(220,220,220,1)");
+	}
+	
 	function layerAwards(){
 		efforts = awards_shp.selectAll("path")
 		.data(el_salvador_awards)
@@ -760,10 +800,14 @@ var valueline2 = d3.line()
 		.append("path")
 		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
 		.attr("d",path)
-		.style("stroke","none")
-		.style("fill",function(d){
+		.style("stroke","white")
+		.style("stroke-width","0.01")
+		//.attr("class","patternFill")
+		//.style("stroke","white")
+		/*.style("fill",function(d){
 			if(d.properties.Partner == "STC"){
-				return "rgb(178, 214, 141)";
+				//return "rgb(178, 214, 141)";
+				return "url(#pathPattern)";
 			}else if(d.properties.Partner == "MCDI"){
 				return "blue";
 			}else if(d.properties.Partner == ""){
@@ -771,7 +815,9 @@ var valueline2 = d3.line()
 			}else if(d.properties.ASSIST){
 				return "yellow";
 			}
-		})
+		})*/
+		//.style("fill","url(#pathPattern)")
+		.style("fill","url(#diagonalHatch)")		
 		//.style("opacity","0.5")
 		.on("click", function(d){
 			console.log(d);	
@@ -780,7 +826,7 @@ var valueline2 = d3.line()
 			d3.select(this).style("fill","tomato");
 		} )
 		.on("mouseout",function(d){
-			d3.select(this).style("fill","rgb(178, 214, 141)");
+			d3.select(this).style("fill","url(#diagonalHatch)");
 		})
 	}
 	
@@ -789,11 +835,22 @@ var valueline2 = d3.line()
 	     .data(topojson.feature(IPPFclinics,IPPFclinics.objects.IPPFClinics).features)
 	     .enter()
 	     .append("path")
-	     .attr("d",path.pointRadius(0.2))
-	    .style("fill","rgb(0,0,0)")
-		.style("stroke","none")
-		.append("text")
-		.text("+");
+		.style("fill","steelblue")
+		.style("stroke","white")
+		.style("stroke-width","0.05")
+		.attr("transform", function(d) { return "translate(" + projection(d.geometry.coordinates) + ")"; })
+	    //.attr("d",path.pointRadius(0.2))
+		.attr("d",d3.symbol().size(0.10).type(d3.symbolCross))
+		.on("mouseover",function(d){
+			d3.select(this).style("stroke-width","0.1");
+		})
+		.on("mouseout",function(d){
+			d3.select(this).style("stroke-width","0.05");
+		})
+		;
+		//.attr("class","clinicPattern")
+	    //.style("fill","url(#clinicSymbol)");
+		//.style("stroke","none");
 		
 		/*clinics.append("text")
 		.attr("class","clinic_cross")
@@ -814,11 +871,13 @@ function buildRegions(){
 		var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
 		//console.log(max[0].value.max_cumulative);
 		if(ht){
-			return choropleth3(max[0].value.cum_ht);
+			//return d3.interpolateOrRd(scale_cases(max[0].value.cum_ht));
+			return choropleth4(max[0].value.cum_ht);
 			//return choropleth(x3(max[0].value.cum_ht));
 		}else{
 			//choropleth1 is actually is ineffective, because we need to see finer grain differences
-			return choropleth3(max[0].value.max_cumulative);
+			//return d3.interpolateOrRd(scale_cases(max[0].value.max_cumulative));
+			return choropleth4(max[0].value.max_cumulative);
 		}
 	})
 	.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");})
@@ -1199,7 +1258,7 @@ var tot = d3.select("body").append("button")
 	.text("total cases")
 	.on("click",function(){
 	ht = false;
-	updateRegions();
+	//updateRegions();
 	updateSMs();
  });
 	
@@ -1207,7 +1266,7 @@ var pht = d3.select("body").append("button")
 	.text("per H.T.") 
 .on("click",function(){
 ht = true;
-updateRegions();
+//updateRegions();
 updateSMs();
 });
 
@@ -1219,10 +1278,12 @@ function updateRegions(){
 			//console.log(max[0].value.max_cumulative);
 			if(ht){
 				//return choropleth(x3(max[0].value.cum_ht));
-				return choropleth3(max[0].value.cum_ht);
+				return choropleth4(max[0].value.cum_ht);
+				//return d3.interpolateOrRd(scale_cases(max[0].value.cum_ht));
 			}else{		
 				//return choropleth(x3(max[0].value.max_cumulative));
-				return choropleth3(max[0].value.max_cumulative);
+				return choropleth4(max[0].value.max_cumulative);
+				//return d3.interpolateOrRd(scale_cases(max[0].value.max_cumulative));
 			}
 		})
 		.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");});
@@ -1237,9 +1298,9 @@ function updateSMs(){
 			var num = byDatebyRegion[c].values.filter(function(v){return v.key == d.properties.fips;})[0].values.filter(function(v){return v.key == "cumulative_suspected_total";})[0].values[0].value;
 			
 			if(ht){
-			return choropleth2(num);
+			return choropleth4(num);
 			}else{
-				choropleth3(num);
+				return choropleth4(num);
 			}
 		})
 		.style("fill", function(d,i,j){return d3.select("#sm_region"+d.properties.adm1_code+j[i].parentNode.id).attr("basecolor");});
@@ -1254,12 +1315,12 @@ function updateSMs(){
   var dx = path.centroid(centroid[0])[0];
   var dy = path.centroid(centroid[0])[1];
   
-svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));  
+//svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));  
 //features.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
 //land.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
 //awards_shp.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy));
 							
-		
+//svg.call(zoom);		
   
   //.on("mouseover",function(d){console.log(d);});
 	
@@ -1361,7 +1422,7 @@ svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).tr
 			
 			var num = byDatebyRegion[c].values.filter(function(v){return v.key == d.properties.fips;})[0].values.filter(function(v){return v.key == "cumulative_suspected_total";})[0].values[0].value;
 			//console.log(choropleth2(num));
-			return choropleth2(num);
+			return choropleth4(num);
 			//console.log(d3.stratify.parentId(d));
 		})
 		.style("fill", function(d,i,j){return d3.select("#sm_region"+d.properties.adm1_code+j[i].parentNode.id).attr("basecolor");})
@@ -1404,18 +1465,17 @@ function clicked(d,i) {
 //Update map on zoom/pan
 function zoomed() {
 	//console.log(zoom.translate()+" "+zoom.scale());
-  features.attr("transform", d3.event.transform)
-      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );
+	features.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );
 	  
-  land.attr("transform", d3.event.transform)
-      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );
+	  land.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	  
 	  
+	  awards_shp.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	
 	  
-  awards_shp.attr("transform", d3.event.transform)
-      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	
-	  
-  clinics_pts.attr("transform", d3.event.transform)
-      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );		  
+	  clinics_pts.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );		  
 	
 	/*up_land.attr("transform", d3.event.transform)
       .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );*/  
