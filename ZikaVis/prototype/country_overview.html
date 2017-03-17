@@ -128,9 +128,10 @@ body {
   float: left;				
 }
 
-.key_labels{
+.pop_key_labels{
 	font-size: 7px;
 }
+
 .ind_keys{
 	height:10px;
 }
@@ -791,7 +792,7 @@ var key = svg_up.append("g")
 	  .data([min_pop,max_pop])
 	  .enter()
 	  .append("text")
-	  .attr("class","key_labels")
+	  .attr("class","pop_key_labels")
 	  .attr("transform",function(d,i){
 		  var n = pop_range(d)
 		  return "translate("+80*i+",11)";
@@ -906,6 +907,9 @@ var valueline_dists = d3.line()
 	var sm_maps;	
 	var efforts;
 	var clinics;
+	var country_indicators;
+	var valueLine3;
+	var domains;
 	
 	var selection = false;
 	
@@ -950,6 +954,9 @@ var valueline_dists = d3.line()
 	
 	
 	function buildCountryData(){
+		
+		d3.select("#countryData").append("text")
+		.text("Country-level indicators");
 		
 		d3.select("body").select("#chartview").select("#countryData").append("div")
 		.attr("id","countryInds");
@@ -1132,12 +1139,22 @@ function show_charts2(d){
 	
 	var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
 	
-	//var yt = d3.scaleLinear().range([graph_height, 0]);
 	
+	var m1 = d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases;});
+	var m2 = d3.max(dd[0].values[1].values, function(v){return v.max_cum_cases;})
+	//var yt = d3.scaleLinear().range([graph_height, 0]);
 	//console.log();
+	var y1 = d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases;})]);
+	var y2 = d3.scaleLinear().range([graph_height, 0]).domain([0,m2]);
 	
 	//d3.scaleLinear().range([graph_height, 0]).domain([0,max[0].value.max_cumulative+10])
-	
+	var doms = [];
+	dd[0].values.forEach(function(v){
+		doms.push(
+			d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(v.values, function(v){return v.max_cum_cases;})])
+		);
+	})
+	//console.log(doms);
 	
 	//y.domain([0,max[0].value.max_cumulative+10]);
 	//console.log(dd);
@@ -1145,14 +1162,15 @@ function show_charts2(d){
 	//move this earlier to save compute time. 
 	dist_charts = d3.select("body").select("#chartview").select("#districtData")
 	.selectAll("svg")
-	.data(dd[0].values, function(d,i){return d;})
+	.data(dd[0].values, function(d,i,j){return d;})
 	.enter()
 	.append("svg")
-	.attr("id",function(d,i){return fips+"_"+d.key;})
+	//.attr("id",function(d,i){return fips+"_"+d.key;})
 	.attr("class","distCharts")
     .attr("width", graph_width + graph_margin.left + graph_margin.right)
     .attr("height", graph_height + graph_margin.top + graph_margin.bottom)
   .append("g")
+	.attr("id",function(d,i){return fips+"_"+d.key;})
     .attr("transform",
 	"translate(" + graph_margin.left + "," + graph_margin.top + ")");
 	
@@ -1186,21 +1204,42 @@ dist_charts.append("text")
                 return "rotate(-65)" 
                 });	
 				
+	var axis1 = [d3.axisLeft(doms[0]).ticks(5),d3.axisLeft(doms[1]).ticks(5)];
+	//var axis2 = d3.axisLeft(doms[1]).ticks(5);			
 				
-	dist_charts.append("g")
+	
+	//do a for each(maybe just for axis)
+	
+	
+	/*dist_charts.append("g")		
 		.attr("class","axis")
-				.call(d3.axisLeft(y).ticks(5));
+		.call(axis1[0]);*/
+		
+		//the solution!!
+		dd[0].values.forEach(function(v){
+			//console.log(v.max_cum_cases);
+			var yy = d3.scaleLinear().range([graph_height, 0]).domain([0,v.max_cum_cases]);
+			
+		  d3.select("#"+fips+"_"+v.key).append("g")
+			.attr("class","axis")
+			.call(d3.axisLeft(yy).ticks(5));
+		})
+		
+		
+				
+				/*function getAxis(d,i){
+					//console.log(d);
+					return axis1[0];
+				}*/			
 	
 	/*dist_charts.selectAll("g")
-		.data(dd[0].values, function(d){ 
-			//console.log(d.max_cum_cases);
-			//if(d.max_cum_cases != undefined){y.domain([0,d.max_cum_cases]);}
-			return d.max_cum_cases;})
+		.data(dd[0].values, function(d,i){return d;})
 		.enter()
 		.append("g")						
 		.attr("class","axis")
-		.call(function(d){return d3.axisLeft(d3.scaleLinear().range([graph_height, 0]).domain([0,10]))
-	.ticks(5););*/
+				.call(function(d){return axis1[0]
+					.ticks(5);}
+				);*/
 			//.call(getY(d3.select(this)))
 			//.ticks(5));
 		//.call(d3.axisLeft(y)
@@ -1334,9 +1373,9 @@ function show_charts(d){
 
 function povChart(){
 
-	var c_margin = {top: 25, right: 10, bottom: 30, left: 40},
+	var c_margin = {top: 25, right: 10, bottom: 50, left: 40},
 	c_width = 210 - c_margin.left - c_margin.right,
- 	c_height = 125 - c_margin.top - c_margin.bottom;	
+ 	c_height = 155 - c_margin.top - c_margin.bottom;	
 	
 	
 var pov_chart = d3.select("body").select("#chartview").select("#countryData").select("#povData").append("svg")
@@ -1402,7 +1441,7 @@ pov_chart.append("g")
 
 function povMap(){
 
-	var c_margin = {top: 45, right: 25, bottom: 30, left:0},
+	var c_margin = {top: 10, right: 25, bottom: 10, left:0},
 	c_width = 175 - c_margin.left - c_margin.right,
  	c_height = 150 - c_margin.top - c_margin.bottom;	
 	
@@ -1431,15 +1470,11 @@ var pov_map = d3.select("body").select("#chartview").select("#countryData").sele
 
 function countryChart(){
 	
-	/*d3.select("#countryData").select("#countryInds").append("text")
-	.style("text-align","center")
-	.text("Country-level indicators");*/
-	
 	var graph3_margin = {top: 10, right: 20, bottom: 40, left: 50},
 	      graph3_width = 250 - graph3_margin.left - graph3_margin.right,
 	      graph3_height = 125 - graph3_margin.top - graph3_margin.bottom;
 		  
-    var country_indicators = d3.select("#countryInds").append("svg")
+    country_indicators = d3.select("#countryInds").append("svg")
 	   .attr("class","country_inds")	  
    	   .attr("width", graph3_width + graph3_margin.left + graph3_margin.right)
    	   .attr("height", graph3_height + graph3_margin.top + graph3_margin.bottom)
@@ -1449,10 +1484,10 @@ function countryChart(){
 		  
 		  // set the ranges
 		  var x = d3.scaleTime().range([0, graph3_width]);
-		  var y = d3.scaleLinear().range([graph3_height, 0]);  
+		  var y = d3.scaleLinear().range([graph3_height, 0]);  		  
 		  
 	  //line charts
-	  var valueline3 = d3.line()
+	  valueline3 = d3.line()
 	    	.x(function(d) { return x(d.report_date); })
 	    	.y(function(d) { //console.log(d.report_date+" "+d.cum_cases); 
 				return y(d.cum_cases); });		  
@@ -1463,48 +1498,19 @@ var dd = byRegion.filter(function(v){return v.key == "ES00";});
 var max = totalByRegion.filter(function(v){return v.key == "ES00";});		
 		
 x.domain(d3.extent(SLVdata, function(v) { return v.report_date; }));
-y.domain([0,max[0].value.max_cumulative+10]);	  
+y.domain([0,max[0].value.max_cumulative+10]);
 
-linegraph3 = country_indicators.selectAll("path")
-.data(dd[0].values, function(d,i){return d.values;})
-.enter()
-.append("path")
-.attr("id",function(d,i){return "line"+d.key})
-.attr("class","line")
-.style("stroke",function(d,i){return colors[i%colors.length];})	
-.attr("d", function(d){
-	//console.log(d.key); 
-	return valueline3(d.values);})
-	.on("mouseover",function(d){
-		d3.select(this).style("stroke-width",3);
-	})
-	.on("mouseout",function(d){
-		d3.select(this).style("stroke-width",0.75);
-	});	
-	
-// Add the X Axis
-  var xaxis = country_indicators.append("g")
-	.attr("class","axis")	
-      .attr("transform", "translate(0,"+graph3_height+")")
-	  //.tickFormat(d3.timeFormat("%B"))
-	.call(d3.axisBottom(x)
-		. tickFormat(d3.timeFormat("%b %y")))
-		.selectAll("text")	
-          .style("text-anchor", "end")
-          .attr("dx", "-.8em")
-          .attr("dy", ".15em")
-          .attr("transform", function(d) {
-              return "rotate(-65)" 
-              });
+//console.log(dd[0].values);
+//have to redraw the map. that's fine. 
 
-  // Add the Y Axis
-  var yaxis = country_indicators.append("g")
-	.attr("class","axis")
-      .call(d3.axisLeft(y)
-			  .ticks(5));
-	  
-linegraph3.append("title")
-		.text(function(d){return d.key;});	
+domains = [];
+dd[0].values.forEach(function(v,i){
+	domains.push(v.max_cum_cases);
+})	 
+
+//console.log(d3.max(domains, function(d){return d;}));
+
+drawCountryLines(dd, x, y, graph3_height); 	
 		
 //build key - line plus label
 var key = d3.select("#countryInds").append("svg")
@@ -1518,13 +1524,14 @@ var key_labels = key.selectAll("g")
 			//.attr("class","ind_keys");
 		
 		key_labels.append("text")
+		.attr("id",function(d){return "label"+d.key})
 		.attr("class","key_labels")
 		.attr("x",10)
 		.attr("y",function(d,i){return i*10+10;})
 		.text(function(d){return d.key;});
 			
 		key_labels.append("circle")
-			.attr("id",function(d){return})
+			.attr("id",function(d){return "circle"+d.key})
 			.attr("cx",5)
 			.attr("cy",function(d,i){return i*10+8;})
 			.attr("r",2)
@@ -1536,14 +1543,27 @@ var key_labels = key.selectAll("g")
 				}
 			});	
 		
-			key_labels.on("click",function(d){
+			key_labels.on("click",function(d,i){
 				d.selected = !d.selected;
 				var op = (d.selected)?0:1;
+				var opL = (d.selected)?0.25:1;
 				
-				d3.select("#circle"+d.key).style("opacity",op);
-				d3.select("#label"+d.key).style("opacity",op);
+				d3.select("#circle"+d.key).style("opacity",opL);
+				d3.select("#label"+d.key).style("opacity",opL);
 				
 				d3.select("#line"+d.key).style("opacity",op);
+				//redraw graph with new axis
+				if(d.selected){
+					//console.log(d.max_cum_cases);
+					domains[i] = 0;
+					//console.log(domains[i]);
+					y.domain([0,d3.max(domains,function(v){return v;})])
+					drawCountryLines(dd, x, y, graph3_height);
+				}else{
+					domains[i] = d.max_cum_cases;
+					y.domain([0,d3.max(domains,function(v){return v;})])
+					drawCountryLines(dd, x, y, graph3_height);
+				}
 			})
 			.on("mouseover", function(d){
 					d3.select("#line"+d.key).dispatch("mouseover");
@@ -1553,6 +1573,61 @@ var key_labels = key.selectAll("g")
 				})				
 
 		  		
+}
+
+function drawCountryLines(dd, x, y, graph3_height){
+	
+	country_indicators.selectAll("*").remove();
+	//console.log(dd);
+	
+	linegraph3 = country_indicators.selectAll("path")
+	.data(dd[0].values, function(d,i){return d.values;})
+	.enter()
+	.append("path")
+	.attr("id",function(d,i){return "line"+d.key})
+	.attr("class","line")
+	.style("stroke",function(d,i){return colors[i%colors.length];})	
+	.style("opacity",function(d,i){
+		if(domains[i]==0){
+			return 0;
+		}else{
+			return 1;
+		}
+	})
+	.attr("d", function(d){
+		//console.log(d.key); 
+		return valueline3(d.values);})
+		.on("mouseover",function(d){
+			d3.select(this).style("stroke-width",3);
+		})
+		.on("mouseout",function(d){
+			d3.select(this).style("stroke-width",0.75);
+		});	
+	
+	// Add the X Axis
+	  var xaxis = country_indicators.append("g")
+		.attr("class","axis")	
+	      .attr("transform", "translate(0,"+graph3_height+")")
+		  //.tickFormat(d3.timeFormat("%B"))
+		.call(d3.axisBottom(x)
+			. tickFormat(d3.timeFormat("%b %y")))
+			.selectAll("text")	
+	          .style("text-anchor", "end")
+	          .attr("dx", "-.8em")
+	          .attr("dy", ".15em")
+	          .attr("transform", function(d) {
+	              return "rotate(-65)" 
+	              });
+
+	  // Add the Y Axis
+	  var yaxis = country_indicators.append("g")
+		.attr("class","axis")
+	      .call(d3.axisLeft(y)
+				  .ticks(5));
+	  
+	linegraph3.append("title")
+			.text(function(d){return d.key;});
+	
 }
 
 
