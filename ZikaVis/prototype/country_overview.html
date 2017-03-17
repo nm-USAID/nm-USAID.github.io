@@ -476,11 +476,9 @@ queue()
 	.defer(d3.json,"IPPFClinics.json")
     .await(ready);
 
-//d3.json("countries.topojson",function(error,geodata) {
-//d3.json("world_less.json",function(error,geodata) {
 	
-	function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty, awards, IPPFclinics){	
-//d3.json("countries_admin1.json",function(error,geodata) {
+	//function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty, awards, IPPFclinics){
+		function ready(error, admin0data, adm1data, SLVdata){	
   if (error) throw error; //unknown error, check the console
   
   //console.log(otherdata.features[5].properties.adm0_a3);
