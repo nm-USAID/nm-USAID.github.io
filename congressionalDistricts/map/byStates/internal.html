@@ -277,7 +277,7 @@ div.button{
 }
 
 tr {
-	vertical-align:top;
+	vertical-align:top;	
 }
 
 /*th {
@@ -483,10 +483,11 @@ queue()
 	.defer(d3.json, "../../awards_USAID_March2017.json")
 	.defer(d3.json, "../../state_ids2.json")
 	.defer(d3.json, "../../us-states.json")
+	.defer(d3.json, "../../cors.json")
 	//.defer(d3.json, "../../us-congress-115.json")
     .await(ready);
 
-	function ready(error, us, congress, reps, awards, ids, us_states) {
+	function ready(error, us, congress, reps, awards, ids, us_states, cors) {
   if (error) throw error;
   
   /******* filter out nulls and non us ******/
@@ -502,6 +503,18 @@ queue()
   //.filter(function(d){return d.Obligated.replace(/,/g,"") >= 1000 || d.Obligated.replace(/,/g,"") == 0});
   
   //awards = awards.filter(function(d){return d.Original_FY == "2010"});
+  //add CORs to award fields
+  awards.forEach(function(d,i){
+	  if(d.Award_Number==""){
+		  var s = cors.filter(function(e){return e.Partner_name == d.Vendor_Name;});
+		  if(s[0]!=undefined){
+			  d.Award_Number = "COR(s): "+s[0].COR;
+		  }
+	  }
+  })
+  
+  
+  
   
   /******* nested data *******/
   //for menus
@@ -1057,24 +1070,25 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		          .enter()
 		          .append("th")
 				  .style("min-width",function(d,i){return min_widths[i];})
-				  .attr("class","header")	  
-		              .text(function(d) { return d; });
+				  .attr("class","header")  
+		          .text(function(d) { return d; });
 					
 					var rows = tbody.selectAll("tr")
     		          .data(datT)
     		          .enter()
     		          .append("tr")
-					  .style("background",function(d,i){
-						  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
+				      .style("background",function(d,i){if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
+					  /*.style("background",function(d,i){
+						  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});*/
 
     				  var cells = rows.selectAll("td")
     				  .data(function(d) { return [d.Original_FY,d.PROGRAM_ELEMENT,d.Vendor_Name, d.Vendor_Category,d.Award_Number,"$"+formatNumber(d.Obligated),d.FBO_or_PPPs];})	  
     				  .enter()
     				  .append("td")
-    				  .attr("class","rows")
-					  //.style("font-size","12px")
-					  //.style("color","black")	  	  	  
+    				  .attr("class","rows")  	  	  
     				  .html(function(d) {
+						  //var st = "<a href=\"url\">"+d+"</a>"
+						  
 						  return d; 
 					  });
 	   
@@ -1088,9 +1102,12 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 				  
   				  if(popupStateOn){
   				  			  popupState.style("pointer-events","all");
+							  cells.style("pointer-events","all");
+							  
   				  			  popupStateId = d.id;
   				  		  }else{
   				  			  popupState.style("pointer-events","none");
+							  cells.style("pointer-events","none")
   				  			  popupStateId = 0;
   				  		  } 
     			  }
@@ -1314,9 +1331,10 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 						  .data(datT)
 						  .enter()
 						  .append("tr")
-							  .style("background",function(d,i){
+						  .style("background",function(d,i){if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
+							  /*.style("background",function(d,i){
 								  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
-							  ;
+							  ;*/
 
 				  
 						  var cells = rows.selectAll("td")
@@ -1334,9 +1352,11 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 						  if(popupOn){
 							  popupId = d.id;
 							  popup.style("pointer-events","all");
+							  cells.style("pointer-events","all");
 						  }else{
 							  popupId = 0;
 							  popup.style("pointer-events","none");
+							  cells.style("pointer-events","none");
 						  }
 				  
 						  if(popupOn){
