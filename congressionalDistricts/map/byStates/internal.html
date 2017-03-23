@@ -280,10 +280,10 @@ tr {
 	vertical-align:top;
 }
 
-th {
-	min-width:200px;
+/*th {
+	min-width:100px;
 	
-}
+}*/
 
 
 </style>
@@ -305,11 +305,11 @@ th {
 
 
 <svg class="patternFill"><defs><pattern id="pathPattern" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
-<rect x="0" y="0" width="100%" height="100%" fill="#7da6cf"/>
+<rect x="0" y="0" width="100%" height="100%" fill="#77c379"/>
 <path d="M 0 0 L 2 2" stroke="white" stroke-width="0.3px"/></pattern></defs></svg>
 
 <svg class="patternFill_lg"><defs><pattern id="pathPattern_lg" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-<rect x="0" y="0" width="100%" height="100%" fill="#7da6cf"/>
+<rect x="0" y="0" width="100%" height="100%" fill="#77c379"/>
 <path d="M 0 0 L 4 4" stroke="white" stroke-width="0.5px"/></pattern></defs></svg>
 
 
@@ -322,10 +322,12 @@ th {
 
 //stroke="#145aa1"
 
+var min_widths = ["50px","150px","200px","100px","150px","100px","100px","100px","100px"];
+
 d3.select("#home").on("click", reset);
 
 var dispatch = d3.dispatch("load", "statechange", "versionchange");
-var stateColor = "#7da6cf";//"#91b6d4";
+var stateColor = "#77c379";//"#91b6d4";
 var distColor = "url(#pathPattern)";//"url(#diagonal-stripe-1)";//"#145aa1";
 var distColorChart = "url(#pathPattern_lg)"; //for barchart
 var state_notSelected = "efefef";
@@ -476,19 +478,16 @@ var popup = d3.select("body").append("div")
 //load data
 queue()
     .defer(d3.json, "../../us.json")
-    .defer(d3.json, "../../us-congress-114.json")
+    .defer(d3.json, "../../us-congress-115d.json")
 	.defer(d3.json, "../../reps3.json")
 	.defer(d3.json, "../../awards_USAID_March2017.json")
 	.defer(d3.json, "../../state_ids2.json")
 	.defer(d3.json, "../../us-states.json")
-	.defer(d3.json, "../../us-congress-115.json")
+	//.defer(d3.json, "../../us-congress-115.json")
     .await(ready);
 
-	function ready(error, us, congress, reps, awards, ids, us_states, congress_115) {
+	function ready(error, us, congress, reps, awards, ids, us_states) {
   if (error) throw error;
-  
-  console.log(congress_115);
-  console.log(congress);
   
   /******* filter out nulls and non us ******/
   awards = awards
@@ -543,15 +542,17 @@ queue()
   .entries(awards);
   
   
+  
   awardsByYear_0 = awardsByYear_0.filter(function(d){return d.key != "null" && d.key != "";});
   awardsByElement_0 = awardsByElement_0.filter(function(d){return d.key != "null" && d.key != "";});
+  awardsByVendorType_0 = awardsByVendorType_0.filter(function(d){return d.key != "null" && d.key != "";});
   
   
   //these are data being pulled
   awardsByState_0 = d3.nest()
   .key(function(d){return d.Vendor_State;})
-  .key(function(d){return d.Vendor_Name;})
-  .key(function(d){return d.PROGRAM_ELEMENT;})
+  //.key(function(d){return d.Vendor_Name;})
+  //.key(function(d){return d.PROGRAM_ELEMENT;})
   .entries(awards);
   
   /*awardsByState_ag_0 = [];
@@ -566,8 +567,8 @@ queue()
   
   awardsByDist_0 = d3.nest()
   .key(function(d){return d.CD_ID;})
-  .key(function(d){return d.Vendor_Name;})
-  .key(function(d){return d.PROGRAM_ELEMENT;})
+  //.key(function(d){return d.Vendor_Name;})
+  //.key(function(d){return d.PROGRAM_ELEMENT;})
   .entries(awards);
   //console.log(awardsByDist);
   awardsTotalByStateDist_0 = d3.nest()
@@ -638,9 +639,33 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 	dispatch.on("load.map", loadStateMap());
 	
 	function loadMenu(){
+	  	/*var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
+		var state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});*/
+	  	var year_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fYear = this.value; dispatch.call("statechange", this, awards_0);});
 	  	var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
+	  	var vendor_type_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fType = this.value; dispatch.call("statechange", this, awards_0);});
+	  	var pship_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fPship = this.value; dispatch.call("statechange", this, awards_0);});
 		var state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
 
+		
+		year_filter.selectAll("option")
+	  	.data([{key: "Filter by Year", value: 10000}].concat(awardsByYear)) 
+	  	.enter().append("option")
+	  	.attr("value",function(d){return d['key'];})
+	  	.text(function(d){return d['key'];});
+		
+		vendor_type_filter.selectAll("option")
+	  	.data([{key: "Filter by Vendor Type", value: 10000}].concat(awardsByVendorType)) 
+	  	.enter().append("option")
+	  	.attr("value",function(d){return d['key'];})
+	  	.text(function(d){return d['key'];});
+		
+		pship_filter.selectAll("option")
+	  	.data([{key: "Filter by PPP/FBO", value: 10000},{key: "PPP", value: "PPP"},{key: "Faith-based", value: "Faith-based"} ]) 
+	  	.enter().append("option")
+	  	.attr("value",function(d){return d['key'];})
+	  	.text(function(d){return d['key'];});
+		
 		
 		element_filter.selectAll("option")
 	  	.data([{key: "Filter by Program Element", value: 10000}].concat(awardsByElement)) 
@@ -698,14 +723,14 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		  
 		  		  awardsByDist = d3.nest()
   						.key(function(d){return d.CD_ID;})
-					    .key(function(d){return d.Vendor_Name;})
-					    .key(function(d){return d.PROGRAM_ELEMENT;})
+					    //.key(function(d){return d.Vendor_Name;})
+					    //.key(function(d){return d.PROGRAM_ELEMENT;})
   						.entries(awards_tmp);
 							
 				  awardsByState = d3.nest()
 					    .key(function(d){return d.Vendor_State;})
-						.key(function(d){return d.Vendor_Name;})
-						.key(function(d){return d.PROGRAM_ELEMENT;})
+						//.key(function(d){return d.Vendor_Name;})
+						//.key(function(d){return d.PROGRAM_ELEMENT;})
 						.entries(awards_tmp);	
 						
 						
@@ -1002,7 +1027,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
     		          thead = awards.append("thead"),
     		          tbody = awards.append("tbody");
 					  
-    				  var datT_ag = [];
+    				  /*var datT_ag = [];
 					  
     				  datT.forEach(function(d,i){
     					  var vendor = d;
@@ -1021,28 +1046,29 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 							  //datT_ag.push({key:vendor.key,values:{name:v.key, award_nums:v.values[0].Award_Number}});
 						  });
     				  });
-    				  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
+    				  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});*/
 	  
     		  		
 					  //console.log(datT);
 		  // append the header row
 		      thead.append("tr")
 		          .selectAll("th")
-		          .data(["Partner", "Element", "Award Number(s)"])
+		          .data(["Year", "Element", "Partner", "Type","Award Number", "Obligation", "FBO/PPP"])
 		          .enter()
 		          .append("th")
+				  .style("min-width",function(d,i){return min_widths[i];})
 				  .attr("class","header")	  
 		              .text(function(d) { return d; });
 					
 					var rows = tbody.selectAll("tr")
-    		          .data(datT_ag)
+    		          .data(datT)
     		          .enter()
     		          .append("tr")
 					  .style("background",function(d,i){
 						  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
 
     				  var cells = rows.selectAll("td")
-    				  .data(function(d) { return [d.key,d.values.name,d.values.award_nums];})	  
+    				  .data(function(d) { return [d.Original_FY,d.PROGRAM_ELEMENT,d.Vendor_Name, d.Vendor_Category,d.Award_Number,"$"+formatNumber(d.Obligated),d.FBO_or_PPPs];})	  
     				  .enter()
     				  .append("td")
     				  .attr("class","rows")
@@ -1102,8 +1128,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		  .attr("clip-path", "url(#clip-land)")
 		  .selectAll("path");
 		  
-		  var f = topojson.feature(congress, congress.objects.districts).features;
-		  var f2 = f.filter(function(d){return Math.floor(d.id/100)==s_id;});
+		  //var f = topojson.feature(congress, congress.objects.districts).features;
+		  //var f2 = f.filter(function(d){return Math.floor(d.id/100)==s_id;});
 		  var f3 = topojson.feature(congress, congress.objects.districts).features;
 		  //console.log(f);
 		  //console.log(f2);
@@ -1111,7 +1137,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		  //console.log(congress.objects.districts.geometries);
 		  
 		 //dists = dd.data(topojson.feature(congress, congress.objects.districts).features)
-		  dists = dd.data(f3)
+	      dists = dd.data(f3)
 		  .enter().append("path")
 		  .attr("d", path)
 		  .attr("id", function(d){//console.log(d); 
@@ -1250,7 +1276,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 					          tbody = awards.append("tbody");
 							  
 							  
-							  var datT_ag = [];
+							  
+							  /*var datT_ag = [];
 							  datT.forEach(function(d,i){
 								  var vendor = d;
 								  vendor.values.forEach(function(v,i){ 
@@ -1269,21 +1296,22 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 									  
 									  //datT_ag.push({key:vendor.key,values:v.key});});
 							  });
-							  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
+							  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});*/
 
 						  
 				  // append the header row
 				      thead.append("tr")
 				          .selectAll("th")
-				          .data(["Partner", "Element", "Award Number(s)"])
+				          .data(["Year", "Element", "Partner", "Type","Award Number","Obligation","FBO/PPP"])
 				          .enter()
 				          .append("th")
+						  .style("min-width",function(d,i){return min_widths[i];})
 						  .attr("class","header")	  
 				          .text(function(d) { return d; });
 						  
 						  
 						  var rows = tbody.selectAll("text")
-						  .data(datT_ag)
+						  .data(datT)
 						  .enter()
 						  .append("tr")
 							  .style("background",function(d,i){
@@ -1293,7 +1321,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 				  
 						  var cells = rows.selectAll("td")
 						  .data(function(d) {
-								  return [d.key, d.values.name, d.values.award_nums];}
+								  return [d.Original_FY,d.PROGRAM_ELEMENT,d.Vendor_Name, d.Vendor_Category,d.Award_Number,"$"+formatNumber(d.Obligated),d.FBO_or_PPPs];}
 							  )	  
 						  .enter()
 						  .append("td")

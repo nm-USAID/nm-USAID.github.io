@@ -305,11 +305,11 @@ th {
 
 
 <svg class="patternFill"><defs><pattern id="pathPattern" x="0" y="0" width="2" height="2" patternUnits="userSpaceOnUse">
-<rect x="0" y="0" width="100%" height="100%" fill="#7da6cf"/>
+<rect x="0" y="0" width="100%" height="100%" fill="#77c379"/>
 <path d="M 0 0 L 2 2" stroke="white" stroke-width="0.3px"/></pattern></defs></svg>
 
 <svg class="patternFill_lg"><defs><pattern id="pathPattern_lg" x="0" y="0" width="4" height="4" patternUnits="userSpaceOnUse">
-<rect x="0" y="0" width="100%" height="100%" fill="#7da6cf"/>
+<rect x="0" y="0" width="100%" height="100%" fill="#77c379"/>
 <path d="M 0 0 L 4 4" stroke="white" stroke-width="0.5px"/></pattern></defs></svg>
 
 
@@ -325,7 +325,7 @@ th {
 d3.select("#home").on("click", reset);
 
 var dispatch = d3.dispatch("load", "statechange", "versionchange");
-var stateColor = "#7da6cf";//"#91b6d4";
+var stateColor = "#77c379";//"#66c2a4";//"#7da6cf";
 var distColor = "url(#pathPattern)";//"url(#diagonal-stripe-1)";//"#145aa1";
 var distColorChart = "url(#pathPattern_lg)"; //for barchart
 var state_notSelected = "efefef";
@@ -367,7 +367,15 @@ var svg = d3.select("body").select("#chart1").append("svg")
 	//.call(zoom)	
 	.append("g");
 	
-	svg.call(zoom);			
+	svg.call(zoom)
+	.on("dblclick.zoom",null);		
+	
+/*var svg_states = svg.append("g")
+	.attr("class","states");	
+	
+var svg_dists = svg.append("g")
+    .attr("class","land");*/
+			
 	
 var chart_tooltip = d3.select("body").append("div")	
     .attr("class", "chart_tooltip")				
@@ -476,19 +484,20 @@ var popup = d3.select("body").append("div")
 //load data
 queue()
     .defer(d3.json, "../../us.json")
-    .defer(d3.json, "../../us-congress-114.json")
+    .defer(d3.json, "../../us-congress-115d.json")
 	.defer(d3.json, "../../reps3.json")
 	.defer(d3.json, "../../awards_USAID_March2017.json")
 	.defer(d3.json, "../../state_ids2.json")
 	.defer(d3.json, "../../us-states.json")
-	.defer(d3.json, "../../us-congress-115.json")
+	//.defer(d3.json, "../../us-congress-115.json")
+	//.defer(d3.json, "../../us-congress-115d.json")
     .await(ready);
 
-	function ready(error, us, congress, reps, awards, ids, us_states, congress_115) {
+	function ready(error, us, congress, reps, awards, ids, us_states) {
   if (error) throw error;
   
-  console.log(congress_115);
-  console.log(congress);
+  //console.log(congress_115);
+  //console.log(tryit);
   
   /******* filter out nulls and non us ******/
   awards = awards
@@ -586,10 +595,10 @@ queue()
   
   
   dispatch.call("load");
-  everythingelse(us, congress, reps, awards, ids, us_states/*, congress_115*/);
+  everythingelse(us, congress, reps, awards, ids, us_states);
 }
 
-function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress_115*/){
+function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	
 	//awards = awards.filter(function(d){return d.state == "NY"})
 	
@@ -617,6 +626,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
   	  district.rep = (result[0] != undefined) ? result[0] : null;
     });
 	
+	//console.log(congress);
+	
     /*congress_115.objects.districts.geometries.forEach(function(district){
   	  var result = reps.filter(function(rep){
   		  return rep.CD_ID === +district.properties.GEOID;
@@ -627,19 +638,23 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
   	  district.rep = (result[0] != undefined) ? result[0] : null;
     });*/
 	
+	 //var f4 = topojson.feature(congress_115, congress_115.objects.districts).features;
+	
      var minDollars = d3.min(awardsTotalByDistId, function(d){return d.value;});
      var maxDollars = d3.max(awardsTotalByDistId, function(d){return d.value;});
      var meanDollars = d3.mean(awardsTotalByDistId, function(d){return d.value;});
 	 
 	 var minState = d3.min(awardsTotalByState, function(d){return d.value.total;});
 	 var maxState = d3.max(awardsTotalByState, function(d){return d.value.total;});
+	 
+	 var state_filter;
 	
 	dispatch.on("load.menu", loadMenu());
 	dispatch.on("load.map", loadStateMap());
 	
 	function loadMenu(){
 	  	var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
-		var state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
+		state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() {schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
 
 		
 		element_filter.selectAll("option")
@@ -655,6 +670,12 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		.style("padding-left","10px")
 	  	.text(function(d){return d['key'];});
 	  	/***********/
+		
+		/*state_filter.dispatch("change",function(){
+			this.value = "KS";
+			schange = 1; fState = this.value; 
+		});*/
+		
 
 		//generate centroids
 			centroids = d3.map();
@@ -667,7 +688,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 			//console.log(centroids.get("01"));
 		
 		dispatch.on("statechange.menu", function(awards_init) {
-		  		  //console.log("changed menu!"+state);
+		  		  //console.log("changed menu!");
 		  		  var awards_tmp = awards_init;
 				  
 				 
@@ -764,8 +785,10 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 							//rather than two calls do from one point to the next
 							svg.call(zoom.transform,d3.zoomIdentity);
 							
+							
 							svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(2).translate(-dx,-dy));
-							}
+							
+						    }
 							
 							svg.selectAll("*").remove(); 
 							
@@ -776,7 +799,9 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 							updateDistMap();
 							
 						}else{
-							svg.call(zoom);
+							svg.call(zoom)
+							.on("dblclick.zoom",null);
+							
 							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity);
 							
 							svg.selectAll("*").remove(); 
@@ -827,6 +852,9 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		choropleth = d3.scaleLog()
 		.domain([1000000,maxState])
 		.range(['#c6dbef', '#08519c']);
+		
+	/*var svg_states = svg.append("g")
+		.attr("class","states");*/
 
 	  svg.append("path")
 	      .attr("id", "land")
@@ -853,6 +881,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		  })	    
 		  .style("fill", function(d){return d3.select("#state"+d.id).attr("basecolor");})
 		  //on click
+		  //.on("dblclick", function(d){console.log("double "+d.id);})
 		  .on("click", function(d){ _popupState(d);
 	  	  	    d3.select("#cb2").on("click",function(){	  
 	  	  	  	  if(popupStateOn){
@@ -1057,7 +1086,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
     				  if(d.active){
     				  	svg.on('.zoom',null);
     				  }else{
-    				  	svg.call(zoom);
+    				  	svg.call(zoom)
+						  .on("dblclick.zoom",null);
     				  }
 				  
   				  if(popupStateOn){
@@ -1084,34 +1114,93 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 		.range(['#c6dbef', '#08519c']);
 		//.range(['#eff3ff', '#08519c']);
 		//.range(['#e0f3db', '#08519c']);
-
-	  svg.append("defs").append("path")
+		
+		
+	var svg_states = svg.append("g")
+  		.attr("class","dists");
+		
+		svg_states.append("defs").append("path")
 	      .attr("id", "land")
 	      .datum(topojson.feature(us, us.objects.land))
 	      .attr("d", path);
-
-	  svg.append("clipPath")
+		
+	  svg_states.append("clipPath")
 	      .attr("id", "clip-land")
 	    .append("use")
-	      .attr("xlink:href", "#land");  
+	      .attr("xlink:href", "#states"); 
+		  
+	var ss = svg_states.append("g")
+		  .attr("class", "districts")
+		  .selectAll("path")
+  		  .data(us_states.features)
+  		  .enter().append("path")
+  		  .attr("d", path)
+  		.style("fill", state_notSelected);  
+
+  	
+	var svg_dists = svg.append("g")
+  		.attr("class","dists");	
+
+	  svg_dists.append("defs").append("path")
+	      .attr("id", "land")
+	      .datum(topojson.feature(us, us.objects.land))
+	      .attr("d", path);	  
+		   
+
+	  svg_dists.append("clipPath")
+	      .attr("id", "clip-land")
+	    .append("use")
+	      .attr("xlink:href", "#land"); 
+		  
+		  //add background states
+	/*var svg_states = svg.append("g")
+		.attr("class","states");
+		
+		  var states = svg_states.selectAll("path")
+		  .data(us_states.features)
+		  .enter().append("path")
+		  .attr("d", path)
+		.style("fill", state_notSelected);*/
+			     
+		
+			
+		    
+		  /*ss.data(us_states.features)
+		  .enter()
+		  .append("path")
+		  .attr("d", path)
+		  .style("fill",stateColor);*/	  
+		  
+	  //var svg_states = svg.append("g")
+		  	  	  
 	
 		//join data
 
-	  var dd = svg.append("g")
+	  var dd = svg_dists.append("g")
 		  .attr("class", "districts")
 		  .attr("clip-path", "url(#clip-land)")
 		  .selectAll("path");
 		  
-		  var f = topojson.feature(congress, congress.objects.districts).features;
-		  var f2 = f.filter(function(d){return Math.floor(d.id/100)==s_id;});
+		  //var f = topojson.feature(congress, congress.objects.districts).features;
+		  //var f2 = f.filter(function(d){return Math.floor(d.id/100)==s_id;});
 		  var f3 = topojson.feature(congress, congress.objects.districts).features;
+		  
+		  //var f5 = f4.filter(function(d){return Math.floor(d.id/100)==s_id;});
+		  
+		  var cd_features = f3;
+		  var cd_mesh = congress;
+		  //var cd_mesh = 
+		  
+		  
+		  
+		  
 		  //console.log(f);
 		  //console.log(f2);
-		  //var filt = congress.filter(function(d){return Math.floor(d.objects.districts.geometries.id/100) == 27; })
-		  //console.log(congress.objects.districts.geometries);
+		  //var filt = congress.objects.districts.filter(function(d){return Math.floor(d.geometries.id/100) == 27; })
+		  //console.log(filt);
 		  
 		 //dists = dd.data(topojson.feature(congress, congress.objects.districts).features)
-		  dists = dd.data(f3)
+		  dists = dd.data(cd_features)
 		  .enter().append("path")
 		  .attr("d", path)
 		  .attr("id", function(d){//console.log(d); 
@@ -1183,21 +1272,21 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress
 					  d3.select("#bar"+d.id).select("svg").select("rect").attr("fill",distColorChart);
 					  
 				  }	
-			  });		  
-	  
+			  });
 
-	  svg.append("path")
+	  svg_dists.append("path")
 	      .attr("class", "district-boundaries")
-	      .datum(topojson.mesh(congress, congress.objects.districts, function(a, b) { 
-			  return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0); }))
-	      .attr("d", path);
+	      .datum(topojson.mesh(cd_mesh, cd_mesh.objects.districts, function(a, b) {
+			  //console.log(a.id);
+			  return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0) && Math.floor(a.id/100) == s_id; }))
+			  .attr("d", path);
 
-	  svg.append("path")
+	  svg_dists.append("path")
 	      .attr("class", "state-boundaries")
 	      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
 	      .attr("d", path); 	
 		  
- svg.selectAll("text")
+ svg_dists.selectAll("text")
 		  .data(us_states.features.filter(function(d){return d.id == s_id;}))
 		  .enter()
 		  .append("text")
