@@ -5,6 +5,16 @@
 body {
 }
 
+
+.axis--x path {
+  display: none;
+}
+
+.axis--y path {
+  display:none;
+  
+}
+
 #container{
 	width:1024px;
 	height:768px;
@@ -111,6 +121,14 @@ body {
     border-color: grey;
 	margin-bottom:2px;
 }
+
+#mapview path {
+  stroke-width: 0.025px;
+  stroke: white;
+  fill: rgb(178, 214, 141);
+  cursor: pointer;
+}
+
 #awardview{
 	float:left;
     width:100%;
@@ -191,6 +209,41 @@ body {
 	background:white;
 }
 
+#popmap{
+	float:left;
+	width:100px;
+	height:75px;
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:4px;
+	padding:5px;
+	background:white;
+}
+
+#povmap{
+	float:left;
+	width:100px;
+	height:75px;
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:4px;
+	padding:5px;
+	background:white;
+}
+#povchart{
+	float:left;
+	width:210px;
+	height:155px;
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:4px;
+	padding:5px;
+	background:white;
+}
+
 
 .chartTitle{
 	float:left;
@@ -219,11 +272,28 @@ body {
 	width:100%;
 	height:100%;
 }
+.patternFill{
+	stroke:white;
+	stroke-width:0.025;
+	fill:none;
+}
+/*.minimap{
+	float:left;
+	width:100px;
+	height:100px;
+}*/
+
+.minimap path {
+  stroke-width: 0.025px;
+  stroke: white;
+  cursor: pointer;
+}
 
 /*sub divs*/
 
 
 </style>
+
 <body>
 	<div id="container"></div>	
 </body>
@@ -238,15 +308,11 @@ body {
 <script src="//d3js.org/queue.v1.min.js"></script>
 <script src="topojson.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
-<script>
-var width = 1024,
-	height = 768;
-
+<script>	
+	
+var ht = false;	
 
 //set up divs
-/*d3.select("body").append("div")
-	.attr("id","container");*/	
-	
 d3.select("#container").append("div")
 	.attr("id","banner");
 
@@ -328,7 +394,8 @@ var temporalview_tab = d3.select("#tabs").append("div")
 	.attr("class","tab")
 	.attr("id","temporal_view_tab")
 	.append("text")
-	.text("temporal view");	
+	.text("temporal view");		
+	
 	
 d3.select("#mapheader").append("div")
 	.attr("id","buttons");
@@ -348,12 +415,81 @@ d3.select("#awardview").append("div")
 //maybe just one svg...
 var mapview_svg = d3.select("#mapview").append("svg")
 	.attr("class","mapview_svg");
+
+	var land;
+	var features;
+	var awards_shp;
+	var clinics_pts;	
+	
+//map layers
+/*var land = mapview_svg.append("g")
+    .attr("class","land");
+	
+var features = mapview_svg.append("g")
+    .attr("class","features");	
+	
+var awards_shp = mapview_svg.append("g")
+	.attr("class","awards_shp");
+	
+var clinics_pts = mapview_svg.append("g")
+	.attr("class","clinics");*/	
+	
+	
 		
 /*var overview_svg = d3.select("#mapview").append("svg")
 	.attr("class","overview_svg");*/
 	
 /*var sm_mults_svg = d3.select("#mapview").append("svg")
-	.attr("class","sm_mults_svg");*/ 			
+	.attr("class","sm_mults_svg");*/ 
+	
+//Map dimensions (in pixels)
+var width = 500,
+    height = 400;
+	
+var sm_width = 125,
+	sm_height = 125;		
+	
+//setup topojson stuff -- paths and projections
+	
+//popup projection //need to automate this!
+var projection_census = d3.geoMercator()
+    .scale(2400)
+    .center([0,0]) //projection center
+    .translate([600/2+3475,625])
+	
+//Generate paths based on projection
+var path_census = d3.geoPath()
+    .projection(projection_census);
+	
+//sm projection	
+var projection_sm = d3.geoMercator()
+    .scale(2700)
+    .center([0,0]) //projection center
+    .translate([width/2+3910,650])
+
+var path_sm = d3.geoPath()
+	.projection(projection_sm);				
+	
+//Map projection
+var projection = d3.geoMercator()
+    .scale(450)
+    .center([0,0]) //projection center
+    .translate([width/2+600,height/2+100]);
+	//.translate([width/2,height/2]) //translate to center the map in view	
+
+//Generate paths based on projection
+var path = d3.geoPath()
+    .projection(projection);
+	
+var clinicSymbol = d3.symbol().size(10).type(d3.symbolCross);	
+/******end topo setup******/	
+	
+			
+//enable zoom
+var zoom = d3.zoom()
+    .scaleExtent([0.3, Infinity])
+    .on("zoom",zoomed);	
+				
 	
 //load data
 queue()
@@ -368,24 +504,512 @@ queue()
 	.defer(d3.json, "globalData.json")
     .await(ready);	
 		
-function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty, awards, IPPFclinics, globaldata){	
+function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata){	
 	  if (error) throw error;	
+	  
+	  
+	  /***************format data************/
+	  var parseTime = d3.timeParse("%m/%e/%y");
+	  var parseYear = d3.timeFormat("%y");
+  
+	  epidata.forEach(function(d,i){
+		  d.report_date = parseTime(d.report_date);
+		  d.year = parseYear(d.report_date);
+		  //console.log(parseYear(d.report_date));
+	  });
+	  
+	  //sort by report data
+	  epidata.sort(function(a,b){return a.report_date - b.report_date;});
+	  
+	  //nest data upfront
+	  var byRegion = d3.nest()
+	  .key(function(d){return d.fips;})
+	  .key(function(d){return d.data_field;})
+	  .entries(epidata);
+  
+	  var totalbyRegionbyYear = d3.nest()
+	  .key(function(d){return d.fips;})
+	  .key(function(d){return d.data_field;})
+	  .key(function(d){return d.year;})
+	  .rollup(function(d){return d3.max(d,function(v){return v.value;})})
+	  .entries(epidata);
+	  
+	  //nest poverty data
+	  var povertyByFips = d3.nest()
+	  .key(function(d){
+		  var code = d.Country_Code.split("_");
+		  var n = d.Country_Code.indexOf(".");
+		  if(n == -1){
+		  	return code[code.length-1];
+		  }else{
+		  return  d.Country_Code.substring(n-2,n+3); }
+	  	  })
+		  .key(function(d){return d.Indicator_Name;})  
+		  .rollup(function(d){
+			  var stats = [d[0]._1996,d[0]._1997,d[0]._1998,d[0]._1999,d[0]._2000,d[0]._2001,d[0]._2002,d[0]._2003,d[0]._2004,d[0]._2005,d[0]._2006, d[0]._2007, d[0]._2008, d[0]._2009,d[0]._2010,d[0]._2011,d[0]._2012,d[0]._2013];
+			  var year;
+			  var latest_stat;
+			  stats.forEach(function(l,i){
+				  if(l!=undefined){
+					  year = 1996+i;
+					  latest_stat = l;
+				  }
+			  })
+			  return {
+				  all: d,
+				  stats:stats,
+				  latest: latest_stat,
+				  latest_stat_year: year
+			  }
+		  })	  
+		  .entries(poverty)
+		  .sort(function(a, b){ return d3.descending(a.values[0].value.latest, b.values[0].value.latest); });
+	  
+	  
+		  //console.log(povertyByFips);
+		  
+	  //change this later - back to original data
+		  //need to add actual cumulative
+		  byRegion.forEach(function(d){
+		  	d.values.forEach(function(e){
+		  	  e.values.forEach(function(f,i){
+				  if(i == 0){
+					  f.new_cases = f.value;
+					  f.cum_cases = f.value;
+					  tot_prev_years = 0;
+				  }else if(i > 0){
+					  if(f.year == prev_yr){//if in same year
+				  
+						  /*if(f.value+tot_last_year < cum_cases){
+							  console.log(f.report_date)
+							  console.log(f.value + " " +tot_last_year+" "+cum_cases);}*/
+				  
+						  f.new_cases = (f.value != null) ? f.value+tot_prev_years-cum_cases : 0; //calc number of new cases
+					  	  f.cum_cases = (f.value != "NA") ? f.value + tot_prev_years : tot_prev_years;
+					  }else{//else across years
+						  tot_prev_years = cum_cases;			  
+					  	  f.new_cases = (f.value != null) ? f.value : 0;
+						  f.cum_cases = (f.value != "NA") ? f.value + tot_prev_years : tot_prev_years;
+					  }
+				  }
+				  //num = f.value;
+				  prev_yr = f.year;
+				  cum_cases = f.cum_cases; 
+		  	  })
+			  	e.max_cum_cases = d3.max(e.values, function(f){return f.cum_cases;});
+				//hopefully not too expensive
+				e.values.forEach(function(f,i){
+					f.max_cum_cases = e.max_cum_cases;
+				});
+			   	//console.log(max_cum_cases);
+			   	//d3.max(d,function(f){return f.cum_cases;
+		  	});
+		  });
+		  
+		  var totalByRegion = d3.nest()
+		  .key(function(d){return d.fips;})
+		  .rollup(function(v){
+			  var t = byRegion.filter(function(e){return e.key == v[0].fips;});
+			  var _pop = censusdata.filter(function(j){return j.fips == v[0].fips});
+			  var pop = (_pop[0]!=undefined) ? _pop[0].population/100000 : 1;
+			  //console.log(pop);
+			  var max = 0;
+			  var m = 0;
+			  t.forEach(function(f,i){
+				  //console.log(f.values);
+				  f.values.forEach(function(g){
+					  //console.log(g.values);
+					  m = d3.max(g.values,function(h){return h.new_cases;});
+					  max = (max > m) ? max : m;
+				  })
+			  })
+	  
+			  return {
+				  //this is actually inaccurate because numbers reset each year
+			    max_val: d3.max(v,function(f){return f.value;}),
+				max_cumulative: d3.max(v,function(f){return f.cum_cases;}),
+				max_new: max,
+				cum_ht: d3.max(v,function(f){return f.cum_cases;})/pop,
+				new_ht: max/pop,
+				  _pop: pop    
+			  };
+		  })
+		  .entries(epidata);	  
+	  
+	  
+	  
+	  
+	  /***********end format data************/ 
+	  
 	  
 	  //country variable
 	  var ADM0 = "SLV";
+	  var country_adm1_features; //prev el_salvador
+	  var country_centroid;
+	  var country_pop;
+	  var country_pov;
+	  var country_awards;
+	  var country_povbyfips;
+	  //global variables
+	  var regions;
+	  var sm_maps;	
+	  var efforts;
+	  var clinics;
+	  var country_indicators;
+	  var valueLine3;
+	  var domains;
+	  var mx = d3.max(epidata, function(v) { return v.value; });
+	  var selection = false;
+	  
+	 var max_pop;
+	 var min_pop;
+	 var pop_range;
+	  
+	  
+  	choropleth4 = d3.scaleLog()
+  	.domain([1,mx])
+  	.range(['#fee8c8','#b30000'])
+	  
+	  
+	  setCountry(ADM0);
 
-//draw based on country
-	  function drawCountry(){
-		  //filter data
-	  	
+//setup based on country
+	  function setCountry(adm0){
+		  //filter data to country
+		  country_adm1_features = geodata_admin1.features.filter(function(d){return d.properties.adm0_a3 == adm0;}) //prev el_salvador
+		  country_centroid = geodata_admin0.features.filter(function(d){return d.properties.ADM0_A3 == adm0;})
+		  country_pop = pop_pls.features.filter(function(d){return d.properties.ADM0_A3 == adm0;})
+		  country_pov = poverty.filter(function(d){return d.Country_Code.indexOf(adm0) != -1;})
+		  country_awards = topojson.feature(awards,awards.objects.usaidawards).features.filter(function(d){return d.properties.ISO == adm0;});
+		  //country_povbyfips = povertyByFips.filter(function(d){return })
+		  
+		  
+	  	//start with overview  	  
+	  	drawOverview();
+	  	drawChartView();
 		
-	  }	  
-	  	  	
+		//zoom to centroid
+	    var dx = path.centroid(country_centroid[0])[0];
+	    var dy = path.centroid(country_centroid[0])[1];
+  
+	  mapview_svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy)); 
+	  mapview_svg.call(zoom);
+	  
+	  //zoom to in small multiples
+	  //add this in!		
+		
+		
+	  }
+	
+	
+//functions!	
+	function drawOverview(){
+		mapview_svg.select("*").remove();
+		//build view
+		drawBasemap();
+		drawRegions();
+		layerAwards();
+		layerClinics();
+		
+	}				
+	
+	function drawTemporalView(){
+		mapview_svg.select("*").remove();
+		//build view
+		mapview_svg.append("text")
+		.attr("x","20px")
+		.attr("y","20px")
+		.text("small multiples!");
+	}
+	
+	function drawChartView(){
+		censusCharts();
+		nationalCharts();
+		subnationalCharts();
+		awardsCharts();
+	}
+	
+	
+//subfunctions - overview
+	function drawBasemap(){
+	land = mapview_svg.append("g")
+	    .attr("class","land");
+		
+	  var countries = land.selectAll("path")
+	      .data(geodata_admin0.features) //generate features from TopoJSON
+	  	.enter()
+	      .append("path")
+	      .attr("id",function(d){return "country"+d.properties.ADM0_A3;})
+	      .attr("class","country_paths")
+	    .attr("d",path)
+	    .style("fill","rgba(220,220,220,1)");	
+	}
+	
+	function drawRegions(){
+	  features = mapview_svg.append("g")
+	    	.attr("class","features");
+		
+	  regions = features.selectAll("path")
+	    .data(country_adm1_features)
+		.enter()
+	    .append("path")
+		.attr("id",function(d){return "region"+d.properties.code_hasc.replace(".","");})
+	    .attr("class","region")
+	    .attr("d",path)
+		.attr("basecolor",function(d){
+			var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
+			if(ht){
+				//return d3.interpolateOrRd(scale_cases(max[0].value.cum_ht));
+				return choropleth4(max[0].value.cum_ht);
+				//return choropleth(x3(max[0].value.cum_ht));
+			}else{
+				//choropleth1 is actually is ineffective, because we need to see finer grain differences
+				//return d3.interpolateOrRd(scale_cases(max[0].value.max_cumulative));
+				return choropleth4(max[0].value.max_cumulative);
+			}
+		})
+		.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");})
+	    .on("click", function(d){
+			d.selected = !d.selected;
+			var color = (d.selected) ? "tomato": d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");
+			d3.select(this).style("fill",color);
+			//show_charts2(d);
+		
+			//only allow one at a time? for now
+			selection = d.selected;
+	  })
+		.on("mouseover",function(d){
+			if(!selection){
+			d3.select(this).style("fill","tomato");
+			//console.log(d.properties.code_hasc);
+			//d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","tomato");
+			//show_charts2(d);
+			}
+		})
+		.on("mouseout",function(d){
+			if(!selection){
+			d3.select(this).style("fill",function(d){
+				return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");
+			})
+			//d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill",d3.select("#bb"+d.properties.code_hasc.replace(".","")).attr("basecolor"));
+			//dists_charts_mout(d);
+			}
+			//show_charts(d);
+		});
+	}
+	
+	function layerClinics(){
+	clinics_pts = mapview_svg.append("g")
+		.attr("class","clinics");
+		
+	    clinics = clinics_pts.selectAll("path")
+	     .data(topojson.feature(IPPFclinics,IPPFclinics.objects.IPPFClinics).features)
+	     .enter()
+	     .append("path")
+		.style("fill","steelblue")
+		.style("stroke","white")
+		.style("stroke-width","0.05")
+		.attr("transform", function(d) { return "translate(" + projection(d.geometry.coordinates) + ")"; })
+	    //.attr("d",path.pointRadius(0.2))
+		.attr("d",d3.symbol().size(0.10).type(d3.symbolCross))
+		.on("mouseover",function(d){
+			d3.select(this).style("stroke-width","0.1");
+		})
+		.on("mouseout",function(d){
+			d3.select(this).style("stroke-width","0.05");
+		});	
+	}
+	
+	
+	function layerAwards(){
+		awards_shp = mapview_svg.append("g")
+			.attr("class","awards_shp");
+			
+		efforts = awards_shp.selectAll("path")
+		.data(country_awards)
+		.enter()
+		.append("path")
+		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
+		.attr("d",path)
+		.style("stroke","white")
+		.style("stroke-width","0.01")
+		.style("fill","url(#diagonalHatch)")		
+		//.style("opacity","0.5")
+		.on("click", function(d){
+			console.log(d);	
+		})
+		.on("mouseover",function(d){
+			d3.select(this).style("fill","tomato");
+		} )
+		.on("mouseout",function(d){
+			d3.select(this).style("fill","url(#diagonalHatch)");
+		})	
+	}
 
+//subfunctions - temporal view
+	/*function drawBasemap(){
+		
+	}
+	function drawRegions(){
+		
+	}
+	function layerClinics(){
+		
+	}
+	function layerAwards(){
+		
+	}*/	
+
+//chartview functions
+	function censusCharts(){
+	
+	var x_pov = d3.scaleLinear()
+	    .domain([1, 100]) //domain to be mapped
+	    .rangeRound([1, 10]); //range to be mapped to
+	
+	var color_pov = d3.scaleThreshold()
+	    .domain(d3.range(1, 10))
+	    .range(d3.schemeBlues[9]);
+		
+		var c_margin = {top: 25, right: 10, bottom: 50, left: 40},
+		c_width = 210 - c_margin.left - c_margin.right,
+	 	c_height = 155 - c_margin.top - c_margin.bottom;	
+		
+	//pop map
+	 max_pop = d3.max(country_pop,function(f){return f.properties.POP_MAX;});
+	 min_pop = d3.min(country_pop,function(f){return f.properties.POP_MAX;});
+	 pop_range = d3.scaleLinear().domain([min_pop,max_pop]).range([0.2,1]); 	
+		
+   var pop_map = d3.select("#censusData").append("div")
+		.attr("class","minimap")
+		.attr("id","popmap");
+		
+		var pop_map_svg = pop_map.append("svg")
+		//.attr("class","minimap");				
+   
+		var pop_land = pop_map_svg.append("g");
+	   
+   pop_land.selectAll("path")
+	   .data(country_adm1_features)
+	   .enter()
+	   .append("path")
+	   .attr("id",function(d){return "country"+d.properties.fips;})
+	   .attr("d",path_census)
+	   .style("fill","rgba(220,220,220,1)");
+	
+	   var pop_places = pop_map_svg.append("g");
+	
+	pop_places.selectAll("path")
+	     .data(country_pop)
+	     .enter()
+	     .append("path")
+	    .attr("d",path_census.pointRadius(3))
+	    .attr("fill","rgb(150,150,150)")
+	    .attr("opacity",function(d){
+	  	  return pop_range(d.properties.POP_MAX);
+	    })
+	    .attr("path.pointRadius","2");	
+		
+	//pov map
+	var pov_map = d3.select("#censusData").append("div")
+		.attr("class","minimap")
+		.attr("id","povmap");
+	   
+     pov_map.append("svg")
+		//.attr("class","minimap")
+		.selectAll("path")
+		.data(country_adm1_features)
+		.enter()
+       .append("path")
+       .attr("id",function(d){return "pov_map"+d.properties.ADM0_A3;})
+       .attr("d",path_census)
+       .style("fill", function(d){
+       	var latest = povertyByFips.filter(function(v){return v.key.replace(".","") == d.properties.code_hasc.replace(".","");});
+     	console.log(latest);
+		return color_pov(x_pov(latest[0].values[0].value.latest));
+       });
+		
+		//pov chart
+	   var pov_chart = d3.select("#censusData").append("div")
+	   .attr("id","povchart");
+	      
+    pov_chart.append("svg")
+    .attr("width", c_width + c_margin.left + c_margin.right)
+    .attr("height", c_height + c_margin.top + c_margin.bottom)
+ 	 .append("g")
+    .attr("transform",
+       "translate(" + c_margin.left + "," + c_margin.top + ")");
+	   
+	   
+ 	  pov_chart.append("text")
+ 	  .attr("class", "axis")
+ 	  .attr("x",-40)
+ 	  .attr("y",-10)
+ 	  .text("% Population over national poverty line");
+	   
+  var x = d3.scaleBand().rangeRound([0, c_width]).padding(0.1),
+      y = d3.scaleLinear().rangeRound([c_height, 0]);
+
+  	//filter out national numbers //this is the issue! need to fix domain!
+  	x.domain(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));
+  	y.domain([0, 100]);
+
+	  
+  pov_chart.append("g")
+        .attr("class", "axis")
+        .call(d3.axisLeft(y)
+  		.ticks(5))
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        //.attr("y", 6)
+        .attr("dy", "0.71em")
+  	.attr("text-anchor", "end");  
+	
+  	pov_chart.selectAll(".bar")
+  	.data(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}))
+  	.enter().append("rect")
+  	.attr("id",function(d){//console.log("bb"+d.key.replace(".","")); 
+  		return "bb"+d.key.replace(".","");})
+	.attr("x", function(d){return x(d.key);}) 
+	.attr("y", function(d){return y(d.values[0].value.latest)})
+	.attr("width", x.bandwidth())
+	.style("fill","steelblue"); 
+  	/*.attr("x", function(d){return x(d.key);})
+		.attr("y", function(d){return y(d.values[0].value.latest)})
+		.attr("basecolor",function(d){
+  			return color_pov(x_pov(d.values[0].value.latest));})
+  	.style("fill",function(d){
+  			return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");
+  	})	
+  	.attr("width", x.bandwidth())
+  	.attr("height",function(d){return c_height - y(d.values[0].value.latest);});
+  	.on("mouseover", function(d){ //console.log(this); 
+  		if(!selection){
+  		d3.select(this).style("fill","tomato");
+  		d3.select("#region"+d.key.replace(".","")).dispatch("mouseover");//style("fill","tomato");
+  		}
+  	})
+  	.on("mouseout", function(d){if(!selection){
+  		d3.select(this).style("fill",
+  		function(d){return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");});
+  		d3.select("#region"+d.key.replace(".","")).dispatch("mouseout");
+  		}
+  	});*/	 
+	   
+	   
+	}
+	function nationalCharts(){
+		
+	}
+	function subnationalCharts(){
+		
+	}
+	function awardsCharts(){
+		
+	}		
 	
 	
-	drawOverview();
-	
+//button functionality
 	overview_tab.on("click",function(){
 		d3.select(this).style("background","#ccc");
 		temporalview_tab.style("background","none");
@@ -397,30 +1021,39 @@ function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, pover
 		overview_tab.style("background","none");
 		
 		drawTemporalView();
-	})
+	});
 	
+	tot_btn.on("click",function(){
+		ht = false;
+	//updateRegions();
+ 	});
+ 
+ 	pht_btn.on("click",function(){
+ 	   ht = true;
+ 	  //updateRegions();
+ 	 //updateSMs();
+ 	});		
 	
-//functions!	
-	function drawOverview(){
-		mapview_svg.select("*").remove();
-		//build view
-		mapview_svg.append("text")
-		.attr("x","20px")
-		.attr("y","20px")
-		.text("overview!");
-		
-	}				
-	
-	function drawTemporalView(){
-		mapview_svg.select("*").remove();
-		//build view
-		mapview_svg.append("text")
-		.attr("x","20px")
-		.attr("y","20px")
-		.text("small multiples!");
-	}	
 //end ready
-}		
+}	
+
+function zoomed() {
+	//console.log(zoom.translate()+" "+zoom.scale());
+	features.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );
+	  
+	  land.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	  
+	  
+	  awards_shp.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	
+	  
+	  clinics_pts.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );		  
+	
+	/*up_land.attr("transform", d3.event.transform)
+      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );*/  
+}	
 
 
 </script>
