@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Zika Mapping - prototype 2</title>
+<style>
+body {
+}
+
+#container{
+	width:1024px;
+	height:768px;
+}
+#banner{
+	float:left;
+	width:100%;
+	height:50px;
+	margin:2px;
+	font:14px sans-serif;
+}
+
+
+#banner h1{
+	font-family: sans-serif;
+	font-weight:bold;
+	font-size:14pt;
+	line-height:0pt;
+}
+#banner h2{
+	font-family: sans-serif;
+	font-size:10pt;
+	font-weight:bold;
+	line-height:8pt;
+	color:#7da6cf;
+}
+
+
+#menu{
+	float:left;
+	width:115px;
+	height:650px;
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:2px;
+	padding:2px;
+	background:#e6e7e8;	
+}
+#middleView{
+	float:left;
+	width:500px;
+	height:650px;
+	margin:2px;
+	padding:2px;
+}
+#mapheader{
+	float:left;
+    width:99%;
+	height:26px;
+	padding-left:5px;
+}
+
+#maptitle{
+	float:left;
+	min-width:200px;
+	height:26px;
+	font-family:sans-serif;
+	font-size:14pt;
+	font-weight:bold;
+	color:grey;
+}
+
+#buttons{
+	float:left;
+	padding-left:20px;
+	/*width:200px;*/
+	width:auto;
+	height:26px;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	font: 10px sans-serif;	
+}
+
+#tabs{
+	float:left;
+	/*width:200px;*/
+	width:auto;
+	height:75%;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	font: 10px sans-serif;
+}
+.tab{
+	float:left;
+    /*width:60px;*/
+	padding:5px;
+	margin-left:2px;
+	height:12px;
+	border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+}
+
+
+#mapview{
+	float:left;
+    width:100%;
+	height:400px;
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin-bottom:2px;
+}
+#awardview{
+	float:left;
+    width:100%;
+	height:220px;
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;	
+	background:#e6e7e8;
+	margin-top:2px;	
+	font: 10px sans-serif
+}
+#awardData{
+	float:left;
+	width:96%;
+	height:90%;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:4px;
+	padding:5px;
+	background:white;
+}
+
+#chartview{
+	float:left;
+	width:365px;
+	height:655px;
+    border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+	background:#e6e7e8;
+	margin:2px;	
+	font: 10px sans-serif
+}
+
+#censusData{
+	float:left;
+	width:94%;
+	height:175px;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	padding:5px;
+	margin:4px;
+	background:white;
+}
+
+#epiData{
+	float:left;
+	width:100%;
+	height:435px;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+}
+
+#nationalData{
+	float:left;
+	width:94%;
+	height:140px;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:4px;
+	padding:5px;
+	background:white;
+}
+
+#subnationalData{
+	float:left;
+	width:94%;
+	height:220px;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:4px;
+	padding:5px;
+	background:white;
+}
+
+
+.chartTitle{
+	float:left;
+	width:94%;
+	height:15px;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:4px;
+	padding:5px;
+	stroke:grey;
+	background:white;
+}
+
+.mapview_svg{
+	width:100%;
+	height:100%;
+}
+
+.overview_svg{
+	width:100%;
+	height:100%;
+}
+
+.sm_mults_svg{
+	width:100%;
+	height:100%;
+}
+
+/*sub divs*/
+
+
+</style>
+<body>
+	<div id="container"></div>	
+</body>
+
+<svg class="patternFill"><defs><pattern id="diagonalHatch" width="0.2" height="0.2" patternUnits="userSpaceOnUse">
+  <path d="M-0.05,0.05 l0.1,-0.1
+           M0,0.2 l0.2,-0.2
+           M0.15,0.25 l0.1,-0.1"/>
+</pattern></defs></svg>
+
+<script src="d3.min.js"></script>
+<script src="//d3js.org/queue.v1.min.js"></script>
+<script src="topojson.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script>
+var width = 1024,
+	height = 768;
+
+
+//set up divs
+/*d3.select("body").append("div")
+	.attr("id","container");*/	
+	
+d3.select("#container").append("div")
+	.attr("id","banner");
+
+d3.select("#container").append("div")
+	.attr("id","menu");
+
+d3.select("#container").append("div")
+	.attr("id","middleView");
+
+d3.select("#container").append("div")
+	.attr("id","chartview");
+	
+//middle column
+//load title on load country	
+d3.select("#middleView").append("div")
+	.attr("id","mapheader");
+
+d3.select("#middleView").append("div")
+	.attr("id","mapview");
+	
+d3.select("#middleView").append("div")
+	.attr("id","awardview");
+	
+//chartview
+d3.select("#chartview").append("div")
+	.attr("id","censusDataTitle")
+	.attr("class","chartTitle")
+	.append("text")
+	.text("CENSUS DATA");	
+	
+d3.select("#chartview").append("div")
+	.attr("id","censusData");		
+	
+d3.select("#chartview").append("div")
+	.attr("id","epiData");
+	
+d3.select("#epiData").append("div")
+	.attr("id","epiDataTitle")
+	.attr("class","chartTitle")
+	.append("text")
+	.text("WEEKLY EPIDEMIOLOGICAL DATA");	
+	
+d3.select("#epiData").append("div")
+	.attr("id","nationalData")
+	.append("text")
+	.text("NATIONAL");
+	
+d3.select("#epiData").append("div")
+	.attr("id","subnationalData")
+	.append("text")
+	.text("SUBNATIONAL");
+	
+
+//banner
+d3.select("#banner").append("h1")
+	.attr("class","banner")
+	.text("ZikaVis");
+	
+d3.select("#banner").append("h2")
+	.attr("class","banner")
+	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");	
+
+//title with tabs, buttons
+d3.select("#mapheader").append("div")
+	.attr("id","maptitle")
+	.append("text")
+	.text("EL SALVADOR");
+	
+d3.select("#mapheader").append("div")
+	.attr("id","tabs");
+	
+var overview_tab = d3.select("#tabs").append("div")
+	.attr("class","tab")
+	.attr("id","overview_tab")
+	.append("text")
+	.text("overview");
+	
+var temporalview_tab = d3.select("#tabs").append("div")
+	.attr("class","tab")
+	.attr("id","temporal_view_tab")
+	.append("text")
+	.text("temporal view");	
+	
+d3.select("#mapheader").append("div")
+	.attr("id","buttons");
+	
+var tot_btn = d3.select("#buttons").append("button")
+	.text("total cases");
+var pht_btn = d3.select("#buttons").append("button")
+	.text("per H.T.");
+				
+//awards data
+d3.select("#awardview").append("div")
+	.attr("id","awardData")
+	.append("text")
+	.text("USAID AWARDS");	
+	
+//svgs for overview + small multiples
+//maybe just one svg...
+var mapview_svg = d3.select("#mapview").append("svg")
+	.attr("class","mapview_svg");
+		
+/*var overview_svg = d3.select("#mapview").append("svg")
+	.attr("class","overview_svg");*/
+	
+/*var sm_mults_svg = d3.select("#mapview").append("svg")
+	.attr("class","sm_mults_svg");*/ 			
+	
+//load data
+queue()
+	.defer(d3.json, "admin_0_countries.json")
+	.defer(d3.json, "admin_1_states_provinces.json")
+    .defer(d3.json, "el_salvador_epi.json")
+	.defer(d3.json, "countryData.json")
+	.defer(d3.json, "populated_places2.json")
+	.defer(d3.json, "poverty.json")
+	.defer(d3.json, "usaidawards.json")
+	.defer(d3.json,"IPPFClinics.json")
+	.defer(d3.json, "globalData.json")
+    .await(ready);	
+		
+function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, poverty, awards, IPPFclinics, globaldata){	
+	  if (error) throw error;	
+	  
+	  //country variable
+	  var ADM0 = "SLV";
+
+//draw based on country
+	  function drawCountry(){
+		  //filter data
+	  	
+		
+	  }	  
+	  	  	
+
+	
+	
+	drawOverview();
+	
+	overview_tab.on("click",function(){
+		d3.select(this).style("background","#ccc");
+		temporalview_tab.style("background","none");
+		
+		drawOverview();
+	});
+	temporalview_tab.on("click",function(){
+		d3.select(this).style("background","#ccc");
+		overview_tab.style("background","none");
+		
+		drawTemporalView();
+	})
+	
+	
+//functions!	
+	function drawOverview(){
+		mapview_svg.select("*").remove();
+		//build view
+		mapview_svg.append("text")
+		.attr("x","20px")
+		.attr("y","20px")
+		.text("overview!");
+		
+	}				
+	
+	function drawTemporalView(){
+		mapview_svg.select("*").remove();
+		//build view
+		mapview_svg.append("text")
+		.attr("x","20px")
+		.attr("y","20px")
+		.text("small multiples!");
+	}	
+//end ready
+}		
+
+
+</script>
