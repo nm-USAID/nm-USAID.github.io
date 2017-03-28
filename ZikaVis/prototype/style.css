@@ -128,9 +128,11 @@
 }
 
 #smview{
-	width:100%;
-	height:100%;
+	position:absolute;
+	width:499px;
+	height:399px;
 	overflow:scroll;
+	background:white;
 }
 
 #awardview{
@@ -297,8 +299,10 @@
 }
 
 .mapview_svg{
-	width:100%;
-	height:100%;
+	position:absolute;
+	width:499px;
+	height:399px;
+	background:white;
 }
 
 .overview_svg{

@@ -128,8 +128,10 @@ d3.select("#awardview").append("div")
 	
 //svgs for overview + small multiples
 //maybe just one svg...
-var mapview_svg = d3.select("#mapview").append("svg")
-	.attr("class","mapview_svg");
+	var mapview_svg;
+	var sm_multiples;
+	// = d3.select("#mapview").append("svg")
+	//.attr("class","mapview_svg");
 
 	var land;
 	var features;
@@ -429,7 +431,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
   	    dx = path.centroid(country_centroid[0])[0];
   	    dy = path.centroid(country_centroid[0])[1];
 		  
-	  	//start with overview  	  
+	  	//start with overview 
+		drawTemporalView(); 	  
 	  	drawOverview();
 		//drawTemporalView();
 	  	drawChartView();
@@ -446,7 +449,25 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	
 //functions!	
 	function drawOverview(){
+		
+		/*if(sm_multiples != null){
+			sm_multiples.remove();
+		}
+		
+		if(mapview_svg != null){
 		mapview_svg.selectAll("*").remove();
+		}else{
+		mapview_svg = d3.select("#mapview").append("svg")
+			.attr("class","mapview_svg");
+		}*/
+		
+	mapview_svg = d3.select("#mapview").append("svg")
+		.attr("class","mapview_svg");
+		
+		//var features;
+		//var regions;
+		//var land;
+		
 		//build view
 		drawBasemap();
 		drawRegions();
@@ -459,7 +480,16 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	}				
 	
 	function drawTemporalView(){
-		mapview_svg.selectAll("*").remove();
+		
+		//mapview_svg.selectAll("*").remove();
+		
+		/*if(mapview_svg != null){
+		mapview_svg.remove();
+		}
+		
+		if(sm_multiples != null){
+		sm_multiples.selectAll("*").remove();
+		}*/
 		//build view
 		/*mapview_svg.append("text")
 		.attr("x","20px")
@@ -493,10 +523,10 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	}
 	
 	function drawRegions(){
-	  features = mapview_svg.append("g")
+	 features = mapview_svg.append("g")
 	    	.attr("class","features");
 		
-	  regions = features.selectAll("path")
+	 regions = features.selectAll("path")
 	    .data(country_adm1_features)
 		.enter()
 	    .append("path")
@@ -1065,13 +1095,14 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		d3.select(this).style("background","#ccc");
 		temporalview_tab.style("background","none");
 		
-		drawOverview();
+		//can we instead just swap the order so that we don't have to redraw???
+		//drawOverview();
 	});
 	temporalview_tab.on("click",function(){
 		d3.select(this).style("background","#ccc");
 		overview_tab.style("background","none");
 		
-		drawTemporalView();
+		//drawTemporalView();
 	});
 	
 	tot_btn.on("click",function(){
@@ -1086,9 +1117,10 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
  	});		
 
 
-	function drawSmallMultiples(){	
+function drawSmallMultiples(){	
 	
 	d3.select("#mapview").append("div")
+	//mapview_svg.append("div")
 		.attr("id","smview");
 	
 	sm_multiples = d3.select("#smview")
@@ -1103,7 +1135,6 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		.attr("height", 100);
 		
 		var formatDate = d3.timeFormat("%m/%e/%y");
-
 		
 		sm_multiples.append("text")
 		.attr("class","date_labels")
@@ -1132,7 +1163,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			d3.select(this).style("fill","tomato");
 			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","tomato");
 			if(!selection){
-				show_charts(d); //add date
+				show_charts2(d); //add date
 			}
 			
 		})
@@ -1142,7 +1173,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			})
 			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill","steelblue");
 			if(!selection){
-				charts_mout(d);
+				dists_charts_mout(d);
 			}
 		});
 	}
