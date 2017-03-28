@@ -235,7 +235,7 @@ body {
 #povchart{
 	float:left;
 	width:210px;
-	height:155px;
+	height:100px;
     border-style: solid;
     border-width: 0.5px;	
     border-color: grey;
@@ -534,6 +534,43 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  .rollup(function(d){return d3.max(d,function(v){return v.value;})})
 	  .entries(epidata);
 	  
+
+	  var povertyByCountryByRegion = d3.nest()
+	  .key(function(d){
+	  	var code = d.Country_Code.split("_");
+		return code[0];
+	  })
+	  .key(function(d){
+		  var code = d.Country_Code.split("_");
+		  var n = d.Country_Code.indexOf(".");
+		  if(n == -1){
+		  	return code[code.length-1];
+		  }else{
+		  return  d.Country_Code.substring(n-2,n+3); }
+	  	  })
+		  .rollup(function(d){
+			  var stats = [d[0]._1996,d[0]._1997,d[0]._1998,d[0]._1999,d[0]._2000,d[0]._2001,d[0]._2002,d[0]._2003,d[0]._2004,d[0]._2005,d[0]._2006, d[0]._2007, d[0]._2008, d[0]._2009,d[0]._2010,d[0]._2011,d[0]._2012,d[0]._2013];
+			  var year;
+			  var latest_stat;
+			  stats.forEach(function(l,i){
+				  if(l!=undefined){
+					  year = 1996+i;
+					  latest_stat = l;
+				  }
+			  })
+			  return {
+				  all: d,
+				  stats:stats,
+				  latest: latest_stat,
+				  latest_stat_year: year
+			  }
+		  })	  
+		  .entries(poverty)
+		  .sort(function(a, b){ return d3.descending(a.values[0].value.latest, b.values[0].value.latest); });
+		  
+		  //console.log(povertyByCountryByRegion.filter(function(d){return d.key == "SLV"})[0].values.sort(function(a, b){ return d3.descending(a.value.latest,b.value.latest);}));
+	  
+	  
 	  //nest poverty data
 	  var povertyByFips = d3.nest()
 	  .key(function(d){
@@ -681,7 +718,9 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  country_pop = pop_pls.features.filter(function(d){return d.properties.ADM0_A3 == adm0;})
 		  country_pov = poverty.filter(function(d){return d.Country_Code.indexOf(adm0) != -1;})
 		  country_awards = topojson.feature(awards,awards.objects.usaidawards).features.filter(function(d){return d.properties.ISO == adm0;});
-		  //country_povbyfips = povertyByFips.filter(function(d){return })
+		  country_povbyfips = povertyByCountryByRegion.filter(function(d){return d.key == adm0;})[0].values.sort(function(a, b){ return d3.descending(a.value.latest,b.value.latest);});
+		  
+		  //console.log(country_povbyfips);
 		  
 		  
 	  	//start with overview  	  
@@ -697,7 +736,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  
 	  //zoom to in small multiples
 	  //add this in!		
-		
+	   	
 		
 	  }
 	
@@ -871,14 +910,18 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	    .domain(d3.range(1, 10))
 	    .range(d3.schemeBlues[9]);
 		
-		var c_margin = {top: 25, right: 10, bottom: 50, left: 40},
+		var c_margin = {top: 25, right: 10, bottom: 10, left: 40},
 		c_width = 210 - c_margin.left - c_margin.right,
-	 	c_height = 155 - c_margin.top - c_margin.bottom;	
+	 	c_height = 100 - c_margin.top - c_margin.bottom;	
 		
 	//pop map
 	 max_pop = d3.max(country_pop,function(f){return f.properties.POP_MAX;});
 	 min_pop = d3.min(country_pop,function(f){return f.properties.POP_MAX;});
-	 pop_range = d3.scaleLinear().domain([min_pop,max_pop]).range([0.2,1]); 	
+	 pop_range = d3.scaleLinear().domain([min_pop,max_pop]).range([0.2,1]); 
+	 
+	 popMap();
+	 povMap();
+	 povChart();	
 		
    var pop_map = d3.select("#censusData").append("div")
 		.attr("class","minimap")
@@ -924,24 +967,27 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
        .attr("id",function(d){return "pov_map"+d.properties.ADM0_A3;})
        .attr("d",path_census)
        .style("fill", function(d){
-       	var latest = povertyByFips.filter(function(v){return v.key.replace(".","") == d.properties.code_hasc.replace(".","");});
-     	console.log(latest);
-		return color_pov(x_pov(latest[0].values[0].value.latest));
+       	//var latest = povertyByFips.filter(function(v){return v.key.replace(".","") == d.properties.code_hasc.replace(".","");});
+     	var latest = country_povbyfips.filter(function(v){ return v.key.replace(".","") == d.properties.code_hasc.replace(".","");});
+		//console.log(latest[0].value.latest);
+		//return color_pov(x_pov(latest[0].values[0].value.latest));
+		return color_pov(x_pov(latest[0].value.latest));
        });
 		
 		//pov chart
 	   var pov_chart = d3.select("#censusData").append("div")
+	   .attr("class","minimap")
 	   .attr("id","povchart");
 	      
-    pov_chart.append("svg")
+    var pc_svg = d3.select("#povchart").append("svg")
     .attr("width", c_width + c_margin.left + c_margin.right)
     .attr("height", c_height + c_margin.top + c_margin.bottom)
- 	 .append("g")
+	   .append("g")
     .attr("transform",
        "translate(" + c_margin.left + "," + c_margin.top + ")");
 	   
 	   
- 	  pov_chart.append("text")
+ 	  pc_svg.append("text")
  	  .attr("class", "axis")
  	  .attr("x",-40)
  	  .attr("y",-10)
@@ -951,11 +997,15 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
       y = d3.scaleLinear().rangeRound([c_height, 0]);
 
   	//filter out national numbers //this is the issue! need to fix domain!
-  	x.domain(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));
+	  
+	x.domain(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));  
+  	//x.domain(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));
   	y.domain([0, 100]);
+	y.domain([0, d3.max(country_povbyfips,function(d){return d.value.latest})]);
+	//y.domain(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.value.latest; }));
 
 	  
-  pov_chart.append("g")
+  pc_svg.append("g")
         .attr("class", "axis")
         .call(d3.axisLeft(y)
   		.ticks(5))
@@ -965,24 +1015,25 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
         .attr("dy", "0.71em")
   	.attr("text-anchor", "end");  
 	
-  	pov_chart.selectAll(".bar")
-  	.data(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}))
+  	pc_svg.selectAll(".bar")
+  	//.data(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}))
+	.data(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}))
   	.enter().append("rect")
   	.attr("id",function(d){//console.log("bb"+d.key.replace(".","")); 
   		return "bb"+d.key.replace(".","");})
 	.attr("x", function(d){return x(d.key);}) 
-	.attr("y", function(d){return y(d.values[0].value.latest)})
+	.attr("y", function(d){return y(d.value.latest)})
 	.attr("width", x.bandwidth())
-	.style("fill","steelblue"); 
-  	/*.attr("x", function(d){return x(d.key);})
-		.attr("y", function(d){return y(d.values[0].value.latest)})
+	.style("fill","steelblue")
+  	.attr("x", function(d){return x(d.key);})
+		.attr("y", function(d){return y(d.value.latest)})
 		.attr("basecolor",function(d){
-  			return color_pov(x_pov(d.values[0].value.latest));})
+  			return color_pov(x_pov(d.value.latest));})
   	.style("fill",function(d){
   			return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");
   	})	
   	.attr("width", x.bandwidth())
-  	.attr("height",function(d){return c_height - y(d.values[0].value.latest);});
+  	.attr("height",function(d){return c_height - y(d.value.latest);})
   	.on("mouseover", function(d){ //console.log(this); 
   		if(!selection){
   		d3.select(this).style("fill","tomato");
@@ -994,10 +1045,23 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
   		function(d){return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");});
   		d3.select("#region"+d.key.replace(".","")).dispatch("mouseout");
   		}
-  	});*/	 
-	   
-	   
+  	});	   
 	}
+	
+	//census subfunctions
+	function povMap(){
+		
+	}
+	
+	function popMap(){
+		
+	}
+	
+	function povChart(){
+		
+	}
+	
+	
 	function nationalCharts(){
 		
 	}
