@@ -1,297 +1,8 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>Zika Mapping - prototype 2</title>
+<link rel="stylesheet" type="text/css" href="style.css">
 <style>
-body {
-}
-
-
-.axis--x path {
-  display: none;
-}
-
-.axis--y path {
-  display:none;
-  
-}
-
-#container{
-	width:1024px;
-	height:768px;
-}
-#banner{
-	float:left;
-	width:100%;
-	height:50px;
-	margin:2px;
-	font:14px sans-serif;
-}
-
-
-#banner h1{
-	font-family: sans-serif;
-	font-weight:bold;
-	font-size:14pt;
-	line-height:0pt;
-}
-#banner h2{
-	font-family: sans-serif;
-	font-size:10pt;
-	font-weight:bold;
-	line-height:8pt;
-	color:#7da6cf;
-}
-
-
-#menu{
-	float:left;
-	width:115px;
-	height:650px;
-    border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:2px;
-	padding:2px;
-	background:#e6e7e8;	
-}
-#middleView{
-	float:left;
-	width:500px;
-	height:650px;
-	margin:2px;
-	padding:2px;
-}
-#mapheader{
-	float:left;
-    width:99%;
-	height:26px;
-	padding-left:5px;
-}
-
-#maptitle{
-	float:left;
-	min-width:200px;
-	height:26px;
-	font-family:sans-serif;
-	font-size:14pt;
-	font-weight:bold;
-	color:grey;
-}
-
-#buttons{
-	float:left;
-	padding-left:20px;
-	/*width:200px;*/
-	width:auto;
-	height:26px;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-	font: 10px sans-serif;	
-}
-
-#tabs{
-	float:left;
-	/*width:200px;*/
-	width:auto;
-	height:75%;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-	font: 10px sans-serif;
-}
-.tab{
-	float:left;
-    /*width:60px;*/
-	padding:5px;
-	margin-left:2px;
-	height:12px;
-	border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;
-}
-
-
-#mapview{
-	float:left;
-    width:100%;
-	height:400px;
-    border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin-bottom:2px;
-}
-
-#mapview path {
-  stroke-width: 0.025px;
-  stroke: white;
-  fill: rgb(178, 214, 141);
-  cursor: pointer;
-}
-
-#awardview{
-	float:left;
-    width:100%;
-	height:220px;
-    border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;	
-	background:#e6e7e8;
-	margin-top:2px;	
-	font: 10px sans-serif
-}
-#awardData{
-	float:left;
-	width:96%;
-	height:90%;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:4px;
-	padding:5px;
-	background:white;
-}
-
-#chartview{
-	float:left;
-	width:365px;
-	height:655px;
-    border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;
-	background:#e6e7e8;
-	margin:2px;	
-	font: 10px sans-serif
-}
-
-#censusData{
-	float:left;
-	width:94%;
-	height:175px;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-	padding:5px;
-	margin:4px;
-	background:white;
-}
-
-#epiData{
-	float:left;
-	width:100%;
-	height:435px;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-}
-
-#nationalData{
-	float:left;
-	width:94%;
-	height:140px;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:4px;
-	padding:5px;
-	background:white;
-}
-
-#subnationalData{
-	float:left;
-	width:94%;
-	height:220px;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:4px;
-	padding:5px;
-	background:white;
-}
-
-#popmap{
-	float:left;
-	width:100px;
-	height:75px;
-    border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:4px;
-	padding:5px;
-	background:white;
-}
-
-#povmap{
-	float:left;
-	width:100px;
-	height:75px;
-    border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:4px;
-	padding:5px;
-	background:white;
-}
-#povchart{
-	float:left;
-	width:210px;
-	height:100px;
-    border-style: solid;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:4px;
-	padding:5px;
-	background:white;
-}
-
-
-.chartTitle{
-	float:left;
-	width:94%;
-	height:15px;
-    border-style: none;
-    border-width: 0.5px;	
-    border-color: grey;
-	margin:4px;
-	padding:5px;
-	stroke:grey;
-	background:white;
-}
-
-.mapview_svg{
-	width:100%;
-	height:100%;
-}
-
-.overview_svg{
-	width:100%;
-	height:100%;
-}
-
-.sm_mults_svg{
-	width:100%;
-	height:100%;
-}
-.patternFill{
-	stroke:white;
-	stroke-width:0.025;
-	fill:none;
-}
-/*.minimap{
-	float:left;
-	width:100px;
-	height:100px;
-}*/
-
-.minimap path {
-  stroke-width: 0.025px;
-  stroke: white;
-  cursor: pointer;
-}
-
-/*sub divs*/
-
-
 </style>
 
 <body>
@@ -308,6 +19,7 @@ body {
 <script src="//d3js.org/queue.v1.min.js"></script>
 <script src="topojson.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
 <script>	
 	
 var ht = false;	
@@ -421,28 +133,6 @@ var mapview_svg = d3.select("#mapview").append("svg")
 	var awards_shp;
 	var clinics_pts;	
 	
-//map layers
-/*var land = mapview_svg.append("g")
-    .attr("class","land");
-	
-var features = mapview_svg.append("g")
-    .attr("class","features");	
-	
-var awards_shp = mapview_svg.append("g")
-	.attr("class","awards_shp");
-	
-var clinics_pts = mapview_svg.append("g")
-	.attr("class","clinics");*/	
-	
-	
-		
-/*var overview_svg = d3.select("#mapview").append("svg")
-	.attr("class","overview_svg");*/
-	
-/*var sm_mults_svg = d3.select("#mapview").append("svg")
-	.attr("class","sm_mults_svg");*/ 
-	
-//Map dimensions (in pixels)
 var width = 500,
     height = 400;
 	
@@ -908,11 +598,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	
 	var color_pov = d3.scaleThreshold()
 	    .domain(d3.range(1, 10))
-	    .range(d3.schemeBlues[9]);
-		
-		var c_margin = {top: 25, right: 10, bottom: 10, left: 40},
-		c_width = 210 - c_margin.left - c_margin.right,
-	 	c_height = 100 - c_margin.top - c_margin.bottom;	
+	    .range(d3.schemeBlues[9]);	
 		
 	//pop map
 	 max_pop = d3.max(country_pop,function(f){return f.properties.POP_MAX;});
@@ -920,9 +606,13 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	 pop_range = d3.scaleLinear().domain([min_pop,max_pop]).range([0.2,1]); 
 	 
 	 popMap();
-	 povMap();
-	 povChart();	
-		
+	 povMap(color_pov,x_pov);
+	 povChart(color_pov,x_pov);	
+		   
+	}
+	
+	//census subfunctions
+function popMap(){
    var pop_map = d3.select("#censusData").append("div")
 		.attr("class","minimap")
 		.attr("id","popmap");
@@ -952,8 +642,9 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  	  return pop_range(d.properties.POP_MAX);
 	    })
 	    .attr("path.pointRadius","2");	
-		
-	//pov map
+	}
+	
+function povMap(color_pov, x_pov){
 	var pov_map = d3.select("#censusData").append("div")
 		.attr("class","minimap")
 		.attr("id","povmap");
@@ -973,92 +664,75 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		//return color_pov(x_pov(latest[0].values[0].value.latest));
 		return color_pov(x_pov(latest[0].value.latest));
        });
-		
-		//pov chart
-	   var pov_chart = d3.select("#censusData").append("div")
-	   .attr("class","minimap")
-	   .attr("id","povchart");
+	}
+	
+function povChart(color_pov,x_pov){
+var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
+		c_width = 175 - c_margin.left - c_margin.right,
+	 	c_height = 75 - c_margin.top - c_margin.bottom;
+	
+	 var pov_chart = d3.select("#censusData").append("div")
+ 	   .attr("class","minimap")
+ 	   .attr("id","povchart");
 	      
-    var pc_svg = d3.select("#povchart").append("svg")
-    .attr("width", c_width + c_margin.left + c_margin.right)
-    .attr("height", c_height + c_margin.top + c_margin.bottom)
-	   .append("g")
-    .attr("transform",
-       "translate(" + c_margin.left + "," + c_margin.top + ")");
+     var pc_svg = d3.select("#povchart").append("svg")
+     .attr("width", c_width + c_margin.left + c_margin.right)
+     .attr("height", c_height + c_margin.top + c_margin.bottom)
+ 	   .append("g")
+     .attr("transform",
+        "translate(" + c_margin.left + "," + c_margin.top + ")");
+	    
+  	  pc_svg.append("text")
+  	  .attr("class", "axis")
+  	  .attr("x",-20)
+  	  .attr("y",-10)
+  	  .text("% Population over national poverty line");
 	   
-	   
- 	  pc_svg.append("text")
- 	  .attr("class", "axis")
- 	  .attr("x",-40)
- 	  .attr("y",-10)
- 	  .text("% Population over national poverty line");
-	   
-  var x = d3.scaleBand().rangeRound([0, c_width]).padding(0.1),
-      y = d3.scaleLinear().rangeRound([c_height, 0]);
-
-  	//filter out national numbers //this is the issue! need to fix domain!
+   var x = d3.scaleBand().rangeRound([0, c_width]).padding(0.1),
+       y = d3.scaleLinear().rangeRound([c_height, 0]);
 	  
-	x.domain(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));  
-  	//x.domain(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));
-  	y.domain([0, 100]);
-	y.domain([0, d3.max(country_povbyfips,function(d){return d.value.latest})]);
-	//y.domain(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.value.latest; }));
-
+ 	x.domain(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));  
+ 	y.domain([0, d3.max(country_povbyfips,function(d){return d.value.latest})]);
 	  
-  pc_svg.append("g")
-        .attr("class", "axis")
-        .call(d3.axisLeft(y)
-  		.ticks(5))
-      .append("text")
-        .attr("transform", "rotate(-90)")
-        //.attr("y", 6)
-        .attr("dy", "0.71em")
-  	.attr("text-anchor", "end");  
+   pc_svg.append("g")
+         .attr("class", "axis")
+         .call(d3.axisLeft(y)
+   		.ticks(5))
+       .append("text")
+         .attr("transform", "rotate(-90)")
+         .attr("dy", "0.71em")
+   	.attr("text-anchor", "end");  
 	
-  	pc_svg.selectAll(".bar")
-  	//.data(povertyByFips.filter(function(d){return d.key.indexOf(".") != -1;}))
-	.data(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}))
-  	.enter().append("rect")
-  	.attr("id",function(d){//console.log("bb"+d.key.replace(".","")); 
-  		return "bb"+d.key.replace(".","");})
-	.attr("x", function(d){return x(d.key);}) 
-	.attr("y", function(d){return y(d.value.latest)})
-	.attr("width", x.bandwidth())
-	.style("fill","steelblue")
-  	.attr("x", function(d){return x(d.key);})
-		.attr("y", function(d){return y(d.value.latest)})
-		.attr("basecolor",function(d){
-  			return color_pov(x_pov(d.value.latest));})
-  	.style("fill",function(d){
-  			return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");
-  	})	
-  	.attr("width", x.bandwidth())
-  	.attr("height",function(d){return c_height - y(d.value.latest);})
-  	.on("mouseover", function(d){ //console.log(this); 
-  		if(!selection){
-  		d3.select(this).style("fill","tomato");
-  		d3.select("#region"+d.key.replace(".","")).dispatch("mouseover");//style("fill","tomato");
-  		}
-  	})
-  	.on("mouseout", function(d){if(!selection){
-  		d3.select(this).style("fill",
-  		function(d){return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");});
-  		d3.select("#region"+d.key.replace(".","")).dispatch("mouseout");
-  		}
-  	});	   
-	}
-	
-	//census subfunctions
-	function povMap(){
-		
-	}
-	
-	function popMap(){
-		
-	}
-	
-	function povChart(){
-		
+   	pc_svg.selectAll(".bar")
+ 	.data(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}))
+   	.enter().append("rect")
+   	.attr("id",function(d){//console.log("bb"+d.key.replace(".","")); 
+   		return "bb"+d.key.replace(".","");})
+ 	.attr("x", function(d){return x(d.key);}) 
+ 	.attr("y", function(d){return y(d.value.latest)})
+ 	.attr("width", x.bandwidth())
+ 	.style("fill","steelblue")
+   	.attr("x", function(d){return x(d.key);})
+ 		.attr("y", function(d){return y(d.value.latest)})
+ 		.attr("basecolor",function(d){
+   			return color_pov(x_pov(d.value.latest));})
+   	.style("fill",function(d){
+   			return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");
+   	})	
+   	.attr("width", x.bandwidth())
+   	.attr("height",function(d){return c_height - y(d.value.latest);})
+   	.on("mouseover", function(d){ //console.log(this); 
+   		if(!selection){
+   		d3.select(this).style("fill","tomato");
+   		d3.select("#region"+d.key.replace(".","")).dispatch("mouseover");//style("fill","tomato");
+   		}
+   	})
+   	.on("mouseout", function(d){if(!selection){
+   		d3.select(this).style("fill",
+   		function(d){return d3.select("#bb"+d.key.replace(".","")).attr("basecolor");});
+   		d3.select("#region"+d.key.replace(".","")).dispatch("mouseout");
+   		}
+   	});
 	}
 	
 	
