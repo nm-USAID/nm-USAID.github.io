@@ -102,13 +102,15 @@ d3.select("#mapheader").append("div")
 var overview_tab = d3.select("#tabs").append("div")
 	.attr("class","tab")
 	.attr("id","overview_tab")
-	.append("text")
+	
+	var lbl_o = overview_tab.append("text")
 	.text("overview");
 	
 var temporalview_tab = d3.select("#tabs").append("div")
 	.attr("class","tab")
-	.attr("id","temporal_view_tab")
-	.append("text")
+	.attr("id","temporal_view_tab");
+	
+	var lbl_t = temporalview_tab.append("text")
 	.text("temporal view");		
 	
 	
@@ -160,7 +162,7 @@ var path_census = d3.geoPath()
 var projection_sm = d3.geoMercator()
     .scale(2700)
     .center([0,0]) //projection center
-    .translate([width/2+3950,650])
+    .translate([width/2+4000,700])
 
 var path_sm = d3.geoPath()
 	.projection(projection_sm);				
@@ -436,6 +438,9 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  	drawOverview();
 		//drawTemporalView();
 	  	drawChartView();
+		
+		//start with overview on top
+		overview_tab.style("background","#ccc");
   
 	  //mapview_svg.call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(15).translate(-dx,-dy)); 
 	  //mapview_svg.call(zoom);
@@ -462,7 +467,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		}*/
 		
 	mapview_svg = d3.select("#mapview").append("svg")
-		.attr("class","mapview_svg");
+			.attr("id","overview_svg")	
+			.attr("class","mapview_svg");
 		
 		//var features;
 		//var regions;
@@ -1095,12 +1101,21 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		d3.select(this).style("background","#ccc");
 		temporalview_tab.style("background","none");
 		
+		//swap svg to front
+		mapview_svg.moveToFront();
+		//d3.select("#overview_svg").parentNode.appendChild(this)
+		
+		//console.log(d3.select("#overview_svg").parentNode.appendChild(this));//.parentElement.appendChild(this);
 		//can we instead just swap the order so that we don't have to redraw???
 		//drawOverview();
 	});
+	
 	temporalview_tab.on("click",function(){
 		d3.select(this).style("background","#ccc");
 		overview_tab.style("background","none");
+		
+		//swap div to front
+		d3.select("#smview").moveToFront();
 		
 		//drawTemporalView();
 	});
@@ -1131,7 +1146,7 @@ function drawSmallMultiples(){
 		.attr("id",function(d,i){return i;})
 		//.attr("class","sm_mults")
 		.attr("class","sm_mults")
-		.attr("width", 150)
+		.attr("width", 155)
 		.attr("height", 100);
 		
 		var formatDate = d3.timeFormat("%m/%e/%y");
@@ -1202,6 +1217,12 @@ function zoomed() {
 	/*up_land.attr("transform", d3.event.transform)
       .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );*/  
 }	
+
+d3.selection.prototype.moveToFront = function() {
+  return this.each(function(){
+    this.parentNode.appendChild(this);
+  });
+};
 
 
 </script>

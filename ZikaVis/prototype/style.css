@@ -102,11 +102,10 @@
     border-width: 0.5px;	
     border-color: grey;
 	cursor: pointer;
-	
 }
 
 .tab:hover{
-	background:#ccc;
+	background-color:#ccc;
 }
 
 
