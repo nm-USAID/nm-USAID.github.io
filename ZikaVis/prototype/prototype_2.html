@@ -238,7 +238,9 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  epidata.sort(function(a,b){return a.report_date - b.report_date;});
 	  
 	  
-	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.descending(a.country, b.country);});
+	  //var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.descending(a.country, b.country);});
+	  
+	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.ascending(a.autochthonous_cases_confirmed, b.autochthonous_cases_confirmed);});
 	  
 	  
 	  var globalbycountry = d3.nest()
@@ -463,7 +465,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		 var x = d3.scalePow(3)
       		.range([0, width]);
 			
-			var b_colors = ["steelblue","orange"];	
+			var b_colors = ["gray","#a0a0a0"];	
 		
   // append the svg object to the body of the page
   // append a 'group' element to 'svg'
