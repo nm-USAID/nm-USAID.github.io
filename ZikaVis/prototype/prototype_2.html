@@ -454,18 +454,21 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  function drawMenu(){
 	  //from https://bl.ocks.org/caravinden/eb0e5a2b38c8815919290fa838c6b63b	  
 	  // set the dimensions and margins of the graph
-	  var margin = {top: 20, right: 10, bottom: 30, left: 60},
-	      width = 115 - margin.left - margin.right,
-	      height = 350 - margin.top - margin.bottom;
+	  var margin = {top: 20, right: 10, bottom: 30, left: 5},
+	      width = 100 - margin.left - margin.right,
+	      height = 400 - margin.top - margin.bottom;
 		  // set the ranges
 		  var y = d3.scaleBand()
       		.range([height, 0])
-     		 .padding(0.3);
+     		 .padding(0.5);
 
 		 var x = d3.scalePow(3)
       		.range([0, width]);
 			
-			var b_colors = ["gray","#a0a0a0"];	
+		 var x_ht = d3.scalePow(3)
+      		.range([0, width]);	
+			
+			var b_colors = ["#2ca25f","#99d8c9"];	
 		
   // append the svg object to the body of the page
   // append a 'group' element to 'svg'
@@ -479,26 +482,46 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			
 		  // Scale the range of the data in the domains
 		    x.domain([0, d3.max(globaldataF, function(d){ return d.autochthonous_cases_confirmed; })])
-		    y.domain(globaldataF.map(function(d) { return d.country; }));	
+		    y.domain(globaldataF.map(function(d) { return d.country; }));
+			
+			x_ht.domain([0, d3.max(globaldataF, function(d){ return (d.autochthonous_cases_confirmed/d.pop_x_1000); })])	
 			
 			
 	  // append the rectangles for the bar chart
-	    menu_svg.append("g")
+	   var gs = menu_svg.append("g")
 			.selectAll("g")
 			.data(globaldataF)
 			.enter().append("g")
-			.attr("transform", function(d) { return "translate(0," + y(d.country) + ")"; })
-			.selectAll(".bar")
-	        .data(function(d){return [{key:d.key,value:d.autochthonous_cases_confirmed},{key:d.key,value:(d.autochthonous_cases_confirmed/d.pop_x_1000)*5000}];})
+			.attr("transform", function(d) { return "translate(0," + y(d.country) + ")"; });
+			
+			gs.append("text")
+			.attr("y","-2px")
+			.attr("class","country_labels")
+			.text(function(d){return d.country;});
+			
+			gs.selectAll(".bar")
+	        .data(function(d){return [{key:d.key,value:d.autochthonous_cases_confirmed},{key:d.key,value:(d.autochthonous_cases_confirmed/d.pop_x_1000)}];})
 	      .enter().append("rect")
 			//.attr("id",function(d){return "b1"+d.country;})
 	        .attr("class", "bar")
 	        //.attr("x", function(d) { return x(d.sales); })
-			.attr("width", function(d) {return x(d.value); } )
+			.attr("width", function(d,i) {
+				if(i==0){
+				return x(d.value);
+				}else if(i==1){
+					return x_ht(d.value);
+				}
+			})
 	        //.attr("width", function(d) {return x(d.autochthonous_cases_confirmed); } )
 	        .attr("y", function(d,i) { return i*((y.bandwidth()/2)); })
 			.style("fill", function(d,i){return b_colors[i];})
-	        .attr("height", y.bandwidth()/2);
+	        .attr("height", y.bandwidth()/2)
+			.on("mouseover",function(d){
+				d3.select(this).style("fill","tomato");
+			})
+			.on("mouseout",function(d,i){
+				d3.select(this).style("fill",b_colors[i]);
+			})
 			
 		/*menu_svg.append("g")
 			.selectAll("g")
@@ -518,12 +541,22 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	    
 	    // add the x Axis
 	    menu_svg.append("g")
+	        //.attr("transform", "translate(0,50px)")
+			.attr("class","axis1")
+	        .call(d3.axisTop(x).ticks(2));
+			
+	    menu_svg.append("g")
 	        .attr("transform", "translate(0," + height + ")")
-	        .call(d3.axisBottom(x).ticks(2));
+			.attr("class","axis2")
+	        .call(d3.axisBottom(x_ht).ticks(2));	
 
 	    // add the y Axis
-	    menu_svg.append("g")
-	        .call(d3.axisLeft(y));
+	    /*menu_svg.append("g")
+	        .call(d3.axisLeft(y));*/
+			
+		  /*menu_svg.append("text")
+			.text(function(d){return d.country;})
+			.attr("class","date-labels");*/	
 		
 	  }
 
