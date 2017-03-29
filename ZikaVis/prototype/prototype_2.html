@@ -25,6 +25,8 @@
 var ht = false;	
 var colors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
 
+var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Caribbean Regional"];
+
 //set up divs
 d3.select("#container").append("div")
 	.attr("id","banner");
@@ -102,13 +104,30 @@ d3.select("#mapheader").append("div")
 var overview_tab = d3.select("#tabs").append("div")
 	.attr("class","tab")
 	.attr("id","overview_tab")
+	.on("mouseover",function(d){
+		//d3.select(this).style("background","#ccc");
+	})
+	.on("mouseout",function(d){
+		/*if(!d3.select(this).selected){
+		d3.select(this).style("background","none");
+		}*/
+	});
 	
 	var lbl_o = overview_tab.append("text")
 	.text("overview");
 	
 var temporalview_tab = d3.select("#tabs").append("div")
 	.attr("class","tab")
-	.attr("id","temporal_view_tab");
+	.attr("id","temporal_view_tab")
+	.on("mouseover",function(d){
+		//d3.select(this).style("background","#ccc");
+	})
+	.on("mouseout",function(d){
+		/*console.log(d3.select(this).selected);
+		if(!d3.select(this).selected){
+		d3.select(this).style("background","none");
+		}*/
+	})
 	
 	var lbl_t = temporalview_tab.append("text")
 	.text("temporal view");		
@@ -217,6 +236,17 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  
 	  //sort by report data
 	  epidata.sort(function(a,b){return a.report_date - b.report_date;});
+	  
+	  
+	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.descending(a.country, b.country);});
+	  
+	  
+	  var globalbycountry = d3.nest()
+	  .key(function(d){return d.country;})
+	  .entries(globaldata);
+	  
+	  //console.log(globalbycountry);
+	  
 	  
 	  //nest data upfront
 	  var byRegion = d3.nest()
@@ -414,8 +444,78 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
   	.domain([1,mx])
   	.range(['#fee8c8','#b30000'])
 	  
+	 drawMenu();  
 	  
 	  setCountry(ADM0);
+
+//draw menu
+	  function drawMenu(){
+	  //from https://bl.ocks.org/caravinden/eb0e5a2b38c8815919290fa838c6b63b	  
+	  // set the dimensions and margins of the graph
+	  var margin = {top: 20, right: 10, bottom: 30, left: 60},
+	      width = 115 - margin.left - margin.right,
+	      height = 500 - margin.top - margin.bottom;
+		  // set the ranges
+		  var y = d3.scaleBand()
+      		.range([height, 0])
+     		 .padding(0.1);
+
+		 var x = d3.scalePow(3)
+      		.range([0, width]);
+		
+  // append the svg object to the body of the page
+  // append a 'group' element to 'svg'
+  // moves the 'group' element to the top left margin
+  var menu_svg = d3.select("#menu").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", 
+            "translate(" + margin.left + "," + margin.top + ")");
+			
+		  // Scale the range of the data in the domains
+		    x.domain([0, d3.max(globaldataF, function(d){ return d.autochthonous_cases_confirmed; })])
+		    y.domain(globaldataF.map(function(d) { return d.country; }));	
+			
+			
+	  // append the rectangles for the bar chart
+	    menu_svg.selectAll(".bar")
+	        .data(globaldataF)
+	      .enter().append("rect")
+			.attr("id",function(d){return "b1"+d.country;})
+	        .attr("class", "bar")
+	        //.attr("x", function(d) { return x(d.sales); })
+	        .attr("width", function(d) {return x(d.autochthonous_cases_confirmed); } )
+	        .attr("y", function(d) { return y(d.country); })
+	        .attr("height", "10px");//y.bandwidth());
+			
+		/*menu_svg.append("g")
+			.selectAll("g")
+			.data(globaldataF)
+			.enter().append("g")
+			//.attr("transform", function(d) { return "translate(" + x0(d.State) + ",0)"; })
+			.selectAll(".bar")
+	        .data(function(d){return {key:d.key, values:[d.autochthonous_cases_confirmed, d.autochthonous_cases_confirmed/d.pop_x_1000]}; )
+	      .enter().append("rect")
+			.attr("id",function(d,i){console.log(d); return "b1"+d.key+"_"+i;})
+	        .attr("class", "bar")
+	        //.attr("x", function(d) { return x(d.sales); })
+	        .attr("width", function(d) {return x(d.value); } )
+	        .attr("y", function(d) { return y(d.key); })
+	        .attr("height", "10px");//y.bandwidth());*/	
+			
+	    
+	    // add the x Axis
+	    menu_svg.append("g")
+	        .attr("transform", "translate(0," + height + ")")
+	        .call(d3.axisBottom(x).ticks(2));
+
+	    // add the y Axis
+	    menu_svg.append("g")
+	        .call(d3.axisLeft(y));
+		
+	  }
+
 
 //setup based on country
 	  function setCountry(adm0){
@@ -791,9 +891,9 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 	
 //national charts	
 	function nationalCharts(){
-		var graph3_margin = {top: 10, right: 20, bottom: 20, left: 40},
+		var graph3_margin = {top: 10, right: 20, bottom: 60, left: 40},
       		graph3_width = 150 - graph3_margin.left - graph3_margin.right,
-      		graph3_height = 100 - graph3_margin.top - graph3_margin.bottom;
+      		graph3_height = 140 - graph3_margin.top - graph3_margin.bottom;
 			
       	  //all indicators with cumulative unchecked
 		  var all_inds = d3.select("#nationalData").append("div")
@@ -851,7 +951,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			.attr("class","key_labels")
 			.attr("x",10)
 			.attr("y",function(d,i){return i*10+10;})
-			.text(function(d){return d.key;});
+			.text(function(d){return d.key.replace("cumulative","c").replace("suspected","s");});
 			
 			key_labels.append("circle")
 				.attr("id",function(d){return "circle"+d.key})
@@ -940,7 +1040,8 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		      .attr("transform", "translate(0,"+graph3_height+")")
 			  //.tickFormat(d3.timeFormat("%B"))
 			.call(d3.axisBottom(x)
-				. tickFormat(d3.timeFormat("%b %y")))
+				.ticks(5)
+				. tickFormat(d3.timeFormat("%m-%y")))
 				.selectAll("text")	
 		          .style("text-anchor", "end")
 		          .attr("dx", "-.8em")
@@ -1068,7 +1169,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			.attr("class","axis")	
 	        .attr("transform", "translate(0,"+graph_height+")")
 			.call(d3.axisBottom(x)
-				.tickFormat(d3.timeFormat("%b %y"))
+				.tickFormat(d3.timeFormat("%m-%y"))
 				.ticks(8))
 				.selectAll("text")	
 	            .style("text-anchor", "end")
@@ -1098,7 +1199,10 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 	
 //button functionality
 	overview_tab.on("click",function(){
+		d3.select(this).selected = true;
 		d3.select(this).style("background","#ccc");
+		
+		temporalview_tab.selected = false;
 		temporalview_tab.style("background","none");
 		
 		//swap svg to front
@@ -1111,7 +1215,10 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 	});
 	
 	temporalview_tab.on("click",function(){
+		d3.select(this).selected = true;
 		d3.select(this).style("background","#ccc");
+		
+		overview_tab.selected = false;
 		overview_tab.style("background","none");
 		
 		//swap div to front
