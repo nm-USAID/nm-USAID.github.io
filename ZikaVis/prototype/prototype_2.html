@@ -25,7 +25,7 @@
 var ht = false;	
 var colors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
 
-var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Caribbean Regional"];
+var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", /*"Colombia", */"Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Caribbean Regional"];
 
 //set up divs
 d3.select("#container").append("div")
@@ -454,14 +454,16 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  // set the dimensions and margins of the graph
 	  var margin = {top: 20, right: 10, bottom: 30, left: 60},
 	      width = 115 - margin.left - margin.right,
-	      height = 500 - margin.top - margin.bottom;
+	      height = 350 - margin.top - margin.bottom;
 		  // set the ranges
 		  var y = d3.scaleBand()
       		.range([height, 0])
-     		 .padding(0.1);
+     		 .padding(0.3);
 
 		 var x = d3.scalePow(3)
       		.range([0, width]);
+			
+			var b_colors = ["steelblue","orange"];	
 		
   // append the svg object to the body of the page
   // append a 'group' element to 'svg'
@@ -479,15 +481,22 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			
 			
 	  // append the rectangles for the bar chart
-	    menu_svg.selectAll(".bar")
-	        .data(globaldataF)
+	    menu_svg.append("g")
+			.selectAll("g")
+			.data(globaldataF)
+			.enter().append("g")
+			.attr("transform", function(d) { return "translate(0," + y(d.country) + ")"; })
+			.selectAll(".bar")
+	        .data(function(d){return [{key:d.key,value:d.autochthonous_cases_confirmed},{key:d.key,value:(d.autochthonous_cases_confirmed/d.pop_x_1000)*5000}];})
 	      .enter().append("rect")
-			.attr("id",function(d){return "b1"+d.country;})
+			//.attr("id",function(d){return "b1"+d.country;})
 	        .attr("class", "bar")
 	        //.attr("x", function(d) { return x(d.sales); })
-	        .attr("width", function(d) {return x(d.autochthonous_cases_confirmed); } )
-	        .attr("y", function(d) { return y(d.country); })
-	        .attr("height", "10px");//y.bandwidth());
+			.attr("width", function(d) {return x(d.value); } )
+	        //.attr("width", function(d) {return x(d.autochthonous_cases_confirmed); } )
+	        .attr("y", function(d,i) { return i*((y.bandwidth()/2)); })
+			.style("fill", function(d,i){return b_colors[i];})
+	        .attr("height", y.bandwidth()/2);
 			
 		/*menu_svg.append("g")
 			.selectAll("g")
