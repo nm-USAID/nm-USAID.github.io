@@ -5,15 +5,15 @@
 <style>
 </style>
 
-<body>
-	<div id="container_global"></div>	
-	<div id="container"></div>
-
 <svg class="patternFill"><defs><pattern id="diagonalHatch" width="0.2" height="0.2" patternUnits="userSpaceOnUse">
   <path d="M-0.05,0.05 l0.1,-0.1
            M0,0.2 l0.2,-0.2
            M0.15,0.25 l0.1,-0.1"/>
 </pattern></defs></svg>
+
+<body>	
+	<div id="container"></div>
+	<div id="global_container"></div>
 
 <script src="d3.min.js"></script>
 <script src="//d3js.org/queue.v1.min.js"></script>
@@ -27,13 +27,52 @@ var colors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99", "#e31a1c","#fdb
 
 var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Caribbean Regional"];
 
-//set up divs
+//set up global view divs	
+d3.select("#global_container").append("div")
+	.attr("id","gl_banner");
+	
+d3.select("#global_container").append("div")
+	.attr("id","gl_mapview");	
+
+d3.select("#global_container").append("div")
+	.attr("id","gl_chartview");	
+	
+//global chartview
+//chartview
+/*d3.select("#gl_chartview").append("div")
+	.attr("id","censusDataTitle")
+	.attr("class","chartTitle")
+	.append("text")
+	.text("CENSUS DATA");	
+	
+d3.select("#gl_chartview").append("div")
+	.attr("id","censusData");*/		
+	
+d3.select("#gl_chartview").append("div")
+	.attr("id","gl_epiData");
+	
+d3.select("#gl_epiData").append("div")
+	.attr("id","epiDataTitle")
+	.attr("class","chartTitle")
+	.append("text")
+	.text("WEEKLY EPIDEMIOLOGICAL DATA");	
+	
+d3.select("#gl_epiData").append("div")
+	.attr("id","newConfirmedData")
+	.append("text")
+	.text("NEW CONFIRMED CASES")
+	.attr("class","subtitle");
+	
+d3.select("#gl_epiData").append("div")
+	.attr("id","byIndicatorData")
+	.append("text")
+	.text("BY INDICATOR")
+	.attr("class","subtitle");		
+
+
+//set up country view divs
 d3.select("#container").append("div")
 	.attr("id","banner");	
-	
-//global view	
-d3.select("#container_global").append("div")
-	.attr("id","banner_global");
 	
 	
 //country view
@@ -99,11 +138,11 @@ d3.select("#banner").append("h2")
 	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");
 	
 //banner global view
-d3.select("#banner_global").append("h1")
+d3.select("#gl_banner").append("h1")
 	.attr("class","banner")
 	.text("ZikaVis");
 	
-d3.select("#banner_global").append("h2")
+d3.select("#gl_banner").append("h2")
 	.attr("class","banner")
 	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");		
 
@@ -179,8 +218,40 @@ var width = 500,
 	
 var sm_width = 125,
 	sm_height = 125;		
+
+var gl_width = 600,
+	gl_height = 400;	
 	
 //setup topojson stuff -- paths and projections
+/************global projection**************/	
+	
+//Map projection
+var global_projection = d3.geoMercator()
+    .scale(500)
+	//.scale(100)
+    .center([0,0]) //projection center
+	.translate([gl_width/2+700,gl_height/2+100]) //translate to center the map in view	
+	//.translate([width/2,height/2]);
+
+//Generate paths based on projection
+var global_path = d3.geoPath()
+    .projection(global_projection);	
+
+//Create an SVG
+var global_svg = d3.select("#gl_mapview").append("svg")
+	.attr("class","gl_mapview")
+    .attr("width", gl_width-1)
+    .attr("height", gl_height-1);	
+
+//Group for the map features
+var global_land = global_svg.append("g")
+    .attr("class","gl_land");
+	
+//Group for the map features
+var global_features = global_svg.append("g")
+    .attr("class","gl_features");		
+	
+/************end global projection**************/	
 	
 //popup projection //need to automate this!
 var projection_census = d3.geoMercator()
@@ -219,7 +290,12 @@ var clinicSymbol = d3.symbol().size(10).type(d3.symbolCross);
 //enable zoom
 var zoom = d3.zoom()
     .scaleExtent([0.3, Infinity])
-    .on("zoom",zoomed);	
+    .on("zoom",zoomed);
+	
+//enable zoom
+var gl_zoom = d3.zoom()
+    .scaleExtent([0.3, Infinity])
+    .on("zoom",gl_zoomed);		
 				
 	
 //load data
@@ -396,7 +472,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  	});
 		  });
 		  
-		  console.log(byRegion);
+		  //console.log(byRegion);
 		  
 		  var totalByRegion = d3.nest()
 		  .key(function(d){return d.fips;})
@@ -463,6 +539,19 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	 var dx;
 	 var dy;
 	  
+ 	var mx = d3.max(globaldata,function(f){return f.autochthonous_cases_confirmed;});
+ 	var	mn = d3.min(globaldata,function(f){return f.autochthonous_cases_confirmed;});
+	
+ 	var mx_ht = d3.max(globaldata,function(f){return f.autochthonous_cases_confirmed/f.pop_x_1000;});
+ 	var	mn_ht = d3.min(globaldata,function(f){return f.autochthonous_cases_confirmed/f.pop_x_1000;});  
+	  
+ 	choropleth_global = d3.scaleLog()
+ 	.domain([1,mx])
+ 	.range(['#fef0d9', '#b30000']);	
+	
+ 	choropleth_global_ht = d3.scaleLog()
+ 	.domain([0.001,mx_ht])
+ 	.range(['#fef0d9', '#b30000']);	  
 	  
   	choropleth4 = d3.scaleLog()
   	.domain([1,mx])
@@ -475,17 +564,67 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	 
 	 
 	 function draw_country_view(){
+	 
 	 drawMenu();  
 	 setCountry(ADM0);
- 	 }
+	 
+ 	 
+	 }
 	 
 	 function draw_global_view(){
-	 	d3.select("#container_global").append("button")
+		 
+		 draw_global_mapview(); 
+		 
+	 	global_svg.call(gl_zoom);
+		
+		d3.select("#global_container").append("button")
 		 .text("Country view")
 		 .on("click",function(d){
 			 d3.select("#container").moveToFront();
 		 })
 	 }
+	 
+//draw global mapview
+	 function draw_global_mapview(){
+	 	//countries
+ 	 	var gl_regions;
+ 	 	var gl_countries;
+ 	 	var gl_efforts;
+		
+	  gl_countries = global_land.selectAll("path")
+	      .data(geodata_admin0.features) //generate features from TopoJSON
+	  	.enter()
+	      .append("path")
+	      .attr("id",function(d){return "gl_country"+d.properties.ADM0_A3;})
+	      .attr("class","country_paths")
+	    .attr("d",global_path)
+		.attr("basecolor",function(d){
+			var c = globaldata.filter(function(v){return v.country == d.properties.ADMIN;});
+			if(c[0] != undefined){
+				//console.log(c[0]);
+				if(ht){
+					return choropleth_global_ht(c[0].autochthonous_cases_confirmed/(c[0].pop_x_1000));
+				}else{
+				return choropleth_global(c[0].autochthonous_cases_confirmed);
+				}
+			}else{
+				return "rgb(220,220,220)";
+			}
+				
+		})
+		.style("fill", function(d){return d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor");})
+		.on("mouseover",function(d){
+			if(d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor") != "rgb(220,220,220)"){
+			d3.select(this).style("fill","tomato");
+			}
+		})
+		.on("mouseout",function(d){
+			d3.select(this).style("fill",function(d){
+				return d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor");
+			})
+		});
+		 
+	 }	//end draw country mapview 	 
 
 //draw menu
 	  function drawMenu(){
@@ -493,7 +632,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		var global_view_btn = d3.select("#menu").append("button")
 		  .text("Global View")
 		  .on("click", function(d){
-		  	d3.select("#container_global").moveToFront();
+		  	d3.select("#global_container").moveToFront();
 		  });
 		  
 		  
@@ -643,17 +782,6 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	
 //functions!	
 	function drawOverview(){
-		
-		/*if(sm_multiples != null){
-			sm_multiples.remove();
-		}
-		
-		if(mapview_svg != null){
-		mapview_svg.selectAll("*").remove();
-		}else{
-		mapview_svg = d3.select("#mapview").append("svg")
-			.attr("class","mapview_svg");
-		}*/
 		
 	mapview_svg = d3.select("#mapview").append("svg")
 			.attr("id","overview_svg")	
@@ -1402,6 +1530,25 @@ function drawSmallMultiples(){
 	
 //end ready
 }	
+
+function gl_zoomed() {
+	//console.log(zoom.translate()+" "+zoom.scale());
+	global_features.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );
+	  
+	  global_land.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	  
+	  
+	  //gl_awards_shp.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	
+	  
+	  //clinics_pts.attr("transform", d3.event.transform);
+      //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );		  
+	
+	/*up_land.attr("transform", d3.event.transform)
+      .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );*/  
+}
+
 
 function zoomed() {
 	//console.log(zoom.translate()+" "+zoom.scale());
