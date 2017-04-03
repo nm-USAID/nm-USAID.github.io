@@ -6,8 +6,8 @@
 </style>
 
 <body>
-	<div id="container"></div>	
-</body>
+	<div id="container_global"></div>	
+	<div id="container"></div>
 
 <svg class="patternFill"><defs><pattern id="diagonalHatch" width="0.2" height="0.2" patternUnits="userSpaceOnUse">
   <path d="M-0.05,0.05 l0.1,-0.1
@@ -25,12 +25,18 @@
 var ht = false;	
 var colors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
 
-var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", /*"Colombia", */"Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Caribbean Regional"];
+var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Caribbean Regional"];
 
 //set up divs
 d3.select("#container").append("div")
-	.attr("id","banner");
-
+	.attr("id","banner");	
+	
+//global view	
+d3.select("#container_global").append("div")
+	.attr("id","banner_global");
+	
+	
+//country view
 d3.select("#container").append("div")
 	.attr("id","menu");
 
@@ -90,7 +96,16 @@ d3.select("#banner").append("h1")
 	
 d3.select("#banner").append("h2")
 	.attr("class","banner")
-	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");	
+	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");
+	
+//banner global view
+d3.select("#banner_global").append("h1")
+	.attr("class","banner")
+	.text("ZikaVis");
+	
+d3.select("#banner_global").append("h2")
+	.attr("class","banner")
+	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");		
 
 //title with tabs, buttons
 d3.select("#mapheader").append("div")
@@ -367,16 +382,21 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 				  //num = f.value;
 				  prev_yr = f.year;
 				  cum_cases = f.cum_cases; 
+				  cum_cases_orig = f.value;
 		  	  })
 			  	e.max_cum_cases = d3.max(e.values, function(f){return f.cum_cases;});
+				e.max_cum_cases_orig = d3.max(e.values, function(f){return f.value;});
 				//hopefully not too expensive
 				e.values.forEach(function(f,i){
 					f.max_cum_cases = e.max_cum_cases;
+					f.max_cum_cases_orig = e.max_cum_cases_orig;
 				});
 			   	//console.log(max_cum_cases);
 			   	//d3.max(d,function(f){return f.cum_cases;
 		  	});
 		  });
+		  
+		  console.log(byRegion);
 		  
 		  var totalByRegion = d3.nest()
 		  .key(function(d){return d.fips;})
@@ -399,9 +419,11 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			  return {
 				  //this is actually inaccurate because numbers reset each year
 			    max_val: d3.max(v,function(f){return f.value;}),
+				max_cumulative_orig: d3.max(v,function(f){return f.value;}),
 				max_cumulative: d3.max(v,function(f){return f.cum_cases;}),
 				max_new: max,
 				cum_ht: d3.max(v,function(f){return f.cum_cases;})/pop,
+				cum_ht_orig: d3.max(v,function(f){return f.value;})/pop,
 				new_ht: max/pop,
 				  _pop: pop    
 			  };
@@ -445,13 +467,36 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
   	choropleth4 = d3.scaleLog()
   	.domain([1,mx])
   	.range(['#fee8c8','#b30000'])
-	  
+	 
+	 draw_global_view();
+	 draw_country_view();
+	 
+	 
+	 
+	 
+	 function draw_country_view(){
 	 drawMenu();  
-	  
-	  setCountry(ADM0);
+	 setCountry(ADM0);
+ 	 }
+	 
+	 function draw_global_view(){
+	 	d3.select("#container_global").append("button")
+		 .text("Country view")
+		 .on("click",function(d){
+			 d3.select("#container").moveToFront();
+		 })
+	 }
 
 //draw menu
 	  function drawMenu(){
+	 //global view button	  
+		var global_view_btn = d3.select("#menu").append("button")
+		  .text("Global View")
+		  .on("click", function(d){
+		  	d3.select("#container_global").moveToFront();
+		  });
+		  
+		  
 	  //from https://bl.ocks.org/caravinden/eb0e5a2b38c8815919290fa838c6b63b	  
 	  // set the dimensions and margins of the graph
 	  var margin = {top: 20, right: 10, bottom: 30, left: 5},
@@ -687,12 +732,12 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
 			if(ht){
 				//return d3.interpolateOrRd(scale_cases(max[0].value.cum_ht));
-				return choropleth4(max[0].value.cum_ht);
+				return choropleth4(max[0].value.cum_ht_orig);
 				//return choropleth(x3(max[0].value.cum_ht));
 			}else{
 				//choropleth1 is actually is ineffective, because we need to see finer grain differences
 				//return d3.interpolateOrRd(scale_cases(max[0].value.max_cumulative));
-				return choropleth4(max[0].value.max_cumulative);
+				return choropleth4(max[0].value.max_cumulative_orig);
 			}
 		})
 		.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");})
@@ -866,7 +911,7 @@ function povMap(color_pov, x_pov){
 	
 function povChart(color_pov,x_pov){
 var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
-		c_width = 175 - c_margin.left - c_margin.right,
+		c_width = 140 - c_margin.left - c_margin.right,
 	 	c_height = 75 - c_margin.top - c_margin.bottom;
 	
 	 var pov_chart = d3.select("#censusData").append("div")
@@ -935,9 +980,9 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 	
 //national charts	
 	function nationalCharts(){
-		var graph3_margin = {top: 10, right: 20, bottom: 60, left: 40},
-      		graph3_width = 150 - graph3_margin.left - graph3_margin.right,
-      		graph3_height = 140 - graph3_margin.top - graph3_margin.bottom;
+		var graph3_margin = {top: 10, right: 20, bottom: 30, left: 40},
+      		graph3_width = 220 - graph3_margin.left - graph3_margin.right,
+      		graph3_height = 90 - graph3_margin.top - graph3_margin.bottom;
 			
       	  //all indicators with cumulative unchecked
 		  var all_inds = d3.select("#nationalData").append("div")
@@ -960,7 +1005,8 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
   	  valueline3 = d3.line()
   	    	.x(function(d) { return x(d.report_date); })
   	    	.y(function(d) { //console.log(d.report_date+" "+d.cum_cases); 
-  				return y(d.cum_cases); });
+  				//return y(d.cum_cases); });
+				return y(d.value); });
 				
 				var dd = byRegion.filter(function(v){return v.key == "ES00";});	
 
@@ -968,20 +1014,25 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 				var max = totalByRegion.filter(function(v){return v.key == "ES00";});		
 		
 				x.domain(d3.extent(epidata, function(v) { return v.report_date; }));
-				y.domain([0,max[0].value.max_cumulative+10]);
+				y.domain([0,max[0].value.max_cumulative_orig+10]);
 
 				//console.log(dd[0].values);
 				//have to redraw the map. that's fine. 
 
 				domains = [];
 				dd[0].values.forEach(function(v,i){
-					domains.push(v.max_cum_cases);
+					domains.push(v.max_cum_cases_orig);
 				})		
 				
 		drawCountryLines(dd, x, y, graph3_height); 				
 		  
-		  var key = all_inds.append("svg")
-			.attr("id","countryChartKey");
+    	  //all indicators with cumulative unchecked
+	  var all_inds_key = d3.select("#nationalData").append("div")
+		.attr("class","epichart")
+		.attr("id","countryChartKey");  
+		  
+		var key = all_inds_key.append("svg");
+			//.attr("id","countryChartKey");
 			
 	var key_labels = key.selectAll("g")
 			.data(dd[0].values, function(d,i){//console.log(d.key); 
@@ -1027,7 +1078,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 						y.domain([0,d3.max(domains,function(v){return v;})])
 						drawCountryLines(dd, x, y, graph3_height);
 					}else{
-						domains[i] = d.max_cum_cases;
+						domains[i] = d.max_cum_cases_orig;
 						y.domain([0,d3.max(domains,function(v){return v;})])
 						drawCountryLines(dd, x, y, graph3_height);
 					}
@@ -1085,14 +1136,14 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			  //.tickFormat(d3.timeFormat("%B"))
 			.call(d3.axisBottom(x)
 				.ticks(5)
-				. tickFormat(d3.timeFormat("%m-%y")))
+				. tickFormat(d3.timeFormat("%-m/%y")))
 				.selectAll("text")	
-		          .style("text-anchor", "end")
-		          .attr("dx", "-.8em")
-		          .attr("dy", ".15em")
-		          .attr("transform", function(d) {
-		              return "rotate(-65)" 
-		              });
+		          //.style("text-anchor", "end")
+		          //.attr("dx", ".9em")
+		          .attr("dy", ".15em");
+		          //.attr("transform", function(d) {
+		            //  return "rotate(-65)" 
+		              //});
 
 		  // Add the Y Axis
 		  var yaxis = country_indicators.append("g")
@@ -1147,11 +1198,11 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		x.domain(d3.extent(epidata, function(v) { return v.report_date; }));
 	
 	
-		var m1 = d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases;});
-		var m2 = d3.max(dd[0].values[1].values, function(v){return v.max_cum_cases;})
+		var m1 = d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases_orig;});
+		var m2 = d3.max(dd[0].values[1].values, function(v){return v.max_cum_cases_orig;})
 		//var yt = d3.scaleLinear().range([graph_height, 0]);
 		//console.log();
-		var y1 = d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases;})]);
+		var y1 = d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases_orig;})]);
 		var y2 = d3.scaleLinear().range([graph_height, 0]).domain([0,m2]);
 		
 		
@@ -1159,15 +1210,16 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 	  	.x(function(d) { return x(d.report_date); })
 	  	.y(function(d) { 
 			//console.log(d.max_cum_cases);
-			y.domain([0,d.max_cum_cases]);
+			y.domain([0,d.max_cum_cases_orig]);
 			//d3.max(d.values,function(f){return f.cum_cases;})
-			return y(d.cum_cases); });
+			//return y(d.cum_cases); });
+			return y(d.value); });
 	
 		//d3.scaleLinear().range([graph_height, 0]).domain([0,max[0].value.max_cumulative+10])
 		var doms = [];
 		dd[0].values.forEach(function(v){
 			doms.push(
-				d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(v.values, function(v){return v.max_cum_cases;})])
+				d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(v.values, function(v){return v.max_cum_cases_orig;})])
 			);
 		})
 		
@@ -1226,7 +1278,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		
 			//the solution!!
 			dd[0].values.forEach(function(v){
-				var yy = d3.scaleLinear().range([graph_height, 0]).domain([0,v.max_cum_cases]);
+				var yy = d3.scaleLinear().range([graph_height, 0]).domain([0,v.max_cum_cases_orig]);
 			
 			  d3.select("#"+fips+"_"+v.key).append("g")
 				.attr("class","axis")
@@ -1375,5 +1427,6 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-
 </script>
+
+</body>
