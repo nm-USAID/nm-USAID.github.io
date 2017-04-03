@@ -32,7 +32,17 @@ d3.select("#global_container").append("div")
 	.attr("id","gl_banner");
 	
 d3.select("#global_container").append("div")
-	.attr("id","gl_mapview");	
+	.attr("id","gl_middleview");	
+	
+d3.select("#gl_middleview").append("div")
+	.attr("id","gl_mapview");
+
+d3.select("#gl_middleview").append("div")
+	.attr("id","gl_awardview")
+	.append("text")
+	.text("USAID AWARDS");
+	
+		
 
 d3.select("#global_container").append("div")
 	.attr("id","gl_chartview");	
@@ -136,6 +146,10 @@ d3.select("#banner").append("h1")
 d3.select("#banner").append("h2")
 	.attr("class","banner")
 	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");
+
+var update_cv = d3.select("#banner").append("button")
+	.attr("class","banner_btn")
+	.text("Update Data");	
 	
 //banner global view
 d3.select("#gl_banner").append("h1")
@@ -144,7 +158,11 @@ d3.select("#gl_banner").append("h1")
 	
 d3.select("#gl_banner").append("h2")
 	.attr("class","banner")
-	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");		
+	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");	
+	
+var update_gl = d3.select("#gl_banner").append("button")
+	.attr("class","banner_btn")
+	.text("Update Data");		
 
 //title with tabs, buttons
 d3.select("#mapheader").append("div")
@@ -249,7 +267,11 @@ var global_land = global_svg.append("g")
 	
 //Group for the map features
 var global_features = global_svg.append("g")
-    .attr("class","gl_features");		
+    .attr("class","gl_features");
+	
+//Group for the map features
+var global_awards = global_svg.append("g")
+	.attr("class","gl_awards");				
 	
 /************end global projection**************/	
 	
@@ -338,8 +360,22 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  .key(function(d){return d.country;})
 	  .entries(globaldata);
 	  
+	  var awards_topo = topojson.feature(awards,awards.objects.usaidawards).features;
+	  
 	  //console.log(globalbycountry);
 	  
+	  //awards by partners
+	  var awardsbyPartner = d3.nest()
+	  .key(function(d){return d.properties.Partner;})
+	  .entries(awards_topo);
+	  
+	  var awardsbyISO = d3.nest()
+	  .key(function(d){return d.properties.ISO;})
+	  .entries(awards_topo);
+	  
+	  console.log(awardsbyPartner);
+	  console.log(awardsbyISO);
+	  //console.log(awards_topo);
 	  
 	  //nest data upfront
 	  var byRegion = d3.nest()
@@ -528,7 +564,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  var country_indicators;
 	  var valueLine3;
 	  var domains;
-	  var mx = d3.max(epidata, function(v) { return v.value; });
+	  var mx_c = d3.max(epidata, function(v) { return v.value; });
 	  var selection = false;
 	  
 	 var max_pop;
@@ -554,7 +590,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
  	.range(['#fef0d9', '#b30000']);	  
 	  
   	choropleth4 = d3.scaleLog()
-  	.domain([1,mx])
+  	.domain([1,mx_c])
   	.range(['#fee8c8','#b30000'])
 	 
 	 draw_global_view();
@@ -623,8 +659,32 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 				return d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor");
 			})
 		});
+		
+	//layerawards
+		
+	/*gl_efforts = global_awards.selectAll("path")
+	.data(topojson.feature(awards,awards.objects.usaidawards).features)
+	.enter()
+	.append("path")
+	.attr("id", function(d){console.log(d); return "gl_award"+d.properties.OBJECTID;})
+	.attr("d",global_path)
+	.style("stroke","white")
+	.style("stroke-width","0.1")
+	.style("fill","url(#diagonalHatch)")		
+	//.style("opacity","0.5")
+	.on("click", function(d){
+		console.log(d);	
+	})
+	.on("mouseover",function(d){
+		d3.select(this).style("fill","tomato");
+	} )
+	.on("mouseout",function(d){
+		d3.select(this).style("fill","url(#diagonalHatch)");
+	})*/
 		 
-	 }	//end draw country mapview 	 
+	}	//end draw country mapview 
+	 
+	 //console.log(topojson.feature(awards,awards.objects.usaidawards).features);	 
 
 //draw menu
 	  function drawMenu(){
@@ -756,6 +816,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  country_povbyfips = povertyByCountryByRegion.filter(function(d){return d.key == adm0;})[0].values.sort(function(a, b){ return d3.descending(a.value.latest,b.value.latest);});
 		  
 		  //console.log(country_povbyfips);
+		  console.log(country_awards);
+		  
 		  
   		//set zoom to centroid
   	    dx = path.centroid(country_centroid[0])[0];
@@ -1539,7 +1601,7 @@ function gl_zoomed() {
 	  global_land.attr("transform", d3.event.transform);
       //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	  
 	  
-	  //gl_awards_shp.attr("transform", d3.event.transform);
+	  global_awards.attr("transform", d3.event.transform);
       //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	
 	  
 	  //clinics_pts.attr("transform", d3.event.transform);
