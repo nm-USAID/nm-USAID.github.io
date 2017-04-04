@@ -494,3 +494,26 @@
 	padding:5px;
 	background:white;
 }
+
+.gl_labels {
+	font: 6px sans-serif;
+	text-anchor:middle;
+	fill:rgba(50,50,50,0.75);
+	text-transform:uppercase;
+}
+
+.c_labels {
+	font: 0.6px sans-serif;
+	text-anchor:middle;
+	fill:rgb(50,50,50);
+	text-transform:uppercase;
+}
+
+.bchart_border {
+  width:18px;
+  height:18px;
+  fill:white;
+  opacity:0.25;
+  stroke:grey;
+  stroke-width:0.4px;	
+}
