@@ -315,7 +315,7 @@ var width = 700,
 var projection_pop = d3.geoMercator()
     .scale(2700)
     .center([0,0]) //projection center
-    .translate([width/2+3950,700])
+    .translate([700/2+3950,700])
 	
 //Generate paths based on projection
 var path_pop = d3.geoPath()
@@ -325,11 +325,10 @@ var path_pop = d3.geoPath()
 var projection_sm = d3.geoMercator()
     .scale(2700)
     .center([0,0]) //projection center
-    .translate([width/2+3910,700])
+    .translate([700/2+3910,700])
 
 var path_sm = d3.geoPath()
-	.projection(projection_sm);
-					
+	.projection(projection_sm);				
 	
 //Map projection
 var projection = d3.geoMercator()
@@ -562,7 +561,7 @@ function ready(error, admin0data, adm1data, SLVdata, countrydata, pop_pls, pover
 		  }
 	  })	  
 	  .entries(el_salvador_pov)
-	  .sort(function(a, b){ return d3.descending(a.values[0].value.latest, b.values[0].value.latest); });;	  
+	  .sort(function(a, b){ return d3.descending(a.values[0].value.latest, b.values[0].value.latest); });	  
 	  
 	  //console.log(povertyByFips);	  
   
@@ -1442,13 +1441,11 @@ function povMap(){
 	
 	
 var pov_map = d3.select("body").select("#chartview").select("#countryData").select("#povData").append("svg")
-   //.attr("class","pov_map")
    .attr("width", c_width + c_margin.left + c_margin.right)
    .attr("height", c_height + c_margin.top + c_margin.bottom)
    .append("g")
    .attr("transform",
-	"translate(" + c_margin.left + "," + c_margin.top + ")");;
-	//.style("background","none");	
+	"translate(" + c_margin.left + "," + c_margin.top + ")");	
 	
   pov_map.selectAll("path")
     .data(el_salvador)
