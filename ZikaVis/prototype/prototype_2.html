@@ -672,8 +672,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		
 		var vv = geodata_admin0.features.filter(function(d){return priority_countries.indexOf(d.properties.ADMIN) != -1;});
 		//console.log(vv);
-		//UNCOMMENT
-		/*var gl_labels = global_labels.selectAll("text")
+		
+		var gl_labels = global_labels.selectAll("text")
 		//.data(geodata_admin0.features)
 		.data(vv)
 		.enter()
@@ -681,7 +681,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		.attr("class","gl_labels")
 		.attr("x",function(d){return global_path.centroid(d)[0];})
 		.attr("y",function(d){return global_path.centroid(d)[1];})
-		.text(function(d){return d.properties.ADMIN;});*/
+		.text(function(d){return d.properties.ADMIN;});
 		
 		
 		
@@ -715,7 +715,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  });*/
 		  
 		  //console.log(vv); UNCOMMENT
-		 /*var bchar_colors = ["steelblue","orange","green"] 
+		 var bchar_colors = ["steelblue","orange","green"] 
 		  
 		 var pp = global_bcharts.selectAll("g")
 		  .data(vv)
@@ -738,7 +738,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  .attr("width","5px")
 		  .attr("height",function(d){return d;})
 			  .style("fill",function(d,i){return bchar_colors[i];}) 
-		  .on("mouseover",function(d){console.log(d);});*
+			  .on("mouseover",function(d){console.log(d);});
 		  
 		//console.log(centroids);
 		
