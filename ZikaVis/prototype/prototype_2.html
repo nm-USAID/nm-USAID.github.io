@@ -378,6 +378,17 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  .key(function(d){return d.country;})
 	  .entries(partners);
 	  
+	  var partnersbyCountrybyLinebyPartner = d3.nest()
+	  .key(function(d){return d.country;})
+	  .key(function(d){return d.line_of_effort;})
+	  .key(function(d){return d.partner;})
+	  .key(function(d){return d.country;})
+	  .entries(partners);
+	  
+	  //console.log(partnersbyLinebyPartner2);
+	  
+	  //console.log(partners);
+	  
 	   //console.log(partnersbyLine);
 	  
 	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.ascending(a.autochthonous_cases_confirmed, b.autochthonous_cases_confirmed);});
@@ -877,8 +888,14 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		draw_by_indicators(dd);
 		}
 		//filter award data
-		console.log(partnersbyLinebyPartner);
-		//var da = partnersbyLinebyPartner.values.forEach(filter(function(c){ console.log(c); return c; }));
+		var da = partnersbyCountrybyLinebyPartner.filter(function(c){return c.key == d.properties.ADMIN;})
+		//console.log(da[0].values);
+		//console.log(partnersbyLinebyPartner);
+		
+		if(da[0]!=undefined){
+			//console.log(da[0].values);
+		draw_global_awards(da[0].values);
+		}
 		
 	}
 	
