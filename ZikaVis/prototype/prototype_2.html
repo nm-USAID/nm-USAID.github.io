@@ -25,7 +25,7 @@
 var ht = false;	
 var colors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
 
-var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Cuba","French Guiana","Guadeloupe","Martinique","Puerto Rico","Saint Barthelemy","Saint Martin"];
+var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Cuba","French Guiana","Guadeloupe","Martinique"/*,"Puerto Rico"*/,"Saint Barthelemy","Saint Martin"];
 
 var Caribbean_regional = ["Cuba","Dominican Republic","French Guiana","Guadeloupe","Haiti","Martinique","Puerto Rico","Saint Barthelemy","Saint Martin"];
 
@@ -72,7 +72,7 @@ d3.select("#gl_epiData").append("div")
 d3.select("#gl_epiData").append("div")
 	.attr("id","newConfirmedData")
 	.append("text")
-	.text("NEW CONFIRMED CASES")
+	.text("CONFIRMED ZIKA CASES")
 	.attr("class","subtitle");
 	
 d3.select("#gl_epiData").append("div")
@@ -357,19 +357,49 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  //sort by report data
 	  epidata.sort(function(a,b){return a.report_date - b.report_date;});
 	  
+	  globaldata.forEach(function(d,i){
+	  		  d.date = parseTime(d.date);
+	  		  d.year = parseYear(d.date);
+	  		  //console.log(parseYear(d.report_date));
+	  	  });
+		  
+	globaldata.sort(function(a,b){return a.date - b.date;}); 
 	  
 	  //var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.descending(a.country, b.country);});
+	  
+	  
 	  
 	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.ascending(a.autochthonous_cases_confirmed, b.autochthonous_cases_confirmed);});
 	  
 	  
 	  var globalbycountry = d3.nest()
 	  .key(function(d){return d.country;})
-	  .entries(globaldataF);
+	  .entries(globaldataF)
+	  .sort(function(a, b){ return d3.descending(a.date, b.date); });
+	  
+	  //add new cases
+	  var last = 0;
+	  globalbycountry.forEach(function(d){
+		  d.values.forEach(function(e,i){
+			  if(i==0){
+				  last = 0;
+				  e.new_autochthonous_cases_confirmed = e.autochthonous_cases_confirmed - last;
+			  }else if(i > 0){
+			    e.new_autochthonous_cases_confirmed = e.autochthonous_cases_confirmed - last;	
+			  }
+			 last = e.autochthonous_cases_confirmed;
+	  	})
+	  })
+	  
+	  
+	  console.log(globalbycountry);
+	  
+	  var global_indicators = ["autochthonous_cases_confirmed","autochthonous_cases_suspected","confirmed_congenital_syndrome","death_among_zika_cases","imported_cases","incidence_rate"];
+	  
 	  
 	  var awards_topo = topojson.feature(awards,awards.objects.usaidawards).features;
 	  
-	  console.log(globalbycountry);
+	  //console.log(globalbycountry);
 	  
 	  //awards by partners
 	  var awardsbyPartner = d3.nest()
@@ -784,10 +814,18 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	}	//end draw country mapview 
 	
 	
-	function draw_global_chartview(){
-  	  var margin = {top: 20, right: 10, bottom: 30, left: 5},
+	function draw_global_chartview(){  
+		draw_new_confirmed_chart();
+		draw_cumulative_confirmed_chart();
+		draw_by_indicators();
+		
+	}
+	
+	
+	function draw_cumulative_confirmed_chart(){
+  	  var margin = {top: 20, right: 10, bottom: 30, left: 50},
       	width = 300 - margin.left - margin.right,
-      	height = 200 - margin.top - margin.bottom;
+      	height = 100 - margin.top - margin.bottom;
 		
 		var x = d3.scaleTime().range([0, width]);
 		var y = d3.scaleLinear().range([height, 0]);
@@ -796,19 +834,31 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		.x(function(d){return x(d.date);})
 		.y(function(d){return y(d.autochthonous_cases_confirmed);});
 		
+		//console.log(d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});}));
+		//console.log(globalbycountry);
+		
+		x.domain(d3.extent(globalbycountry[0].values, function(v) {return v.date; }));
+		y.domain([0,d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});})]);
+		
 		//var gl_inds = d3.select("#newConfirmedData").append("div");
 		
-	  var global_indicators = d3.select("#newConfirmedData").append("svg")
-		.attr("id","gl_inds")	  
+	  var global_indicators_1 = d3.select("#newConfirmedData").append("svg")
+		.attr("class","gl_ind_charts")
+		.attr("id","gl_inds_cum")	  
  	   	.attr("width", width + margin.left + margin.right)
  	   	.attr("height", height + margin.top + margin.bottom)
 	 	.append("g")
  	  	 .attr("transform",
         	"translate(" + margin.left + "," + margin.top + ")");
+			
+		global_indicators_1.append("text")
+			.attr("class","chart_labels")
+			.attr("x",-10)
+			.attr("y",-10)
+			.text("cumulative confirmed cases");
 		
 		
-		
-		/*var linegraph = global_indicators.selectAll("path")
+		var linegraph = global_indicators_1.selectAll("path")
 			.data(globalbycountry)
 			.enter()
 			.append("path")
@@ -817,17 +867,219 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			.style("stroke",function(d,i){return colors[i%colors.length];})
 			.style("fill","none")	
 			.attr("d", function(d){ 
+				//console.log(d.values);
 				return valueline(d.values);})
 				.on("mouseover",function(d){
+					console.log(d);
 					d3.select(this).style("stroke-width",3);
 				})
 				.on("mouseout",function(d){
 					d3.select(this).style("stroke-width",0.75);
-				});*/	
+				});
+		
+	  var xaxis = global_indicators_1.append("g")
+		.attr("class","axis")	
+	      .attr("transform", "translate(0,"+height+")")
+		.call(d3.axisBottom(x)
+			.ticks(7)
+			. tickFormat(d3.timeFormat("%-m/%y")))
+			.selectAll("text")	
+	          .attr("dy", ".15em");
+	  
+	  var yaxis = global_indicators_1.append("g")
+		.attr("class","axis")	  
+         .call(d3.axisLeft(y).ticks(4))	
+	}
+	
+	function draw_new_confirmed_chart(){
+  	  var margin = {top: 20, right: 10, bottom: 30, left: 50},
+      	width = 300 - margin.left - margin.right,
+      	height = 100 - margin.top - margin.bottom;
+		
+		var x = d3.scaleTime().range([0, width]);
+		var y = d3.scaleLinear().range([height, 0]);
+		
+		var valueline = d3.line()
+		.x(function(d){return x(d.date);})
+		.y(function(d){return y(d.new_autochthonous_cases_confirmed);});
+		
+		//console.log(d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});}));
+		//console.log(globalbycountry);
+		
+		x.domain(d3.extent(globalbycountry[0].values, function(v) {return v.date; }));
+		y.domain([0,d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.new_autochthonous_cases_confirmed;});})]);
+		
+		//var gl_inds = d3.select("#newConfirmedData").append("div");
+		
+	  var global_indicators_2 = d3.select("#newConfirmedData").append("svg")
+		.attr("class","gl_ind_charts")
+		.attr("id","gl_inds")	  
+ 	   	.attr("width", width + margin.left + margin.right)
+ 	   	.attr("height", height + margin.top + margin.bottom)
+	 	.append("g")
+ 	  	 .attr("transform",
+        	"translate(" + margin.left + "," + margin.top + ")");
+			
+		global_indicators_2.append("text")
+			.attr("class","chart_labels")
+			.attr("x",-10)
+			.attr("y",-10)
+			.text("new confirmed cases");	
 		
 		
+		var linegraph = global_indicators_2.selectAll("path")
+			.data(globalbycountry)
+			.enter()
+			.append("path")
+			.attr("id",function(d,i){return "line"+d.key})
+			.attr("class","line")
+			.style("stroke",function(d,i){return colors[i%colors.length];})
+			.style("fill","none")	
+			.attr("d", function(d){ 
+				//console.log(d.values);
+				return valueline(d.values);})
+				.on("mouseover",function(d){
+					console.log(d);
+					d3.select(this).style("stroke-width",3);
+				})
+				.on("mouseout",function(d){
+					d3.select(this).style("stroke-width",0.75);
+				});
+		
+	  var xaxis = global_indicators_2.append("g")
+		.attr("class","axis")	
+	      .attr("transform", "translate(0,"+height+")")
+		.call(d3.axisBottom(x)
+			.ticks(7)
+			. tickFormat(d3.timeFormat("%-m/%y")))
+			.selectAll("text")	
+	          .attr("dy", ".15em");
+	  
+	  var yaxis = global_indicators_2.append("g")
+		.attr("class","axis")	  
+         .call(d3.axisLeft(y).ticks(4))	
+	}
+	
+	function draw_by_indicators(){
+		
+			
+  	  var margin = {top: 20, right: 10, bottom: 30, left: 50},
+      	width = 175 - margin.left - margin.right,
+      	height = 100 - margin.top - margin.bottom;
+		
+		var x = d3.scaleTime().range([0, width]);
+		var y = d3.scaleLinear().range([height, 0]);
+		
+		var valueline = d3.line()
+		.x(function(d){return x(d.date);})
+		.y(function(d){
+			var i = d.current_ind;
+			//console.log(i);
+			y.domain([0,doms[i]]);
+			
+			if(i==0){
+			return y(d.autochthonous_cases_confirmed);
+			}else
+			if(i==1){
+			return y(d.autochthonous_cases_suspected);
+			}else
+			if(i==2){
+			return y(d.confirmed_congenital_syndrome);
+			}else
+			if(i==3){
+			return y(d.death_among_zika_cases);
+			}else
+			if(i==4){
+			return y(d.imported_cases);
+			}else
+			if(i==5){
+			return y(d.incidence_rate);
+			}
+		});
+			
+		
+		x.domain(d3.extent(globalbycountry[0].values, function(v) {return v.date; }));
+		//y.domain([0,d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});})]);
 		
 		
+		var doms = [];
+		doms.push(d3.max(globalbycountry, function(v){return d3.max(v.values,function(f){return f.autochthonous_cases_confirmed;})}));
+		doms.push(d3.max(globalbycountry, function(v){return d3.max(v.values,function(f){return f.autochthonous_cases_suspected;})}));
+		doms.push(d3.max(globalbycountry, function(v){return d3.max(v.values,function(f){return f.confirmed_congenital_syndrome;})}));
+		doms.push(d3.max(globalbycountry, function(v){return d3.max(v.values,function(f){return f.death_among_zika_cases;})}));
+		doms.push(d3.max(globalbycountry, function(v){return d3.max(v.values,function(f){return f.imported_cases;})}));
+		doms.push(d3.max(globalbycountry, function(v){return d3.max(v.values,function(f){return f.incidence_rate;})}));
+		
+		//y.domain([0,doms[5]]);
+		
+		//console.log(doms);
+		
+		var global_indicators_3 = d3.select("#byIndicatorData")
+		.selectAll("svg")
+		.data(global_indicators)
+		.enter().append("svg")
+		.attr("class","globalCharts")
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+		.attr("id",function(d,i){return "ind_"+i;})
+	    .attr("transform",
+		"translate(" + margin.left + "," + margin.top + ")");
+		
+	global_indicators_3.append("text")
+		.attr("class","chart_labels")
+		.attr("x",-10)
+		.attr("y",-10)
+		.text(function(d){return d;});
+		
+		linegraph = global_indicators_3.selectAll("path")
+		.data(globalbycountry)
+		.enter()
+		.append("path")
+		.attr("class","line")
+		.style("stroke",function(d,i){return colors[i%colors.length];})
+		.style("fill","none")
+		.attr("d", function(d,i,j){
+			k = +j[i].parentNode.id.replace("ind_","");
+			//console.log(k);
+			
+			d.values.forEach(function(c){
+				c.current_ind = k;	
+			})
+			//console.log(d.values);
+			//y.domain([0,9000]);
+			
+			/*var vline = d3.line()
+			.x(function(f){return x(f.date);})
+			.y(function(f){
+				var global_indicators_n = [f.autochthonous_cases_confirmed,f.autochthonous_cases_suspected,f.confirmed_congenital_syndrome,f.death_among_zika_cases,f.imported_cases,f.incidence_rate];
+				
+				return y(global_indicators_n[i]);
+			});*/
+			
+			//return vline(d.values)
+			return valueline(d.values)
+		;});
+		
+		
+var xaxis = global_indicators_3.append("g")
+.attr("class","axis")	
+    .attr("transform", "translate(0,"+height+")")
+.call(d3.axisBottom(x)
+	.ticks(7)
+	. tickFormat(d3.timeFormat("%-m/%y")))
+	.selectAll("text")	
+        .attr("dy", ".15em");
+		
+		
+		global_indicators.forEach(function(d,i){
+			var yy = d3.scaleLinear().range([height, 0]).domain([0,doms[i]]);
+			
+			d3.select("#ind_"+i+"").append("g")
+			.attr("class","axis")
+			.call(d3.axisLeft(yy).ticks(5));
+			
+		})
 		
 	}
 	 
@@ -1109,15 +1361,15 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	}
 	
 	function layerLabels(){
-		var country_labels = mapview_svg.append("g");
-			var c_labels = country_labels.selectAll("text")
+		var country_labels2 = mapview_svg.append("g");
+			var c_labels = country_labels2.selectAll("text")
 			.data(country_adm1_features)
 			.enter()
 			.append("text")
 			.attr("class","c_labels")
 			.attr("x",function(d){return path.centroid(d)[0];})
-			.attr("y",function(d){return path.centroid(d)[1];})
-			.text(function(d){return d.properties.name;});
+		.attr("y",function(d){return path.centroid(d)[1];});
+			//.text(function(d){return d.properties.name;});
 	}
 	
 	function layerClinics(){
@@ -1555,6 +1807,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		var y1 = d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases_orig;})]);
 		var y2 = d3.scaleLinear().range([graph_height, 0]).domain([0,m2]);
 		
+		//console.log(dd[0]);
 		
 	var valueline_dists = d3.line()
 	  	.x(function(d) { return x(d.report_date); })

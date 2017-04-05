@@ -486,7 +486,7 @@
 #byIndicatorData{
 	float:left;
 	width:94%;
-	height:220px;
+	height:370px;
     border-style: none;
     border-width: 0.5px;	
     border-color: grey;
@@ -503,7 +503,7 @@
 }
 
 .c_labels {
-	font: 0.6px sans-serif;
+	font: 0.5px sans-serif;
 	text-anchor:middle;
 	fill:rgb(50,50,50);
 	text-transform:uppercase;
@@ -516,4 +516,7 @@
   opacity:0.25;
   stroke:grey;
   stroke-width:0.4px;	
+}
+.gl_ind_charts{
+	float:left;
 }
