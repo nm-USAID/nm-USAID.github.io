@@ -524,3 +524,27 @@
 .gl_ind_charts{
 	float:left;
 }
+
+.gl_awards_charts{
+	width:100%;
+	height:95%;
+	font: 10px sans-serif;
+}
+
+.gl_awards_div{
+	float:left;
+	height:95%;
+	margin-top:20px;
+}
+
+
+.award_effort{
+	float:left;
+	width:32%;
+	height:95%;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	margin:2px;
+	padding:0px;
+}
