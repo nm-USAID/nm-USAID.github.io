@@ -386,7 +386,11 @@
 
 .country_labels{
 	font: 10px sans-serif;
-	fill:black;
+	font-weight:normal;
+}
+
+.gl_country_labels{
+	font: 10px sans-serif;
 }
 
 #districtData{

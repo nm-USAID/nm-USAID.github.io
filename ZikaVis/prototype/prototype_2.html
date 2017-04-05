@@ -369,6 +369,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  
 	  
 	  
+	  
 	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.ascending(a.autochthonous_cases_confirmed, b.autochthonous_cases_confirmed);});
 	  
 	  
@@ -392,12 +393,14 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  })
 	  
 	  
-	  console.log(globalbycountry);
+	  //console.log(globalbycountry);
 	  
 	  var global_indicators = ["autochthonous_cases_confirmed","autochthonous_cases_suspected","confirmed_congenital_syndrome","death_among_zika_cases","imported_cases","incidence_rate"];
 	  
 	  
 	  var awards_topo = topojson.feature(awards,awards.objects.usaidawards).features;
+	  
+	  //console.log(awards_topo);
 	  
 	  //console.log(globalbycountry);
 	  
@@ -406,12 +409,32 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  .key(function(d){return d.properties.Partner;})
 	  .entries(awards_topo);
 	  
+	  var awardsAssistbyCountry = d3.nest()
+	  .key(function(d){return d.properties.ASSIST;})
+	  .key(function(d){return d.properties.Country;})
+	  .entries(awards_topo);
+	  
 	  var awardsbyISO = d3.nest()
 	  .key(function(d){return d.properties.ISO;})
 	  .entries(awards_topo);
 	  
+	  var awardsbyCountry = d3.nest()
+	  .key(function(d){return d.properties.Country;})
+	  .entries(awards_topo);
+	  
+	  var awardsbyCountrybyPartner = d3.nest()
+	  .key(function(d){return d.properties.Country;})
+	  .key(function(d){return d.properties.Partner;})
+	  .entries(awards_topo);
+	  
+	  var awardsbyCountryAssist = d3.nest()
+	  .key(function(d){return d.properties.NAME_0;})
+	  .key(function(d){return d.properties.ASSIST;})
+	  .entries(awards_topo);
+	  
 	  //console.log(awardsbyPartner);
-	  //console.log(awardsbyISO);
+	  console.log(awardsbyCountryAssist);
+	  //console.log(awardsbyCountrybyPartner);
 	  //console.log(awards_topo);
 	  
 	  //nest data upfront
@@ -754,13 +777,13 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  .attr("transform", function(d) {//console.log(d.geometry.coordinates); 
 			  return "translate(" +global_path.centroid(d)+ ")";});	  
 		  
-		  pp.append("rect")
+		  /*pp.append("rect")
 			  .attr("class","bchart_border")
 			  .attr("x","-12px")
-			  .attr("y","-27px");	    	  	  
+			  .attr("y","-27px");*/	    	  	  
 		  
 		  pp.selectAll("svg")
-		  .data([5,10,15])
+		  .data([5,5,5])
 		  .enter()
 		  .append("rect")	  	  	  
 		  .attr("x",function(d,i){return -i*5.5;})
@@ -1130,20 +1153,25 @@ var xaxis = global_indicators_3.append("g")
 			x_ht.domain([0, d3.max(globaldataF, function(d){ return (d.autochthonous_cases_confirmed/d.pop_x_1000); })])	
 			
 			
+			//console.log(globalbycountry);
 	  // append the rectangles for the bar chart
 	   var gs = menu_svg.append("g")
 			.selectAll("g")
-			.data(globaldataF)
+			.data(globalbycountry)
 			.enter().append("g")
-			.attr("transform", function(d) { return "translate(0," + y(d.country) + ")"; });
+			.attr("transform", function(d) { return "translate(0," + y(d.key) + ")"; });
 			
 			gs.append("text")
 			.attr("y","-2px")
-			.attr("class","country_labels")
-			.text(function(d){return d.country;});
+			.attr("class","gl_country_labels")
+			//.text(function(d){return "h";});
+			.text(function(d){return d.key;});
 			
 			gs.selectAll(".bar")
-	        .data(function(d){return [{key:d.key,value:d.autochthonous_cases_confirmed},{key:d.key,value:(d.autochthonous_cases_confirmed/d.pop_x_1000)}];})
+	        .data(function(d){
+				//console.log(d.values.length);
+				var n = d.values.length-1;
+				return [{key:d.key,value:d.values[n].autochthonous_cases_confirmed},{key:d.key,value:(d.values[n].autochthonous_cases_confirmed/d.values[n].pop_x_1000)}];})
 	      .enter().append("rect")
 			//.attr("id",function(d){return "b1"+d.country;})
 	        .attr("class", "bar")
@@ -2022,11 +2050,11 @@ function gl_zoomed() {
 	  global_awards.attr("transform", d3.event.transform);
       //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );	
 	  
-	  //global_bcharts.attr("transform", d3.event.transform);
+	  global_bcharts.attr("transform", d3.event.transform);
 	  //clinics_pts.attr("transform", d3.event.transform);
       //.selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );		  
 	  
-	  //global_labels.attr("transform", d3.event.transform);
+	  global_labels.attr("transform", d3.event.transform);
 	
 	/*up_land.attr("transform", d3.event.transform)
       .selectAll("path").style("stroke-width", 0.5 / d3.event.transform.k + "px" );*/  
