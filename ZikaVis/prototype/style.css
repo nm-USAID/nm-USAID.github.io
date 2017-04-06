@@ -263,7 +263,7 @@
 	float:left;
 	width:100px;
 	height:75px;
-    border-style: solid;
+    border-style: none;
     border-width: 0.25px;	
     border-color: grey;
 	margin:2px;
@@ -275,7 +275,7 @@
 	float:left;
 	width:100px;
 	height:75px;
-    border-style: solid;
+    border-style: none;
     border-width: 0.25px;	
     border-color: grey;
 	margin:4px;
@@ -284,7 +284,7 @@
 }
 #povchart{
 	float:left;
-    border-style: solid;
+    border-style: none;
     border-width: 0.25px;	
     border-color: grey;
 	margin:2px;
@@ -305,15 +305,15 @@
 
 #conf_cases{
 	float:left;
-	width:110px;
-	height:100%;
+	width:300px;
+	height:100px;
 	overflow:scroll;
 }
 
 .epichart{
 	float:left;
 	height:43%;
-    border-style: solid;
+    border-style: none;
     border-width: 0.25px;	
     border-color: grey;
 	margin:2px;
@@ -514,10 +514,10 @@
 }
 
 .bchart_border {
-  width:18px;
-  height:18px;
+  width:16px;
+  height:5px;
   fill:white;
-  opacity:0.25;
+  opacity:1;
   stroke:grey;
   stroke-width:0.4px;	
 }

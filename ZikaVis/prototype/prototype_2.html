@@ -71,9 +71,14 @@ d3.select("#gl_epiData").append("div")
 	
 d3.select("#gl_epiData").append("div")
 	.attr("id","newConfirmedData")
-	.append("text")
 	.text("CONFIRMED ZIKA CASES")
 	.attr("class","subtitle");
+	
+d3.select("#newConfirmedData").append("div")
+	.attr("id","new_conf");
+	
+d3.select("#newConfirmedData").append("div")
+	.attr("id","cum_conf");		
 	
 d3.select("#gl_epiData").append("div")
 	.attr("id","byIndicatorData");	
@@ -391,13 +396,19 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  
 	   //console.log(partnersbyLine);
 	  
-	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.ascending(a.autochthonous_cases_confirmed, b.autochthonous_cases_confirmed);});
+	  var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;});//.sort(function(a, b){ return d3.ascending(a.autochthonous_cases_confirmed, b.autochthonous_cases_confirmed);});
+	  
+	  var globaldataFS = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.ascending(a.autochthonous_cases_confirmed, b.autochthonous_cases_confirmed);});
 	  
 	  
 	  var globalbycountry = d3.nest()
 	  .key(function(d){return d.country;})
 	  .entries(globaldataF)
-	  .sort(function(a, b){ return d3.descending(a.date, b.date); });
+	  .sort(function(a, b){return a.date - b.date; });
+	  
+	  var globalbycountryS = d3.nest()
+	  .key(function(d){return d.country;})
+	  .entries(globaldataFS);
 	  
 	  //add new cases
 	  var last = 0;
@@ -405,7 +416,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  d.values.forEach(function(e,i){
 			  if(i==0){
 				  last = 0;
-				  e.new_autochthonous_cases_confirmed = e.autochthonous_cases_confirmed - last;
+				  e.new_autochthonous_cases_confirmed = 0;//e.autochthonous_cases_confirmed - last;
 			  }else if(i > 0){
 			    e.new_autochthonous_cases_confirmed = e.autochthonous_cases_confirmed - last;	
 			  }
@@ -547,6 +558,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  
 	  
 		  //console.log(povertyByFips);
+		  //console.log(byRegion);
 		  
 	  //change this later - back to original data
 		  //need to add actual cumulative
@@ -648,6 +660,9 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  var mx_c = d3.max(epidata, function(v) { return v.value; });
 	  var selection = false;
 	  
+	  //var global_indicators_1;
+	  //var global_indicators_2;
+	  
 	 var max_pop;
 	 var min_pop;
 	 var pop_range;
@@ -674,18 +689,15 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
   	.domain([1,mx_c])
   	.range(['#fee8c8','#b30000'])
 	 
-	 draw_global_view();
 	 draw_country_view();
+	 draw_global_view();
 	 
-	 var bchart_colors = ["steelblue","orange","green"];
+	 var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
 	 
 	 
 	 function draw_country_view(){
-	 
 	 drawMenu();  
 	 setCountry(ADM0);
-	 
- 	 
 	 }
 	 
 	 function draw_global_view(){
@@ -795,7 +807,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  });*/
 		  
 		  //console.log(vv); UNCOMMENT
-		var bchart_colors = ["steelblue","orange","green"];
+		//var bchart_colors = ["steelblue","orange","green"];
+		var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
 		  
 		 var pp = global_bcharts.selectAll("g")
 		  .data(vv)
@@ -804,12 +817,13 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  .attr("transform", function(d) {//console.log(d.geometry.coordinates); 
 			  return "translate(" +global_path.centroid(d)+ ")";});	  
 		  
-		  /*pp.append("rect")
-			  .attr("class","bchart_border")
-			  .attr("x","-12px")
-			  .attr("y","-27px");*/	    	  	  
-		  //console.log(partnersbyLine.filter(function(v){return v.values.key == j[i].parentNode.id.replace("gl_bchart","");}));
 		  var sz = 5;
+		  pp.append("rect")
+			  .attr("class","bchart_border")
+			  .attr("x","-10px")
+			  .attr("y","-15px");	    	  	  
+		  //console.log(partnersbyLine.filter(function(v){return v.values.key == j[i].parentNode.id.replace("gl_bchart","");}));
+		  //var sz = 5;
 		  
 		  pp.selectAll("svg")
 		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
@@ -885,6 +899,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		//filter charts
 		var dd = globalbycountry.filter(function(c){return c.key == d.properties.ADMIN;});
 		if(dd[0]!=undefined){
+		draw_new_confirmed_chart(dd);
+		draw_cumulative_confirmed_chart(dd);
 		draw_by_indicators(dd);
 		}
 		//filter award data
@@ -901,6 +917,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	
 	function restorecharts(){
 		//console.log("restoring");
+		draw_new_confirmed_chart(globalbycountry);
+		draw_cumulative_confirmed_chart(globalbycountry);
 		draw_by_indicators(globalbycountry);
 		draw_global_awards(partnersbyLinebyPartner);
 	}
@@ -916,7 +934,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		.text("USAID AWARDS");
 		
 		
-		var bchart_colors = ["steelblue","orange","green"];
+		//var bchart_colors = ["steelblue","orange","green"];
+		var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
 		
 		var awardsDiv = d3.select("#gl_awardview").append("div")
 		.attr("class","gl_awards_div");
@@ -989,34 +1008,42 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	
 	
 	function draw_global_chartview(){  
-		draw_new_confirmed_chart();
-		draw_cumulative_confirmed_chart();
+		draw_new_confirmed_chart(globalbycountry);
+		draw_cumulative_confirmed_chart(globalbycountry);
 		draw_by_indicators(globalbycountry);
 		
 	}
 	
 	
-	function draw_cumulative_confirmed_chart(){
+	function draw_cumulative_confirmed_chart(dat){
+		
+		/*if(global_indicators_1 != undefined){
+		d3.select("#gl_inds_cum").selectAll("*").remove();
+		}*/
+		d3.select("#cum_conf").selectAll("*").remove();	
+		
   	  var margin = {top: 20, right: 10, bottom: 30, left: 50},
       	width = 300 - margin.left - margin.right,
       	height = 100 - margin.top - margin.bottom;
 		
 		var x = d3.scaleTime().range([0, width]);
+		//var y = d3.scaleLog().range([height, 0]);
 		var y = d3.scaleLinear().range([height, 0]);
 		
 		var valueline = d3.line()
 		.x(function(d){return x(d.date);})
 		.y(function(d){return y(d.autochthonous_cases_confirmed);});
 		
+		
 		//console.log(d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});}));
 		//console.log(globalbycountry);
 		
-		x.domain(d3.extent(globalbycountry[0].values, function(v) {return v.date; }));
-		y.domain([0,d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});})]);
+		x.domain(d3.extent(dat[0].values, function(v) {return v.date; }));
+		y.domain([d3.min(dat, function(v){return d3.min(v.values,function(g){return g.autochthonous_cases_confirmed;});}),d3.max(dat, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});})]);
 		
 		//var gl_inds = d3.select("#newConfirmedData").append("div");
 		
-	  var global_indicators_1 = d3.select("#newConfirmedData").append("svg")
+	  var global_indicators_1 = d3.select("#cum_conf").append("svg")
 		.attr("class","gl_ind_charts")
 		.attr("id","gl_inds_cum")	  
  	   	.attr("width", width + margin.left + margin.right)
@@ -1033,7 +1060,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		
 		
 		var linegraph = global_indicators_1.selectAll("path")
-			.data(globalbycountry)
+			.data(dat)
 			.enter()
 			.append("path")
 			.attr("id",function(d,i){return "line"+d.key})
@@ -1079,7 +1106,14 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
          .call(d3.axisLeft(y).ticks(4))	
 	}
 	
-	function draw_new_confirmed_chart(){
+	function draw_new_confirmed_chart(dat){
+		
+		/*if(global_indicators_2 != undefined){
+		d3.select("#gl_inds").selectAll("*").remove();
+		}*/	
+		d3.select("#new_conf").selectAll("*").remove();	
+		
+		
   	  var margin = {top: 20, right: 10, bottom: 30, left: 50},
       	width = 300 - margin.left - margin.right,
       	height = 100 - margin.top - margin.bottom;
@@ -1094,12 +1128,12 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		//console.log(d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});}));
 		//console.log(globalbycountry);
 		
-		x.domain(d3.extent(globalbycountry[0].values, function(v) {return v.date; }));
-		y.domain([0,d3.max(globalbycountry, function(v){return d3.max(v.values,function(g){return g.new_autochthonous_cases_confirmed;});})]);
+		x.domain(d3.extent(dat[0].values, function(v) {return v.date; }));
+		y.domain([0,d3.max(dat, function(v){return d3.max(v.values,function(g){return g.new_autochthonous_cases_confirmed;});})]);
 		
 		//var gl_inds = d3.select("#newConfirmedData").append("div");
 		
-	  var global_indicators_2 = d3.select("#newConfirmedData").append("svg")
+	  var global_indicators_2 = d3.select("#new_conf").append("svg")
 		.attr("class","gl_ind_charts")
 		.attr("id","gl_inds")	  
  	   	.attr("width", width + margin.left + margin.right)
@@ -1116,7 +1150,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		
 		
 		var linegraph = global_indicators_2.selectAll("path")
-			.data(globalbycountry)
+			.data(dat)
 			.enter()
 			.append("path")
 			.attr("id",function(d,i){return "line"+d.key})
@@ -1162,6 +1196,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	
 	
 	function draw_by_indicators(dat){
+		
+		//console.log(dat);
 	
 	
 		d3.select("#byIndicatorData").selectAll("*").remove();	
@@ -1178,6 +1214,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
       	height = 100 - margin.top - margin.bottom;
 		
 		var x = d3.scaleTime().range([0, width]);
+		//var y = d3.scaleLog().range([height, 0]);
 		var y = d3.scaleLinear().range([height, 0]);
 		
 		var valueline = d3.line()
@@ -1185,7 +1222,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		.y(function(d){
 			var i = d.current_ind;
 			//console.log(i);
-			y.domain([0,doms[i]]);
+			y.domain([doms_min[i],doms[i]]);
 			
 			if(i==0){
 			return y(d.autochthonous_cases_confirmed);
@@ -1219,6 +1256,15 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		doms.push(d3.max(dat, function(v){return d3.max(v.values,function(f){return f.death_among_zika_cases;})}));
 		doms.push(d3.max(dat, function(v){return d3.max(v.values,function(f){return f.imported_cases;})}));
 		doms.push(d3.max(dat, function(v){return d3.max(v.values,function(f){return f.incidence_rate;})}));
+		
+		var doms_min = [];
+		doms_min.push(d3.min(dat, function(v){return d3.min(v.values,function(f){return f.autochthonous_cases_confirmed;})}));
+		doms_min.push(d3.min(dat, function(v){return d3.min(v.values,function(f){return f.autochthonous_cases_suspected;})}));
+		doms_min.push(d3.min(dat, function(v){return d3.min(v.values,function(f){return f.confirmed_congenital_syndrome;})}));
+		doms_min.push(d3.min(dat, function(v){return d3.min(v.values,function(f){return f.death_among_zika_cases;})}));
+		doms_min.push(d3.min(dat, function(v){return d3.min(v.values,function(f){return f.imported_cases;})}));
+		doms_min.push(d3.min(dat, function(v){return d3.min(v.values,function(f){return f.incidence_rate;})}));
+		
 		
 		//y.domain([0,doms[5]]);
 		
@@ -1303,11 +1349,12 @@ var xaxis = global_indicators_3.append("g")
 		
 		
 		global_indicators.forEach(function(d,i){
-			var yy = d3.scaleLinear().range([height, 0]).domain([0,doms[i]]);
+			//var yy = d3.scaleLog().range([height, 0]).domain([0.1,doms[i]]);
+			var yy = d3.scaleLinear().range([height, 0]).domain([doms_min[i],doms[i]]);
 			
 			d3.select("#ind_"+i+"").append("g")
 			.attr("class","axis")
-			.call(d3.axisLeft(yy).ticks(5));
+			.call(d3.axisLeft(yy).ticks(4));
 			
 		})
 		
@@ -1354,17 +1401,17 @@ var xaxis = global_indicators_3.append("g")
             "translate(" + margin.left + "," + margin.top + ")");
 			
 		  // Scale the range of the data in the domains
-		    x.domain([0, d3.max(globaldataF, function(d){ return d.autochthonous_cases_confirmed; })])
-		    y.domain(globaldataF.map(function(d) { return d.country; }));
+		    x.domain([0, d3.max(globaldataFS, function(d){ return d.autochthonous_cases_confirmed; })])
+		    y.domain(globaldataFS.map(function(d) { return d.country; }));
 			
-			x_ht.domain([0, d3.max(globaldataF, function(d){ return (d.autochthonous_cases_confirmed/d.pop_x_1000); })])	
+			x_ht.domain([0, d3.max(globaldataFS, function(d){ return (d.autochthonous_cases_confirmed/d.pop_x_1000); })])	
 			
 			
 			//console.log(globalbycountry);
 	  // append the rectangles for the bar chart
 	   var gs = menu_svg.append("g")
 			.selectAll("g")
-			.data(globalbycountry)
+			.data(globalbycountryS)
 			.enter().append("g")
 			.attr("transform", function(d) { return "translate(0," + y(d.key) + ")"; });
 			
@@ -1654,6 +1701,8 @@ var xaxis = global_indicators_3.append("g")
 			d3.select(this).style("fill","url(#diagonalHatch)");
 		})	
 	}
+	
+	
 
 //subfunctions - temporal view
 	/*function drawBasemap(){
@@ -1698,7 +1747,7 @@ function popMap(){
 		.attr("id","popmap");
 		
 		var pop_map_svg = pop_map.append("svg")
-		//.attr("class","minimap");				
+		//.attr("class","minimap");			
    
 		var pop_land = pop_map_svg.append("g");
 	   
@@ -1721,7 +1770,14 @@ function popMap(){
 	    .attr("opacity",function(d){
 	  	  return pop_range(d.properties.POP_MAX);
 	    })
-	    .attr("path.pointRadius","2");	
+	    .attr("path.pointRadius","2");
+		
+		pop_map_svg.append("text")
+   	  .attr("class", "axis")
+   	  .attr("x",0)
+   	  .attr("y",10)
+   	  .text("Pop density map");	
+			
 	}
 	
 function povMap(color_pov, x_pov){
@@ -1729,9 +1785,9 @@ function povMap(color_pov, x_pov){
 		.attr("class","minimap")
 		.attr("id","povmap");
 	   
-     pov_map.append("svg")
+		var pp = pov_map.append("svg");
 		//.attr("class","minimap")
-		.selectAll("path")
+		pp.selectAll("path")
 		.data(country_adm1_features)
 		.enter()
        .append("path")
@@ -1744,6 +1800,12 @@ function povMap(color_pov, x_pov){
 		//return color_pov(x_pov(latest[0].values[0].value.latest));
 		return color_pov(x_pov(latest[0].value.latest));
        });
+	   
+   	  pp.append("text")
+   	  .attr("class", "axis")
+   	  .attr("x",0)
+   	  .attr("y",10)
+   	  .text("Poverty map");
 	}
 	
 function povChart(color_pov,x_pov){
@@ -1766,7 +1828,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
   	  .attr("class", "axis")
   	  .attr("x",-20)
   	  .attr("y",-10)
-  	  .text("% Population over national poverty line");
+  	  .text("% Pop over national poverty line");
 	   
    var x = d3.scaleBand().rangeRound([0, c_width]).padding(0.1),
        y = d3.scaleLinear().rangeRound([c_height, 0]);
@@ -1815,11 +1877,73 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
    	});
 	}
 	
+	function c_new_confirmed(dat){
+		
+		var pp = dat.values.filter(function(v){return v.key == "cumulative_confirmed";})[0];
+		
+	var margin = {top: 20, right: 20, bottom: 30, left: 40},
+  		width = 220 - margin.left - margin.right,
+  		height = 100 - margin.top - margin.bottom;
+		
+		
+	  var new_confirmed = d3.select("#nationalData").append("div")
+	  .attr("class","epichart");
+	  
+		
+	  var conf_cases = new_confirmed.append("svg")
+	  .attr("id","conf_cases")
+ 	   .attr("width", width + margin.left + margin.right)
+ 	   .attr("height", height + margin.top + margin.bottom)
+	 .append("g")
+ 	   .attr("transform",
+        "translate(" + margin.left + "," + margin.top + ")");
+		
+		conf_cases.append("text").attr("class","axis").attr("x",-10).attr("y",-10).text("cumulative confirmed");
+	  
+		
+		  var x = d3.scaleTime().range([0, width]);
+		  var y = d3.scaleLinear().range([height, 0]);
+		  
+		x.domain(d3.extent(epidata, function(v) { return v.report_date; }));
+		y.domain([0,d3.max(pp.values,function(v){return v.value;})]);
+		  
+  	var valueline = d3.line()
+  	  	.x(function(d) { return x(d.report_date); })
+  	  	.y(function(d) { return y(d.value);})
+		 
+		//console.log(pp); 
+		  
+  		linegraph = conf_cases.append("path")
+		.data([pp.values])
+  		.attr("class","line")
+  		.style("stroke","steelblue")
+		.style("fill","none")
+		.attr("d", valueline);	
+	 	    
+	  var xaxis = conf_cases.append("g")
+		.attr("class","axis")	
+	      .attr("transform", "translate(0,"+height+")")
+		  //.tickFormat(d3.timeFormat("%B"))
+		.call(d3.axisBottom(x)
+			.ticks(5)
+			. tickFormat(d3.timeFormat("%-m/%y")))
+			.selectAll("text")	
+	          //.style("text-anchor", "end")
+	          //.attr("dx", ".9em")
+	          .attr("dy", ".15em");	  	 
+			  
+	  var yaxis = conf_cases.append("g")
+		.attr("class","axis")	
+		.call(d3.axisLeft(y)
+			  .ticks(5));	  	 	   	
+		
+	}
+	
 //national charts	
 	function nationalCharts(){
-		var graph3_margin = {top: 10, right: 20, bottom: 30, left: 40},
+		var graph3_margin = {top: 20, right: 20, bottom: 30, left: 40},
       		graph3_width = 220 - graph3_margin.left - graph3_margin.right,
-      		graph3_height = 90 - graph3_margin.top - graph3_margin.bottom;
+      		graph3_height = 100 - graph3_margin.top - graph3_margin.bottom;
 			
       	  //all indicators with cumulative unchecked
 		  var all_inds = d3.select("#nationalData").append("div")
@@ -1833,6 +1957,8 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
    		 .append("g")
      	   .attr("transform",
             "translate(" + graph3_margin.left + "," + graph3_margin.top + ")");
+			
+			//country_indicators.append("text").attr("class","axis").attr("x",-10).attr("y",-10).text("all indicators");
 			
   		  // set the ranges
   		  var x = d3.scaleTime().range([0, graph3_width]);
@@ -1875,7 +2001,8 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			.data(dd[0].values, function(d,i){//console.log(d.key); 
 				return d;})
 			.enter()
-				.append("g");
+				.append("g")
+				.attr("id",function(d){return "label"+d.key});
 				//.attr("class","ind_keys");
 		
 			key_labels.append("text")
@@ -1926,14 +2053,15 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 				.on("mouseout", function(d){
 						d3.select("#line"+d.key).dispatch("mouseout");
 					})	
+					
+					d3.select("#labelcumulative_suspected_total").dispatch("click");	
 			
 		  //new confirmed cases (if available)
 		  var new_confirmed = d3.select("#nationalData").append("div")
 		  .attr("class","epichart");
 		  
-		  var conf_cases = new_confirmed.append("svg")
-		  .attr("id","conf_cases");	
-		
+		  
+		  c_new_confirmed(dd[0]);
 	}
 	
 	function drawCountryLines(dd, x, y, graph3_height){
@@ -1994,11 +2122,71 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 	}
 	
 	function subnationalCharts(){
-		
+		//show_charts2(country_adm1_features);
 		
 	}
 	
+	
+	
 	function awardsCharts(){
+		
+		var da = partnersbyCountrybyLinebyPartner.filter(function(c){return c.key == "El Salvador";})[0].values;
+		
+		console.log(da);
+		console.log(partnersbyLinebyPartner);
+		
+			//d3.select("#awardData").append("text")
+			//.text("USAID AWARDS");
+		
+		
+			//var bchart_colors = ["steelblue","orange","green"];
+			var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
+		
+		
+			var award_efforts = d3.select("#awardData").selectAll("svg")
+			.data(da)
+			.enter()
+			.append("svg")
+			.attr("id",function(d,i){return "line_"+i;})
+			.attr("class","award_effort");
+		
+			award_efforts.append("text")
+			.text(function(d){return d.key.replace("and","&");})
+			.attr("y","20px");
+			/*.attr("fill",function(d,i,j){
+				var n = j[i].parentNode.id.replace("line_","");
+				console.log(n);
+				return bchart_colors[n];
+			});*/
+		
+			var line_partners = award_efforts.selectAll("g")
+				.data(function(d){//console.log(d.values); 
+					return d.values;})
+			.enter()
+			.append("g")
+			.attr("id",function(d,i,j){return "line_"+j[i].parentNode.id.replace("line_","");})
+			.attr("transform", function(d,i){return "translate(0,"+(i*15+30)+")";});
+		
+			line_partners.append("rect")
+			.attr("width","8px")
+			.attr("height","8px")
+			.attr("id",function(d){
+				var l = d.values[0].values[0].line_of_effort;
+				return l+"_"+d.key;
+			})
+			.attr("basecolor",function(d,i,j){
+				var n = j[i].parentNode.id.replace("line_","");
+				//console.log(n);
+				return bchart_colors[n];
+			})
+			.attr("fill",function(d){
+				return d3.select(this).attr("basecolor");
+			});
+		
+			line_partners.append("text")
+			.attr("x","15px")
+			.attr("y","8px")
+			.text(function(d){return d.key;});
 		
 	}
 	
@@ -2008,6 +2196,118 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		d3.select("#subnationalData").append("text")
 		.text("SUBNATIONAL")
 		.attr("class","subtitle"); //may have to do this separately. This is overkill
+	}
+	
+	
+	function show_charts(d){
+	var graph_margin = {top: 20, right: 20, bottom: 50, left: 35},
+	    graph_width = 150 - graph_margin.left - graph_margin.right,
+	    graph_height = 150 - graph_margin.top - graph_margin.bottom;
+	
+		//d3.select("#subnationalData").selectAll("*").remove();
+		d3.select("#subnationalData").selectAll("*").remove();
+		
+		d3.select("#subnationalData").append("text")
+		.text("SUBNATIONAL")
+		.attr("class","subtitle");
+	
+		var dd = byRegion.filter(function(v){return v.key == d.properties.fips;});
+	
+		var max = totalByRegion.filter(function(v){return v.key == d.properties.fips;});
+		
+		var x = d3.scaleTime().range([0, graph_width]);
+		var y = d3.scaleLinear().range([graph_height, 0]);
+		
+		x.domain(d3.extent(epidata, function(v) { return v.report_date; }));
+	
+	
+		var m1 = d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases_orig;});
+		var m2 = d3.max(dd[0].values[1].values, function(v){return v.max_cum_cases_orig;})
+		//var yt = d3.scaleLinear().range([graph_height, 0]);
+		//console.log();
+		var y1 = d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(dd[0].values[0].values, function(v){return v.max_cum_cases_orig;})]);
+		var y2 = d3.scaleLinear().range([graph_height, 0]).domain([0,m2]);
+		
+		//console.log(dd[0]);
+		
+	var valueline_dists = d3.line()
+	  	.x(function(d) { return x(d.report_date); })
+	  	.y(function(d) { 
+			//console.log(d.max_cum_cases);
+			y.domain([0,d.max_cum_cases_orig]);
+			//d3.max(d.values,function(f){return f.cum_cases;})
+			//return y(d.cum_cases); });
+			return y(d.value); });
+	
+		//d3.scaleLinear().range([graph_height, 0]).domain([0,max[0].value.max_cumulative+10])
+		var doms = [];
+		dd[0].values.forEach(function(v){
+			doms.push(
+				d3.scaleLinear().range([graph_height, 0]).domain([0,d3.max(v.values, function(v){return v.max_cum_cases_orig;})])
+			);
+		})
+		
+		d3.select("#subnationalData").append("div")
+		.attr("id","districtData");
+		
+		//move this earlier to save compute time. 
+		dist_charts = d3.select("#districtData")
+		.selectAll("svg")
+		.data(dd[0].values, function(d,i,j){return d;})
+		.enter()
+		.append("svg")
+		//.attr("id",function(d,i){return fips+"_"+d.key;})
+		.attr("class","distCharts")
+	    .attr("width", graph_width + graph_margin.left + graph_margin.right)
+	    .attr("height", graph_height + graph_margin.top + graph_margin.bottom)
+	  .append("g")
+		.attr("id",function(d,i){return fips+"_"+d.key;})
+	    .attr("transform",
+		"translate(" + graph_margin.left + "," + graph_margin.top + ")");
+	
+	
+	dist_charts.append("text")
+		.attr("class","chart_labels")
+		.attr("x",-10)
+		.attr("y",-10)
+		.text(function(d){return d.key;});
+		
+	var buttons = dist_charts.append("button")
+		.attr("x",-10)
+		.attr("y",-10)
+		.attr("id", function(d,i){return "toggle_"+d.key})
+		.text("");
+	
+	
+		linegraph = dist_charts.append("path")
+		.attr("class","line")
+		.style("stroke","steelblue")
+		.style("fill","none")
+		.attr("d", function(d){return valueline_dists(d.values);});
+		
+		dist_charts.append("g")
+			.attr("class","axis")	
+	        .attr("transform", "translate(0,"+graph_height+")")
+			.call(d3.axisBottom(x)
+				.tickFormat(d3.timeFormat("%m-%y"))
+				.ticks(8))
+				.selectAll("text")	
+	            .style("text-anchor", "end")
+	            .attr("dx", "-.8em")
+	            .attr("dy", ".15em")
+	            .attr("transform", function(d) {return "rotate(-65)" 
+	                });	
+				
+		var axis1 = [d3.axisLeft(doms[0]).ticks(5),d3.axisLeft(doms[1]).ticks(5)];
+		
+			//the solution!!
+			dd[0].values.forEach(function(v){
+				var yy = d3.scaleLinear().range([graph_height, 0]).domain([0,v.max_cum_cases_orig]);
+			
+			  d3.select("#"+fips+"_"+v.key).append("g")
+				.attr("class","axis")
+				.call(d3.axisLeft(yy).ticks(5));
+			})
 	}
 	
 	
@@ -2103,7 +2403,7 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			.attr("class","axis")	
 	        .attr("transform", "translate(0,"+graph_height+")")
 			.call(d3.axisBottom(x)
-				.tickFormat(d3.timeFormat("%m-%y"))
+				.tickFormat(d3.timeFormat("%-m-%y"))
 				.ticks(8))
 				.selectAll("text")	
 	            .style("text-anchor", "end")
