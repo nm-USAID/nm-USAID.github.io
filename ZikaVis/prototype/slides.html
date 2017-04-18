@@ -128,7 +128,7 @@ queue()
 .defer(d3.json, "globalData.json")
 .defer(d3.json, "Partners.json")
 .defer(d3.json, "PAHO_subnational_cleaned.json")
-.defer(d3.json, "award_info.json")
+.defer(d3.json, "award_info2.json")
 .defer(d3.json, "adm2_shapes.json")
 .await(ready);		
 	
@@ -183,6 +183,8 @@ function ready(error, geodata_admin0, geodata_admin1, epidata, censusdata, pop_p
 		 })
 		 //console.log(shapes);
 	 });
+	 
+	 console.log(award_shapes);
 	 
 	 //console.log(strip("Acacías"));
 	 
@@ -419,8 +421,8 @@ var regions = features.selectAll("path")
 	
 //awards
 var efforts = award_layers.selectAll("path")
-	.data(topojson.feature(awards,awards.objects.usaidawards).features)
-	//.data(award_shapes)
+	//.data(topojson.feature(awards,awards.objects.usaidawards).features)
+	.data(award_shapes)
 	.enter()
 	.append("path")
 	.attr("d",path)
