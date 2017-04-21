@@ -486,7 +486,7 @@ queue()
     .defer(d3.json, "../../us.json")
     .defer(d3.json, "../../us-congress-115d.json")
 	.defer(d3.json, "../../reps3.json")
-	.defer(d3.json, "../../awards_USAID_March2017.json")
+	.defer(d3.json, "../../awards_USAID_public.json")
 	.defer(d3.json, "../../state_ids2.json")
 	.defer(d3.json, "../../us-states.json")
 	//.defer(d3.json, "../../us-congress-115.json")
@@ -502,12 +502,12 @@ queue()
   /******* filter out nulls and non us ******/
   awards = awards
   //.filter(function(d){return d.CD_ID != "null"})
-  .filter(function(d){return d.Zip_Code!="(blank)"})
+  //.filter(function(d){return d.Zip_Code!="(blank)"})
   .filter(function(d){return d.Vendor_State!="(blank)"});
   //.filter(function(d){return d3.format(d.Obligated.replace(/,/g,"")) < 1000});
   
-  awards = awards
-  .filter(function(d){return d.Obligated >= 1000 || d.Obligated == 0});
+  //awards = awards
+  //.filter(function(d){return d.Obligated >= 1000 || d.Obligated == 0});
   //.filter(function(d){return d.CD_ID!="1198"})
   //.filter(function(d){return d.Obligated.replace(/,/g,"") >= 1000 || d.Obligated.replace(/,/g,"") == 0});
   
@@ -525,7 +525,7 @@ queue()
 	  return{
 		  stateId : sId,
 		  ids: t, 
-	  total:d3.sum(v,function(d){return d.Obligated;})
+		  total:1//d3.sum(v,function(d){return d.Obligated;})
   };
   })
   .entries(awards)
@@ -534,25 +534,26 @@ queue()
   
   //console.log(awardsTotalByState_0);
   //console.log(JSON.stringify(awardsTotalByState));
-  awardsByYear_0 = d3.nest()
+  /*awardsByYear_0 = d3.nest()
   .key(function(d){return d.Original_FY;})
   .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated);}); })
   .sortKeys(d3.ascending)
-  .entries(awards);
+  .entries(awards);*/
+  
   awardsByElement_0 = d3.nest()
   .key(function(d){return d.PROGRAM_ELEMENT;})
-  .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated);}); })
+  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d3.format(d.Obligated);}); })
   .sortKeys(d3.ascending)
   .entries(awards);
   
-  awardsByVendorType_0 = d3.nest()
+  /*awardsByVendorType_0 = d3.nest()
   .key(function(d){return d.Vendor_Category;})
   //.rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated.replace(/,/g,""));}); })
   .sortKeys(d3.ascending)
-  .entries(awards);
+  .entries(awards);*/
   
   
-  awardsByYear_0 = awardsByYear_0.filter(function(d){return d.key != "null" && d.key != "";});
+  //awardsByYear_0 = awardsByYear_0.filter(function(d){return d.key != "null" && d.key != "";});
   awardsByElement_0 = awardsByElement_0.filter(function(d){return d.key != "null" && d.key != "";});
   
   
@@ -582,13 +583,13 @@ queue()
   awardsTotalByStateDist_0 = d3.nest()
   .key(function(d){return d.Vendor_State;})
   .key(function(d){return d.CD_ID;})
-  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
+  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d.Obligated;}); })
   .map(awards);
   //console.log(JSON.stringify(awardsTotalByDist));
   awardsTotalByDistId_0 = d3.nest()
   //.key(function(d){return d.Original_FY;})
   .key(function(d){return d.CD_ID;})
-  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
+  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d.Obligated;}); })
   .entries(awards);
   //.sort(function(a, b){ return d3.descending(a.value, b.value); });  //not for public version
   /*****end******/
@@ -603,9 +604,9 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 	//awards = awards.filter(function(d){return d.state == "NY"})
 	
 	var awardsTotalByState = awardsTotalByState_0;
-	var awardsByYear = awardsByYear_0;
+	//var awardsByYear = awardsByYear_0;
 	var awardsByElement = awardsByElement_0;
-	var awardsByVendorType = awardsByVendorType_0;
+	//var awardsByVendorType = awardsByVendorType_0;
 	var awardsByDist = awardsByDist_0;
 	var awardsByState = awardsByState_0;
 	//var awardsByState_ag = awardsByState_ag_0;
@@ -712,7 +713,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				 //recompile data (there must be a more efficient way, but this seems to work fine...)
 				 awardsTotalByDistId = d3.nest()
 					  .key(function(d){return d.CD_ID;})
-					  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
+					  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d.Obligated;}); })
 					  .entries(awards_tmp)
 					  .sort(function(a, b){ return d3.ascending(a.key, b.key); }); 
 				  
@@ -749,7 +750,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  	  return{
 							  stateId : sId,
 					  		  ids: t, 
-					  	  total:d3.sum(v,function(d){return d.Obligated;})
+					  	  total:1//d3.sum(v,function(d){return d.Obligated;})
 					    };
 					    })
 					    .entries(awards_tmp)
