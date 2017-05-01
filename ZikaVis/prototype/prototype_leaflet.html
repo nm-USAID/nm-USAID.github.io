@@ -131,7 +131,7 @@ d3.select("#middleView").append("div")
 	.attr("id","mapheader");
 
 d3.select("#middleView").append("div")
-	.attr("id","mapview");
+	.attr("id","mapview");	
 	
 d3.select("#middleView").append("div")
 	.attr("id","awardview");
@@ -260,6 +260,7 @@ d3.select("#awardview").append("div")
 //maybe just one svg...
 	var mapview_svg;
 	var over_view;
+	var country_map;
 	var sm_view;
 	var sm_multiples;
 	// = d3.select("#mapview").append("svg")
@@ -321,7 +322,7 @@ var global_bcharts = global_svg.append("g")
 	
 /************end global projection**************/
 	
-	var country_map;
+	//var country_map;
 	var path_leaflet;
 		
 	
@@ -957,7 +958,20 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	 
 	 function draw_country_view(){
 	 drawMenu();  
+	 setLeaflet();
 	 setCountry(ADM0);
+	 }
+	 
+	 function setLeaflet(){
+	 //need to set this up here
+	 over_view = d3.select("#mapview").append("div")
+	 	.attr("id","overview");
+	
+	 country_map = L.map('overview').setView([14, -89], 7)		
+	 	.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png?access_token={accessToken}",{
+			id: 'your.mapbox.project.id',
+    		accessToken: 'your.mapbox.public.access.token'
+	 	}));
 	 }
 	 
 	 function draw_global_view(){
@@ -971,6 +985,9 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		 .text("Country view")
 		 .on("click",function(d){
 			 d3.select("#container").moveToFront();
+			 if(overview_tab.selected){
+				 d3.select("#overview").style("opacity",1);
+			 }
 		 })
 	 }
 	 
@@ -1031,7 +1048,10 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
 				ADM0 = 	d.properties.ADM0_A3;
 				setCountry(ADM0);
-			d3.select("#container").moveToFront();	
+			d3.select("#container").moveToFront();
+		 if(overview_tab.selected){
+			 d3.select("#overview").style("opacity",1);
+		 }		
 			}
 		});
 		
@@ -1662,6 +1682,7 @@ var xaxis = global_indicators_3.append("g")
 		var global_view_btn = d3.select("#menu").append("button")
 		  .text("Global View")
 		  .on("click", function(d){
+			d3.select("#overview").style("opacity",0);  
 		  	d3.select("#global_container").moveToFront();
 		  });
 		  
@@ -2017,17 +2038,18 @@ var b2 = path.bounds(country_centroid[0]),
 	  }
 	
 	
+	//.addLayer(new L.TileLayer("http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png"/*"http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png""http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png" "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"*/));
+	
 //functions!	
 	function drawOverview(){	
 	//6,-70,4	
 	//overview
-	over_view = d3.select("#mapview").append("div")
+	/*over_view = d3.select("#mapview").append("div")
 	//mapview_svg.append("div")
 		.attr("id","overview");
 		
-	country_map = L.map('overview').setView([14, -89], 7)
-		//.addLayer(new L.TileLayer("http://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}.png"/*"http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png""http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png" "http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"*/));		
-		.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png"));
+	country_map = L.map('overview').setView([14, -89], 7)		
+		.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png"));*/
 		//L.svg({clickable:true}).addTo(country_map);
 	
 		function projectPoint(x, y) {
@@ -2098,6 +2120,9 @@ var b2 = path.bounds(country_centroid[0]),
 			  
 			  
 	     	}
+			
+			d3.select("#overview").style("opacity",0);
+			//country_map.TileLayer.opacity(0);	
 	  //mapview_svg.call(zoom.transform,d3.zoomIdentity);//.translate(width/2,height/2).scale(8).translate(-dx,-dy)); 
   	  //mapview_svg.call(zoom);
 	}				
@@ -2237,8 +2262,10 @@ var b2 = path.bounds(country_centroid[0]),
 	  })
 		.on("mouseover",function(d){
 			if(!selection){
-			d3.select(this).style("fill",hover_color);
+			//d3.select(this).style("stroke-width","2px");	
+			//d3.select(this).style("fill",hover_color);
 			d3.select(this).style("opacity",1);
+			d3.select(this).style("stroke","white");
 			//console.log(d.properties.code_hasc);
 			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill",hover_color);
 			show_charts2(d,null);
@@ -2250,6 +2277,7 @@ var b2 = path.bounds(country_centroid[0]),
 				return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");
 			})
 			d3.select(this).style("opacity",0.80);
+			d3.select(this).style("stroke","none");
 			d3.select("#bb"+d.properties.code_hasc.replace(".","")).style("fill",d3.select("#bb"+d.properties.code_hasc.replace(".","")).attr("basecolor"));
 			dists_charts_mout(d);
 			}
@@ -2367,7 +2395,8 @@ var b2 = path.bounds(country_centroid[0]),
 	
 	function layerClinics(){
 	clinics_pts = mapview_svg.append("g")
-		.attr("class","clinics");
+		.attr("class", "leaflet-zoom-hide");
+		//.attr("class","clinics");
 		
 	    clinics = clinics_pts.selectAll("path")
 	     .data(topojson.feature(IPPFclinics,IPPFclinics.objects.IPPFClinics).features)
@@ -2377,8 +2406,8 @@ var b2 = path.bounds(country_centroid[0]),
 		.style("stroke","white")
 		//.style("stroke-width",0.75/c_scale)
 		.style("stroke-width",1)
-		.attr("transform", function(d) { return "translate(" + projection(d.geometry.coordinates) + ")"; })
-	    //.attr("d",path.pointRadius(0.2))
+		//.attr("transform", function(d) { return "translate(" + projection(d.geometry.coordinates) + ")"; })
+	    //.attr("d",path_leaflet.pointRadius(0.2))
 		.attr("d",d3.symbol().size(10).type(d3.symbolCross))
 		//.attr("d",d3.symbol().size(0.75/c_scale).type(d3.symbolCross))
 		.on("mouseover",function(d){
@@ -3474,6 +3503,7 @@ var linegraph = global_indicators_2.append("path")
 		
 		//swap svg to front
 		d3.select("#overview").moveToFront();
+		d3.select("#overview").style("opacity",1);
 		//mapview_svg.moveToFront();
 		//d3.select("#overview_svg").parentNode.appendChild(this)
 		
@@ -3491,6 +3521,8 @@ var linegraph = global_indicators_2.append("path")
 		
 		//swap div to front
 		d3.select("#smview").moveToFront();
+		d3.select("#overview").style("opacity",0);
+		
 		
 		//drawTemporalView();
 	});
