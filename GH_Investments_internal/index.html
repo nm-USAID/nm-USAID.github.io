@@ -277,13 +277,13 @@ div.button{
 }
 
 tr {
-	vertical-align:top;
+	vertical-align:top;	
 }
 
-th {
-	min-width:200px;
+/*th {
+	min-width:100px;
 	
-}
+}*/
 
 
 </style>
@@ -318,15 +318,16 @@ th {
 <script src="./src/topojson.v1.min.js"></script>
 <script src="./src/d3-dispatch.v1.min.js"></script>
 
-
 <script>
 
 //stroke="#145aa1"
 
+var min_widths = ["50px","150px","200px","100px","150px","100px","100px","100px","100px"];
+
 d3.select("#home").on("click", reset);
 
 var dispatch = d3.dispatch("load", "statechange", "versionchange");
-var stateColor = "#77c379";//"#66c2a4";//"#7da6cf";
+var stateColor = "#77c379";//"#91b6d4";
 var distColor = "url(#pathPattern)";//"url(#diagonal-stripe-1)";//"#145aa1";
 var distColorChart = "url(#pathPattern_lg)"; //for barchart
 var state_notSelected = "efefef";
@@ -368,15 +369,7 @@ var svg = d3.select("body").select("#chart1").append("svg")
 	//.call(zoom)	
 	.append("g");
 	
-	svg.call(zoom)
-	.on("dblclick.zoom",null);		
-	
-/*var svg_states = svg.append("g")
-	.attr("class","states");	
-	
-var svg_dists = svg.append("g")
-    .attr("class","land");*/
-			
+	svg.call(zoom);			
 	
 var chart_tooltip = d3.select("body").append("div")	
     .attr("class", "chart_tooltip")				
@@ -485,32 +478,43 @@ var popup = d3.select("body").append("div")
 //load data
 queue()
     .defer(d3.json, "us.json")
-    .defer(d3.json, "us-congress-115d.json")
-	.defer(d3.json, "reps3.json")
-	.defer(d3.json, "awards_USAID_public.json")
-	.defer(d3.json, "state_ids2.json")
+    .defer(d3.json, "us-congress-115.json")
+	.defer(d3.json, "reps.json")
+	.defer(d3.json, "awards_USAID_internal.json")
+	.defer(d3.json, "state_ids.json")
 	.defer(d3.json, "us-states.json")
+	.defer(d3.json, "cors.json")
+	//.defer(d3.json, "../../us-congress-115.json")
     .await(ready);
 
-	function ready(error, us, congress, reps, awards, ids, us_states) {
+	function ready(error, us, congress, reps, awards, ids, us_states, cors) {
   if (error) throw error;
-  
-  //console.log(congress_115);
-  //console.log(tryit);
   
   /******* filter out nulls and non us ******/
   awards = awards
   //.filter(function(d){return d.CD_ID != "null"})
-  //.filter(function(d){return d.Zip_Code!="(blank)"})
+  .filter(function(d){return d.Zip_Code!="(blank)"})
   .filter(function(d){return d.Vendor_State!="(blank)"});
   //.filter(function(d){return d3.format(d.Obligated.replace(/,/g,"")) < 1000});
   
-  //awards = awards
-  //.filter(function(d){return d.Obligated >= 1000 || d.Obligated == 0});
+  awards = awards
+  .filter(function(d){return d.Obligated >= 1000 || d.Obligated == 0});
   //.filter(function(d){return d.CD_ID!="1198"})
   //.filter(function(d){return d.Obligated.replace(/,/g,"") >= 1000 || d.Obligated.replace(/,/g,"") == 0});
   
   //awards = awards.filter(function(d){return d.Original_FY == "2010"});
+  //add CORs to award fields
+  awards.forEach(function(d,i){
+	  if(d.Award_Number==""){
+		  var s = cors.filter(function(e){return e.Partner_name == d.Vendor_Name;});
+		  if(s[0]!=undefined){
+			  d.Award_Number = "COR(s): "+s[0].COR;
+		  }
+	  }
+  })
+  
+  
+  
   
   /******* nested data *******/
   //for menus
@@ -524,7 +528,7 @@ queue()
 	  return{
 		  stateId : sId,
 		  ids: t, 
-		  total:1//d3.sum(v,function(d){return d.Obligated;})
+	  total:d3.sum(v,function(d){return d.Obligated;})
   };
   })
   .entries(awards)
@@ -533,34 +537,35 @@ queue()
   
   //console.log(awardsTotalByState_0);
   //console.log(JSON.stringify(awardsTotalByState));
-  /*awardsByYear_0 = d3.nest()
+  awardsByYear_0 = d3.nest()
   .key(function(d){return d.Original_FY;})
   .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated);}); })
   .sortKeys(d3.ascending)
-  .entries(awards);*/
-  
+  .entries(awards);
   awardsByElement_0 = d3.nest()
   .key(function(d){return d.PROGRAM_ELEMENT;})
-  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d3.format(d.Obligated);}); })
+  .rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated);}); })
   .sortKeys(d3.ascending)
   .entries(awards);
   
-  /*awardsByVendorType_0 = d3.nest()
+  awardsByVendorType_0 = d3.nest()
   .key(function(d){return d.Vendor_Category;})
   //.rollup(function(v){return d3.sum(v,function(d){return d3.format(d.Obligated.replace(/,/g,""));}); })
   .sortKeys(d3.ascending)
-  .entries(awards);*/
+  .entries(awards);
   
   
-  //awardsByYear_0 = awardsByYear_0.filter(function(d){return d.key != "null" && d.key != "";});
+  
+  awardsByYear_0 = awardsByYear_0.filter(function(d){return d.key != "null" && d.key != "";});
   awardsByElement_0 = awardsByElement_0.filter(function(d){return d.key != "null" && d.key != "";});
+  awardsByVendorType_0 = awardsByVendorType_0.filter(function(d){return d.key != "null" && d.key != "";});
   
   
   //these are data being pulled
   awardsByState_0 = d3.nest()
   .key(function(d){return d.Vendor_State;})
-  .key(function(d){return d.Vendor_Name;})
-  .key(function(d){return d.PROGRAM_ELEMENT;})
+  //.key(function(d){return d.Vendor_Name;})
+  //.key(function(d){return d.PROGRAM_ELEMENT;})
   .entries(awards);
   
   /*awardsByState_ag_0 = [];
@@ -575,37 +580,37 @@ queue()
   
   awardsByDist_0 = d3.nest()
   .key(function(d){return d.CD_ID;})
-  .key(function(d){return d.Vendor_Name;})
-  .key(function(d){return d.PROGRAM_ELEMENT;})
+  //.key(function(d){return d.Vendor_Name;})
+  //.key(function(d){return d.PROGRAM_ELEMENT;})
   .entries(awards);
   //console.log(awardsByDist);
   awardsTotalByStateDist_0 = d3.nest()
   .key(function(d){return d.Vendor_State;})
   .key(function(d){return d.CD_ID;})
-  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d.Obligated;}); })
+  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
   .map(awards);
   //console.log(JSON.stringify(awardsTotalByDist));
   awardsTotalByDistId_0 = d3.nest()
   //.key(function(d){return d.Original_FY;})
   .key(function(d){return d.CD_ID;})
-  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d.Obligated;}); })
+  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
   .entries(awards);
   //.sort(function(a, b){ return d3.descending(a.value, b.value); });  //not for public version
   /*****end******/
   
   
   dispatch.call("load");
-  everythingelse(us, congress, reps, awards, ids, us_states);
+  everythingelse(us, congress, reps, awards, ids, us_states/*, congress_115*/);
 }
 
-function everythingelse(us, congress, reps, awards_0, ids, us_states){
+function everythingelse(us, congress, reps, awards_0, ids, us_states/*, congress_115*/){
 	
 	//awards = awards.filter(function(d){return d.state == "NY"})
 	
 	var awardsTotalByState = awardsTotalByState_0;
-	//var awardsByYear = awardsByYear_0;
+	var awardsByYear = awardsByYear_0;
 	var awardsByElement = awardsByElement_0;
-	//var awardsByVendorType = awardsByVendorType_0;
+	var awardsByVendorType = awardsByVendorType_0;
 	var awardsByDist = awardsByDist_0;
 	var awardsByState = awardsByState_0;
 	//var awardsByState_ag = awardsByState_ag_0;
@@ -626,8 +631,6 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
   	  district.rep = (result[0] != undefined) ? result[0] : null;
     });
 	
-	//console.log(congress);
-	
     /*congress_115.objects.districts.geometries.forEach(function(district){
   	  var result = reps.filter(function(rep){
   		  return rep.CD_ID === +district.properties.GEOID;
@@ -638,24 +641,44 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
   	  district.rep = (result[0] != undefined) ? result[0] : null;
     });*/
 	
-	 //var f4 = topojson.feature(congress_115, congress_115.objects.districts).features;
-	
      var minDollars = d3.min(awardsTotalByDistId, function(d){return d.value;});
      var maxDollars = d3.max(awardsTotalByDistId, function(d){return d.value;});
      var meanDollars = d3.mean(awardsTotalByDistId, function(d){return d.value;});
 	 
 	 var minState = d3.min(awardsTotalByState, function(d){return d.value.total;});
 	 var maxState = d3.max(awardsTotalByState, function(d){return d.value.total;});
-	 
-	 var state_filter;
 	
 	dispatch.on("load.menu", loadMenu());
 	dispatch.on("load.map", loadStateMap());
 	
 	function loadMenu(){
+	  	/*var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
+		var state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});*/
+	  	var year_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fYear = this.value; dispatch.call("statechange", this, awards_0);});
 	  	var element_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fElement = this.value; dispatch.call("statechange", this, awards_0);});
-		state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() {schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
+	  	var vendor_type_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fType = this.value; dispatch.call("statechange", this, awards_0);});
+	  	var pship_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { fPship = this.value; dispatch.call("statechange", this, awards_0);});
+		var state_filter = d3.select("body").select("#dropdowns").append("select").on("change", function() { schange = 1; fState = this.value; dispatch.call("statechange", this, awards_0);});
 
+		
+		year_filter.selectAll("option")
+	  	.data([{key: "Filter by Year", value: 10000}].concat(awardsByYear)) 
+	  	.enter().append("option")
+	  	.attr("value",function(d){return d['key'];})
+	  	.text(function(d){return d['key'];});
+		
+		vendor_type_filter.selectAll("option")
+	  	.data([{key: "Filter by Vendor Type", value: 10000}].concat(awardsByVendorType)) 
+	  	.enter().append("option")
+	  	.attr("value",function(d){return d['key'];})
+	  	.text(function(d){return d['key'];});
+		
+		pship_filter.selectAll("option")
+	  	.data([{key: "Filter by PPP/FBO", value: 10000},{key: "PPP", value: "PPP"},{key: "Faith-based", value: "Faith-based"} ]) 
+	  	.enter().append("option")
+	  	.attr("value",function(d){return d['key'];})
+	  	.text(function(d){return d['key'];});
+		
 		
 		element_filter.selectAll("option")
 	  	.data([{key: "Filter by Program Element", value: 10000}].concat(awardsByElement)) 
@@ -670,12 +693,6 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		.style("padding-left","10px")
 	  	.text(function(d){return d['key'];});
 	  	/***********/
-		
-		/*state_filter.dispatch("change",function(){
-			this.value = "KS";
-			schange = 1; fState = this.value; 
-		});*/
-		
 
 		//generate centroids
 			centroids = d3.map();
@@ -688,7 +705,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 			//console.log(centroids.get("01"));
 		
 		dispatch.on("statechange.menu", function(awards_init) {
-		  		  //console.log("changed menu!");
+		  		  //console.log("changed menu!"+state);
 		  		  var awards_tmp = awards_init;
 				  
 				 
@@ -712,21 +729,21 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 				 //recompile data (there must be a more efficient way, but this seems to work fine...)
 				 awardsTotalByDistId = d3.nest()
 					  .key(function(d){return d.CD_ID;})
-					  .rollup(function(v){return 1;})//d3.sum(v,function(d){return d.Obligated;}); })
+					  .rollup(function(v){return d3.sum(v,function(d){return d.Obligated;}); })
 					  .entries(awards_tmp)
 					  .sort(function(a, b){ return d3.ascending(a.key, b.key); }); 
 				  
 		  
 		  		  awardsByDist = d3.nest()
   						.key(function(d){return d.CD_ID;})
-					    .key(function(d){return d.Vendor_Name;})
-					    .key(function(d){return d.PROGRAM_ELEMENT;})
+					    //.key(function(d){return d.Vendor_Name;})
+					    //.key(function(d){return d.PROGRAM_ELEMENT;})
   						.entries(awards_tmp);
 							
 				  awardsByState = d3.nest()
 					    .key(function(d){return d.Vendor_State;})
-						.key(function(d){return d.Vendor_Name;})
-						.key(function(d){return d.PROGRAM_ELEMENT;})
+						//.key(function(d){return d.Vendor_Name;})
+						//.key(function(d){return d.PROGRAM_ELEMENT;})
 						.entries(awards_tmp);	
 						
 						
@@ -749,7 +766,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  	  return{
 							  stateId : sId,
 					  		  ids: t, 
-					  	  total:1//d3.sum(v,function(d){return d.Obligated;})
+					  	  total:d3.sum(v,function(d){return d.Obligated;})
 					    };
 					    })
 					    .entries(awards_tmp)
@@ -785,10 +802,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							//rather than two calls do from one point to the next
 							svg.call(zoom.transform,d3.zoomIdentity);
 							
-							
 							svg.transition().duration(750).call(zoom.transform,d3.zoomIdentity.translate(width/2,height/2).scale(2).translate(-dx,-dy));
-							
-						    }
+							}
 							
 							svg.selectAll("*").remove(); 
 							
@@ -799,9 +814,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							updateDistMap();
 							
 						}else{
-							svg.call(zoom)
-							.on("dblclick.zoom",null);
-							
+							svg.call(zoom);
 							svg.transition().duration(550).call(zoom.transform,d3.zoomIdentity);
 							
 							svg.selectAll("*").remove(); 
@@ -852,9 +865,6 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		choropleth = d3.scaleLog()
 		.domain([1000000,maxState])
 		.range(['#c6dbef', '#08519c']);
-		
-	/*var svg_states = svg.append("g")
-		.attr("class","states");*/
 
 	  svg.append("path")
 	      .attr("id", "land")
@@ -881,7 +891,6 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  })	    
 		  .style("fill", function(d){return d3.select("#state"+d.id).attr("basecolor");})
 		  //on click
-		  //.on("dblclick", function(d){console.log("double "+d.id);})
 		  .on("click", function(d){ _popupState(d);
 	  	  	    d3.select("#cb2").on("click",function(){	  
 	  	  	  	  if(popupStateOn){
@@ -1031,7 +1040,7 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
     		          thead = awards.append("thead"),
     		          tbody = awards.append("tbody");
 					  
-    				  var datT_ag = [];
+    				  /*var datT_ag = [];
 					  
     				  datT.forEach(function(d,i){
     					  var vendor = d;
@@ -1050,34 +1059,36 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 							  //datT_ag.push({key:vendor.key,values:{name:v.key, award_nums:v.values[0].Award_Number}});
 						  });
     				  });
-    				  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
+    				  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});*/
 	  
     		  		
 					  //console.log(datT);
 		  // append the header row
 		      thead.append("tr")
 		          .selectAll("th")
-		          .data(["Partner", "Element"])
+		          .data(["Year", "Element", "Partner", "Type","Award Number", "Obligation", "FBO/PPP"])
 		          .enter()
 		          .append("th")
-				  .attr("class","header")	  
-		              .text(function(d) { return d; });
+				  .style("min-width",function(d,i){return min_widths[i];})
+				  .attr("class","header")  
+		          .text(function(d) { return d; });
 					
 					var rows = tbody.selectAll("tr")
-    		          .data(datT_ag)
+    		          .data(datT)
     		          .enter()
     		          .append("tr")
-					  .style("background",function(d,i){
-						  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
+				      .style("background",function(d,i){if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
+					  /*.style("background",function(d,i){
+						  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});*/
 
     				  var cells = rows.selectAll("td")
-    				  .data(function(d) { return [d.key,d.values.name];})	  
+    				  .data(function(d) { return [d.Original_FY,d.PROGRAM_ELEMENT,d.Vendor_Name, d.Vendor_Category,d.Award_Number,"$"+formatNumber(d.Obligated),d.FBO_or_PPPs];})	  
     				  .enter()
     				  .append("td")
-    				  .attr("class","rows")
-					  //.style("font-size","12px")
-					  //.style("color","black")	  	  	  
+    				  .attr("class","rows")  	  	  
     				  .html(function(d) {
+						  //var st = "<a href=\"url\">"+d+"</a>"
+						  
 						  return d; 
 					  });
 	   
@@ -1086,15 +1097,17 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
     				  if(d.active){
     				  	svg.on('.zoom',null);
     				  }else{
-    				  	svg.call(zoom)
-						  .on("dblclick.zoom",null);
+    				  	svg.call(zoom);
     				  }
 				  
   				  if(popupStateOn){
   				  			  popupState.style("pointer-events","all");
+							  cells.style("pointer-events","all");
+							  
   				  			  popupStateId = d.id;
   				  		  }else{
   				  			  popupState.style("pointer-events","none");
+							  cells.style("pointer-events","none")
   				  			  popupStateId = 0;
   				  		  } 
     			  }
@@ -1114,69 +1127,20 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		.range(['#c6dbef', '#08519c']);
 		//.range(['#eff3ff', '#08519c']);
 		//.range(['#e0f3db', '#08519c']);
-		
-		
-	var svg_states = svg.append("g")
-  		.attr("class","dists");
-		
-		svg_states.append("defs").append("path")
+
+	  svg.append("defs").append("path")
 	      .attr("id", "land")
 	      .datum(topojson.feature(us, us.objects.land))
 	      .attr("d", path);
-		
-	  svg_states.append("clipPath")
+
+	  svg.append("clipPath")
 	      .attr("id", "clip-land")
 	    .append("use")
-	      .attr("xlink:href", "#states"); 
-		  
-	var ss = svg_states.append("g")
-		  .attr("class", "districts")
-		  .selectAll("path")
-  		  .data(us_states.features)
-  		  .enter().append("path")
-  		  .attr("d", path)
-  		.style("fill", state_notSelected);  
-
-  	
-	var svg_dists = svg.append("g")
-  		.attr("class","dists");	
-
-	  svg_dists.append("defs").append("path")
-	      .attr("id", "land")
-	      .datum(topojson.feature(us, us.objects.land))
-	      .attr("d", path);	  
-		   
-
-	  svg_dists.append("clipPath")
-	      .attr("id", "clip-land")
-	    .append("use")
-	      .attr("xlink:href", "#land"); 
-		  
-		  //add background states
-	/*var svg_states = svg.append("g")
-		.attr("class","states");
-		
-		  var states = svg_states.selectAll("path")
-		  .data(us_states.features)
-		  .enter().append("path")
-		  .attr("d", path)
-		.style("fill", state_notSelected);*/
-			     
-		
-			
-		    
-		  /*ss.data(us_states.features)
-		  .enter()
-		  .append("path")
-		  .attr("d", path)
-		  .style("fill",stateColor);*/	  
-		  
-	  //var svg_states = svg.append("g")
-		  	  	  
+	      .attr("xlink:href", "#land");  
 	
 		//join data
 
-	  var dd = svg_dists.append("g")
+	  var dd = svg.append("g")
 		  .attr("class", "districts")
 		  .attr("clip-path", "url(#clip-land)")
 		  .selectAll("path");
@@ -1184,23 +1148,13 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 		  //var f = topojson.feature(congress, congress.objects.districts).features;
 		  //var f2 = f.filter(function(d){return Math.floor(d.id/100)==s_id;});
 		  var f3 = topojson.feature(congress, congress.objects.districts).features;
-		  
-		  //var f5 = f4.filter(function(d){return Math.floor(d.id/100)==s_id;});
-		  
-		  var cd_features = f3;
-		  var cd_mesh = congress;
-		  //var cd_mesh = 
-		  
-		  
-		  
-		  
 		  //console.log(f);
 		  //console.log(f2);
-		  //var filt = congress.objects.districts.filter(function(d){return Math.floor(d.geometries.id/100) == 27; })
-		  //console.log(filt);
+		  //var filt = congress.filter(function(d){return Math.floor(d.objects.districts.geometries.id/100) == 27; })
+		  //console.log(congress.objects.districts.geometries);
 		  
 		 //dists = dd.data(topojson.feature(congress, congress.objects.districts).features)
-		  dists = dd.data(cd_features)
+	      dists = dd.data(f3)
 		  .enter().append("path")
 		  .attr("d", path)
 		  .attr("id", function(d){//console.log(d); 
@@ -1272,21 +1226,21 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					  d3.select("#bar"+d.id).select("svg").select("rect").attr("fill",distColorChart);
 					  
 				  }	
-			  });
+			  });		  
+	  
 
-	  svg_dists.append("path")
+	  svg.append("path")
 	      .attr("class", "district-boundaries")
-	      .datum(topojson.mesh(cd_mesh, cd_mesh.objects.districts, function(a, b) {
-			  //console.log(a.id);
-			  return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0) && Math.floor(a.id/100) == s_id; }))
-			  .attr("d", path);
+	      .datum(topojson.mesh(congress, congress.objects.districts, function(a, b) { 
+			  return a !== b && (a.id / 1000 | 0) === (b.id / 1000 | 0); }))
+	      .attr("d", path);
 
-	  svg_dists.append("path")
+	  svg.append("path")
 	      .attr("class", "state-boundaries")
 	      .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
 	      .attr("d", path); 	
 		  
- svg_dists.selectAll("text")
+ svg.selectAll("text")
 		  .data(us_states.features.filter(function(d){return d.id == s_id;}))
 		  .enter()
 		  .append("text")
@@ -1339,7 +1293,8 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 					          tbody = awards.append("tbody");
 							  
 							  
-							  var datT_ag = [];
+							  
+							  /*var datT_ag = [];
 							  datT.forEach(function(d,i){
 								  var vendor = d;
 								  vendor.values.forEach(function(v,i){ 
@@ -1358,31 +1313,33 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 									  
 									  //datT_ag.push({key:vendor.key,values:v.key});});
 							  });
-							  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});
+							  datT_ag.sort(function(a,b){return d3.ascending(a.key,b.key);});*/
 
 						  
 				  // append the header row
 				      thead.append("tr")
 				          .selectAll("th")
-				          .data(["Partner", "Element"])
+				          .data(["Year", "Element", "Partner", "Type","Award Number","Obligation","FBO/PPP"])
 				          .enter()
 				          .append("th")
+						  .style("min-width",function(d,i){return min_widths[i];})
 						  .attr("class","header")	  
 				          .text(function(d) { return d; });
 						  
 						  
 						  var rows = tbody.selectAll("text")
-						  .data(datT_ag)
+						  .data(datT)
 						  .enter()
 						  .append("tr")
-							  .style("background",function(d,i){
+						  .style("background",function(d,i){if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
+							  /*.style("background",function(d,i){
 								  if(i%2) { return "white";} else {return "rgb(245,245,245)";}});
-							  ;
+							  ;*/
 
 				  
 						  var cells = rows.selectAll("td")
 						  .data(function(d) {
-								  return [d.key, d.values.name];}
+								  return [d.Original_FY,d.PROGRAM_ELEMENT,d.Vendor_Name, d.Vendor_Category,d.Award_Number,"$"+formatNumber(d.Obligated),d.FBO_or_PPPs];}
 							  )	  
 						  .enter()
 						  .append("td")
@@ -1395,9 +1352,11 @@ function everythingelse(us, congress, reps, awards_0, ids, us_states){
 						  if(popupOn){
 							  popupId = d.id;
 							  popup.style("pointer-events","all");
+							  cells.style("pointer-events","all");
 						  }else{
 							  popupId = 0;
 							  popup.style("pointer-events","none");
+							  cells.style("pointer-events","none");
 						  }
 				  
 						  if(popupOn){
