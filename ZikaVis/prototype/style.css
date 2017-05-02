@@ -8,27 +8,27 @@
 }
 
 .axis1 line{
-  stroke: #2ca25f;
+  stroke: #808080;
 }
 
 .axis1 path{
-  stroke: #2ca25f;
+  stroke: #808080;
 }
 
 .axis1 text{
-  fill: #2ca25f;
+  fill: #808080;
 }
 
 .axis2 line{
-  stroke: #99d8c9;
+  stroke: #D3D3D3;
 }
 
 .axis2 path{
-  stroke: #99d8c9;
+  stroke: #D3D3D3;
 }
 
 .axis2 text{
-  fill: #99d8c9;
+  fill: #D3D3D3;
 }
 
 /*.bar { fill: steelblue; }*/
@@ -84,12 +84,12 @@
 	float:left;
 	width:100px;
 	height:650px;
-    border-style: solid;
+    border-style: none;
     border-width: 0.5px;	
     border-color: grey;
 	margin:2px;
 	padding:2px;
-	background:#e6e7e8;	
+	background:none;/*#e6e7e8;*/	
 }
 #middleView{
 	float:left;
@@ -113,6 +113,7 @@
 	font-size:14pt;
 	font-weight:bold;
 	color:grey;
+	text-transform:uppercase;
 }
 
 #buttons{
@@ -127,11 +128,18 @@
 	font: 10px sans-serif;	
 }
 
+.place-label{
+	font: 5em sans-serif;	
+}
+
+
+
 #tabs{
 	float:left;
 	/*width:200px;*/
 	width:auto;
 	height:75%;
+	margin-right:25px;
     border-style: none;
     border-width: 0.5px;	
     border-color: grey;
@@ -149,6 +157,21 @@
 	cursor: pointer;
 }
 
+.toggle_button{
+	float:left;
+	padding-top:3px;
+	padding-bottom:5px;
+	padding-left:5px;
+	padding-right:5px;
+	margin-left:2px;
+	border-style: solid;
+    border-width: 0.5px;	
+    border-color: grey;
+	border-radius:5px;
+	cursor: pointer;
+	text-align:middle;
+}
+
 .tab:hover{
 	background-color:#ccc;
 }
@@ -162,13 +185,22 @@
     border-width: 0.5px;	
     border-color: grey;
 	margin-bottom:2px;
+	background:white;
 }
 
 #mapview path {
-  stroke-width: 0.025px;
-  stroke: white;
+  /*stroke-width: 0.010px;*/
+  stroke-width:1px;
+  stroke: none;
   fill: rgb(178, 214, 141);
   cursor: pointer;
+}
+
+#overview{
+	position:absolute;
+	width:499px;
+	height:399px;
+	background:none;
 }
 
 #smview{
@@ -262,7 +294,7 @@
 #popmap{
 	float:left;
 	width:100px;
-	height:75px;
+	height:90px;
     border-style: none;
     border-width: 0.25px;	
     border-color: grey;
@@ -325,6 +357,11 @@
 	width:100%;
 }
 
+.award_subtitle{
+	float:left;
+	width:85%;
+}
+
 
 .chartTitle{
 	float:left;
@@ -343,7 +380,7 @@
 	position:absolute;
 	width:499px;
 	height:399px;
-	background:white;
+	/*background:white;*/
 }
 
 .overview_svg{
@@ -357,7 +394,7 @@
 }
 .patternFill{
 	stroke:white;
-	stroke-width:0.025;
+	stroke-width:0.1;
 	fill:none;
 }
 /*.minimap{
@@ -367,7 +404,7 @@
 }*/
 
 .minimap path {
-  stroke-width: 0.025px;
+  stroke-width: 0.25px;
   stroke: white;
   cursor: pointer;
 }
@@ -382,6 +419,12 @@
 .date_labels{
 	font-size: 7px;
 	fill:grey;
+}
+
+.mapview_title{
+	font: 9px sans-serif;
+	fill:black;
+	text-transform:uppercase;
 }
 
 .country_labels{
