@@ -55,7 +55,7 @@ var Caribbean_regional = ["Cuba","Dominican Republic","French Guiana","Guadeloup
 var hover_color = "tomato";
 
 
-var ADM0_A3_lookup = [{key:"Haiti",value:"HTI"},{key:"El Salvador",value:"SLV"},{key:"Dominican Republic",value:"DOM"},{key:"Honduras",value:"HND"},{key:"Guatemala",value:"GTM"},{key:"Colombia",value:"COL"},{key:"Nicaragua",value:"NIC"},{key:"Peru",value:"PER"},{key:"Ecuador",value:"ECU"},{key:"Jamaica",value:"JAM"},{key:"Venezuela",value:"VEN"},{key:"Caribbean Regional",value:""}];
+var ADM0_A3_lookup = [{key:"Haiti",values:"HTI"/*{country_code:"HTI",lat:,long:,zoom:*/},{key:"El Salvador",value:"SLV"},{key:"Dominican Republic",value:"DOM"},{key:"Honduras",value:"HND"},{key:"Guatemala",value:"GTM"},{key:"Colombia",value:"COL"},{key:"Nicaragua",value:"NIC"},{key:"Peru",value:"PER"},{key:"Ecuador",value:"ECU"},{key:"Jamaica",value:"JAM"},{key:"Venezuela",value:"VEN"},{key:"Caribbean Regional",value:""}];
 
 //set up global view divs	
 d3.select("#global_container").append("div")
@@ -374,6 +374,7 @@ var gl_zoom = d3.zoom()
     .scaleExtent([0.3, Infinity])
     .on("zoom",gl_zoomed);		
 				
+	//var lat_longs - just enter manually SVL:14, 89; 
 	
 //enable zoom
 var popmap_zoom = d3.zoom()
@@ -971,7 +972,39 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	 	.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png?access_token={accessToken}",{
 			id: 'your.mapbox.project.id',
     		accessToken: 'your.mapbox.public.access.token'
+			//onEachFeature: onEachFeature
 	 	}));
+		
+		
+		/*country_map.on("click",function(e){
+			var marker = new L.marker(e.latlng).bindPopup('add comment').addTo(country_map);
+		});*/
+		
+			function highlightFeature(e) {
+			    var layer = e.target;
+
+			    layer.setStyle({
+			        weight: 5,
+			        color: '#666',
+			        dashArray: '',
+			        fillOpacity: 0.7
+			    });
+
+			    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			        layer.bringToFront();
+			    }
+			}
+			
+			function resetHighlight(e) {
+			    country_map.resetStyle(e.target);
+			}
+			
+			function onEachFeature(feature, layer) {
+			    layer.on({
+			        mouseover: highlightFeature,
+			        mouseout: resetHighlight,
+			    });
+			}
 	 }
 	 
 	 function draw_global_view(){
@@ -1909,6 +1942,10 @@ var xaxis = global_indicators_3.append("g")
 		  //country_povbyfips = country_povbyfips2;
 		  //console.log(country_povbyfips);
 		  
+		  
+		  
+		 // country_map.setView([30, -89],5);
+		  
 		
 		  d3.select("#maptitle").selectAll("text").remove();
 		
@@ -2098,15 +2135,17 @@ var b2 = path.bounds(country_centroid[0]),
 	      // .call(zoom.translate(translate).scale(scale).event); // not in d3 v4
 	      //mapview_svg.call( zoom.transform, d3.zoomIdentity.translate(translate[0],translate[1]).scale(8.5) ); // updated for d3 v4
 	  
- 	     country_map.on("viewreset", reset);
+ 	     country_map.on('viewreset', reset);
+		 country_map.on('zoom', reset);
    	   	 reset();
 		 
 	     function reset() {
+			 //console.log("reset");
 			 var bounds = path_leaflet.bounds(country_centroid[0]),//country_adm1_features[0]),
 	     	      topLeft = bounds[0],
 	     	      bottomRight = bounds[1];
 				  
-				  console.log(bounds);
+				  //console.log(bounds);
 
 	     	  mapview_svg.attr("width", bottomRight[0] - topLeft[0])
 	     	      .attr("height", bottomRight[1] - topLeft[1])
@@ -2116,9 +2155,7 @@ var b2 = path.bounds(country_centroid[0]),
 	     	  features.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
 	     	  regions.attr("d", path_leaflet);
 			  awards_shp.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
-			  efforts.attr("d", path_leaflet);
-			  
-			  
+			  efforts.attr("d", path_leaflet); 
 	     	}
 			
 			d3.select("#overview").style("opacity",0);
@@ -2175,8 +2212,8 @@ var b2 = path.bounds(country_centroid[0]),
 	
 	function drawRegions(){
 	 features = mapview_svg.append("g")
-			.attr("class", "leaflet-zoom-hide");
-	    	//.attr("class","features");
+			//.attr("class", "leaflet-zoom-hide");
+	    	.attr("class","features");
 		
 			//console.log(country_adm1_features);	
 			
@@ -2188,6 +2225,7 @@ var b2 = path.bounds(country_centroid[0]),
 	    .append("path")
 		.attr("id",function(d){return "region"+d.properties.code_hasc.replace(".","");})
 	    .attr("class","region")
+		.style("pointer-events","all")
 	    .attr("d",path_leaflet)
 		.attr("opacity",0.80)	
 		//.attr("basecolor","steelblue")
@@ -2431,6 +2469,7 @@ var b2 = path.bounds(country_centroid[0]),
 		.enter()
 		.append("path")
 		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
+		.style("pointer-events","all")
 		.attr("d",path_leaflet)
 		.style("stroke","white")
 		.style("stroke-width","0.25")
