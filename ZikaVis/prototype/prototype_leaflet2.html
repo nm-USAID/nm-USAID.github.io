@@ -976,11 +976,11 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	 	}));
 		
 		
-		/*country_map.on("click",function(e){
+		country_map.on('contextmenu',function(e){
 			var marker = new L.marker(e.latlng).bindPopup('add comment').addTo(country_map);
-		});*/
+		});
 		
-			function highlightFeature(e) {
+			/*function highlightFeature(e) {
 			    var layer = e.target;
 
 			    layer.setStyle({
@@ -1004,7 +1004,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			        mouseover: highlightFeature,
 			        mouseout: resetHighlight,
 			    });
-			}
+			}*/
 	 }
 	 
 	 function draw_global_view(){
@@ -1040,6 +1040,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	      .attr("class","country_paths")
 	    .attr("d",global_path)
 		.attr("basecolor",function(d){
+			//if(priority_countries.indexOf(d.properties.ADMIN)==-1){return "rgb(220,220,220)";}
 			var c = globaldata.filter(function(v){return v.country == d.properties.ADMIN;});
 			if(c[0] != undefined){
 				//console.log(d.properties.ADMIN);
@@ -1144,7 +1145,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  .attr("transform", function(d) {//console.log(d.geometry.coordinates); 
 			  return "translate(" +global_path.centroid(d)+ ")";});	  
 		  
-		  var sz = 5;
+		  var sz = 7;
 		  /*pp.append("rect")
 			  .attr("class","bchart_border")
 			  .attr("x","-10px")
@@ -1152,13 +1153,39 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  	    	  	  
 		  //console.log(partnersbyLine.filter(function(v){return v.values.key == j[i].parentNode.id.replace("gl_bchart","");}));
 		  //var sz = 5;
+		  //console.log(partnersbyLine);
+		  console.log(partnersbyCountrybyLinebyPartner);
 		  
-		  pp.selectAll("svg")
+pp.selectAll("svg")
+		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
+		  //.data(partnersbyCountrybyLinebyPartner.filter(function(d,i,j){return d.key == j[i].parentNode.id.replace("gl_bchart_","");}))	  
+		  .data(function(d){return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;})
+		  .enter()
+		  .append("rect")	  	  	  
+		  .attr("x",function(d,i,j){//
+			  console.log(d);
+			  //console.log(j[i].parentNode.id+" "+i); console.log(d); 
+			  return -(sz*2)+i*(sz+0.5);})
+		  .attr("y",function(d){return -sz-10;})
+		  .attr("width",sz)
+		  .attr("height",function(d,i,j){
+			  return sz;
+			  //console.log(d);
+			  //console.log(j[i].parentNode.id.replace("gl_bchart_",""));
+		  })
+		  .style("fill",function(d,i){
+			  if(d.key == "Vector Control"){return bchart_colors[0];}
+			  if(d.key == "Maternal and Child Health/Service Delivery"){return bchart_colors[1];}
+			  if(d.key == "Social and Behavior Change Communication"){return bchart_colors[2];}
+		  });
+		  
+		  /*pp.selectAll("svg")
 		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
 		  .data(partnersbyLine)	  
 		  .enter()
 		  .append("rect")	  	  	  
-		  .attr("x",function(d,i,j){//console.log(j[i].parentNode.id); console.log(d); 
+		  .attr("x",function(d,i,j){//
+			  //console.log(j[i].parentNode.id+" "+i); console.log(d); 
 			  return -(sz*2)+i*(sz+0.5);})
 		  .attr("y",function(d){return -sz-10;})
 		  .attr("width",sz)
@@ -1172,7 +1199,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 				  return 0;
 			  }
 		  })
-		  .style("fill",function(d,i){return bchart_colors[i];});
+		  .style("fill",function(d,i){return bchart_colors[i];});*/
 		  
 		  
 			  //.on("mouseover",function(d,i,j){console.log(d.values.filter(function(v){return v.key == j[i].parentNode.id.replace("gl_bchart_","");})[0]);});
