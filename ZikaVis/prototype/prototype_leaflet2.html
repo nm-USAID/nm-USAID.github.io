@@ -1160,7 +1160,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			  if(d.properties.ADMIN == "Dominican Republic"){
 				  var cc = global_path.centroid(d);
 				  console.log(cc);
-				  return "translate(["+(cc[0]+100)+","+cc[1]+"])";
+				  return "translate(" +global_path.centroid(d)+ ")";//"translate(["+(cc[0]+100)+","+cc[1]+"])";
 			  }else{
 				  return "translate(" +global_path.centroid(d)+ ")";
 				  }	  
@@ -1185,8 +1185,12 @@ pp.selectAll("svg")
 		  .append("rect")	  	  	  
 		  .attr("x",function(d,i,j){//
 			  //console.log(d);
-			  //console.log(j[i].parentNode.id+" "+i); console.log(d); 
-			  return -(sz*2)+i*(sz+0.5);})
+			  //console.log(j[i].parentNode.id+" "+i); console.log(d);
+			  if(j[i].parentNode.id.replace("gl_bchart_","")=="Dominican Republic"){
+				  return -(sz*2)+i*(sz+0.5)+20;
+			  } else{
+				  return -(sz*2)+i*(sz+0.5);
+			  }})
 		  .attr("y",function(d){return -sz-7;})
 		  .attr("width",sz)
 		  .attr("height",function(d,i,j){
