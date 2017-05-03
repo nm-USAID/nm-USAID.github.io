@@ -966,6 +966,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	 function draw_country_view(){
 	 drawMenu();  
 	 setLeaflet();
+ 	overview_tab.selected = true;
+ 	temporalview_tab.selected = false;
 	 setCountry(ADM0);
 	 }
 	 
@@ -2117,8 +2119,8 @@ var b2 = path.bounds(country_centroid[0]),
 	//drawOverview();
 	//drawTemporalView();
 	//temporalview_tab.style("background","#ccc");
-	overview_tab.selected = true;
-	temporalview_tab.selected = false;
+	//overview_tab.selected = true;
+	//temporalview_tab.selected = false;
 	//overview_tab.selected = 0;
 		  
 	  	//start with overview 
@@ -2133,6 +2135,9 @@ var b2 = path.bounds(country_centroid[0]),
 		overview_tab.style("background","none");
 		temporalview_tab.style("background","#ccc");
 	}
+	
+	overview_tab.dispatch("click");
+	
 	  	drawChartView();
 		
 		//start with overview on top
