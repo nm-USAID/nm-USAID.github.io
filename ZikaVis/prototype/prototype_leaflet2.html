@@ -951,7 +951,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	.range(d3.schemeReds[9]);
 	//schemeReds
 	//schemeOrRd
-	global_choropleth = choropleth_global;//color_global;
+	global_choropleth = color_global;//choropleth_global;//color_global;
 	global_choropleth_ht = color_global;
 	
 	country_choropleth = color4;//choropleth4;//color4;
@@ -1070,13 +1070,15 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
 			//if(d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor") != "rgb(220,220,220)"){
 			//if(d3.select("#gl_country"+d.properties.ADMIN).attr("basecolor") != "rgb(220,220,220)"){
-			d3.select(this).style("fill",hover_color);
+			//d3.select(this).style("fill",hover_color);
+			d3.select(this).style("stroke-width","2");
 			//}
 			filtercharts(d);
 			}
 		})
 		.on("mouseout",function(d){
 			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
+			d3.select(this).style("stroke-width","0.25");	
 			d3.select(this).style("fill",function(d){
 				//return d3.select("#gl_country"+d.properties.ADMIN).attr("basecolor");
 				return d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor");
