@@ -890,7 +890,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  var all_inds_key;
 	  var valueLine3;
 	  var domains;
-	  var mx_c = d3.max(epidata, function(v) { return v.value; });
+	  var mx_c = d3.max(epidata_all, function(v) { return v.value; });
 	  var selection = false;
 	  var country_title = "El Salvador";
 	  var paho_sub;
@@ -923,7 +923,10 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  
  	choropleth_global = d3.scaleLog()
  	.domain([1,mx])
+	//.range([d3.interpolateOrRd(0),d3.interpolateOrRd(1)]);
  	.range(['#fef0d9', '#b30000']);	
+	
+	//console.log(d3.interpolateReds(0));
 	
 	//console.log("max global: "+mx);
 	
@@ -935,21 +938,24 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
   	.domain([1,mx_c])
   	.range(['#fee8c8','#b30000'])
 	
+	/*color4 = d3.scaleThreshold()
+    .domain([1, 5, 10, 50, 100, 500, 1000, 5000, 25000])
+	.range([d3.interpolateOrRd(0),d3.interpolateOrRd(1)]);*/
 	
 	color4 = d3.scaleThreshold()
     .domain([1, 5, 10, 50, 100, 500, 1000, 5000, 25000])
 	.range(d3.schemeReds[9]);
 	
 	color_global = d3.scaleThreshold()
-    .domain([1, 50, 100, 500, 1000, 1000, 50000, 100000, 150000])
+    .domain([1, 50, 100, 500, 1000, 10000, 50000, 100000, 150000])
 	.range(d3.schemeReds[9]);
 	//schemeReds
 	//schemeOrRd
-	global_choropleth = color_global;
+	global_choropleth = choropleth_global;//color_global;
 	global_choropleth_ht = color_global;
 	
-	country_choropleth = color4;
-	country_choropleth_ht = color4;
+	country_choropleth = color4;//choropleth4;//color4;
+	country_choropleth_ht = color4;//choropleth4;//color4;
 	 
 	 draw_country_view();
 	 draw_global_view();
@@ -1100,7 +1106,13 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		.enter()
 		.append("text")
 		.attr("class","gl_labels")
-		.attr("x",function(d){return global_path.centroid(d)[0];})
+		.attr("x",function(d){
+			if(d.properties.ADMIN == "Dominican Republic"){
+				return global_path.centroid(d)[0]+40;
+			}else{
+				return global_path.centroid(d)[0];
+			}
+		})
 		.attr("y",function(d){return global_path.centroid(d)[1];})
 		.text(function(d){return d.properties.ADMIN;});
 		
@@ -1143,7 +1155,14 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  .enter().append("g")
 		  .attr("id",function(d){return "gl_bchart_"+d.properties.ADMIN})
 		  .attr("transform", function(d) {//console.log(d.geometry.coordinates); 
-			  return "translate(" +global_path.centroid(d)+ ")";});	  
+			  if(d.properties.ADMIN == "Dominican Republic"){
+				  var cc = global_path.centroid(d);
+				  console.log(cc);
+				  return "translate(["+(cc[0]+100)+","+cc[1]+"])";
+			  }else{
+				  return "translate(" +global_path.centroid(d)+ ")";
+				  }	  
+		  		});
 		  
 		  var sz = 7;
 		  /*pp.append("rect")
@@ -1154,7 +1173,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		  //console.log(partnersbyLine.filter(function(v){return v.values.key == j[i].parentNode.id.replace("gl_bchart","");}));
 		  //var sz = 5;
 		  //console.log(partnersbyLine);
-		  console.log(partnersbyCountrybyLinebyPartner);
+		  //console.log(partnersbyCountrybyLinebyPartner);
 		  
 pp.selectAll("svg")
 		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
@@ -1163,10 +1182,10 @@ pp.selectAll("svg")
 		  .enter()
 		  .append("rect")	  	  	  
 		  .attr("x",function(d,i,j){//
-			  console.log(d);
+			  //console.log(d);
 			  //console.log(j[i].parentNode.id+" "+i); console.log(d); 
 			  return -(sz*2)+i*(sz+0.5);})
-		  .attr("y",function(d){return -sz-10;})
+		  .attr("y",function(d){return -sz-7;})
 		  .attr("width",sz)
 		  .attr("height",function(d,i,j){
 			  return sz;
@@ -2061,8 +2080,15 @@ var b2 = path.bounds(country_centroid[0]),
 	  //console.log(s2);
 	 
 	  c_scale = s2;
-	  //console.log(c_scale); 	  
-		  
+	  //console.log(c_scale); 
+	  
+	 /* overview_tab.selected = true;
+	  temporalview_tab.selected = false;  	  
+		    
+	drawTemporalView(); 
+	drawOverview();			    
+	overview_tab.style("background","#ccc");
+	temporalview_tab.style("background","#none");*/	  
 /*projection
 	.scale(s2)
 	  .translate(t2);*/
@@ -2217,6 +2243,11 @@ var b2 = path.bounds(country_centroid[0]),
 		censusCharts();
 		nationalCharts();
 		c_new_confirmed_paho();
+		/*if(ADM0=="SLV"){
+			c_new_confirmed();
+		}else{
+		c_new_confirmed_paho();
+		}*/
 		subnationalCharts();
 		awardsCharts();
 	}
@@ -2352,14 +2383,14 @@ var b2 = path.bounds(country_centroid[0]),
 		
 		var formatDate = d3.timeFormat("%m/%e/%y");
 		
-		var t = (ht)?"Cumulative Zika cases (per 100,000) as of 8/1/2016":"Cumulative Zika cases (per 100,000) as of 8/1/2016";
+		//var t = (ht)?"Cumulative Zika cases (per 100,000) as of 8/1/2016":"Cumulative Zika cases (per 100,000) as of 8/1/2016";
 		
-		mapview_svg.append("text")
+		/*mapview_svg.append("text")
 		.attr("id","tagline")
 		.attr("class","mapview_title")
 		.attr("x",10)
 		.attr("y",390)
-		.text("Cumulative Zika cases as of 8/1/2016");
+		.text("Cumulative Zika cases as of 8/1/2016");*/
 		//.text(function(d){ return formatDate(new Date(""+d.key+""));});
 		
 	var x_key = d3.scaleLinear()
@@ -2381,7 +2412,7 @@ var b2 = path.bounds(country_centroid[0]),
 		
 		//var key_svg = key.append("svg");
 		
-		var key = mapview_svg.selectAll("rect")
+		/*var key = mapview_svg.selectAll("rect")
   	  	.data(color4.range().map(function(color) {
     		var d = color4.invertExtent(color);
     		if (d[0] == null) d[0] = x_key.domain()[0];
@@ -2393,7 +2424,7 @@ var b2 = path.bounds(country_centroid[0]),
 		 .attr("y", 380)
   	 	 .attr("height", 6)
   	 	 .attr("width",20)
-  	 	 .attr("fill", function(d) { console.log(d); return color4(d[0]); });
+  	 	 .attr("fill", function(d) { console.log(d); return color4(d[0]); });*/
 		 
 		 /*mapview_svg.selectAll("text")
 		 .data(function(d){return d;})
@@ -2524,6 +2555,48 @@ var b2 = path.bounds(country_centroid[0]),
 			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
 		})	
 	}
+
+
+	function layerAwards_sm(){
+		awards_shp = mapview_svg.append("g")
+			.attr("class","awards_shp");
+			
+			//d3.select("#diagonalHatch").attr("transform", "translate([0,0])"+"scale(0.5)");	
+			
+		efforts = awards_shp.selectAll("path")
+		.data(country_awards)
+		.enter()
+		.append("path")
+		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
+		.style("pointer-events","all")
+		.attr("d",path_leaflet)
+		.style("stroke","white")
+		.style("stroke-width","0.25")
+		.attr("basecolor",function(d,i){
+			if(country_awards_info[i].Program=="ASSIST"){
+				//return "url(#diagonalHatch)";
+				return "url(#pattern2)"
+			}else if(country_awards_info[i].Program == "0"){
+				return "url(#diagonalHatch)";
+			}
+		})
+		.style("fill",function(d,i){
+			return d3.select(this).attr("basecolor");
+		})	
+		//.style("fill",function(d){return "url(#diagonalHatch)";})	
+				
+		//.style("opacity","0.5")
+		.on("click", function(d){
+			console.log(d);	
+		})
+		.on("mouseover",function(d){
+			d3.select(this).style("fill",hover_color);
+		} )
+		.on("mouseout",function(d){
+			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
+		})	
+	}
+
 	
 	
 
@@ -2738,7 +2811,9 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 	
 	
 	
-	function c_new_confirmed(dat){
+	function c_new_confirmed(){
+		
+		var dat = byRegion.filter(function(v){return v.key == FIPS0;})[0];
 		
 		var pp = dat.values.filter(function(v){return v.key == "cumulative_confirmed";})[0];
 		
@@ -2779,31 +2854,47 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		//console.log("rain...?");
 		//console.log(rainfall);
 	//var rain = rainfall.filter(function(d){return d.Country == ADMIN0;});	
-		
-  	var valueline_rain = d3.line()
-  	  	.x(function(d) { return x(d.report_date); })
-  	  	.y(function(d) { 
-			
-			
-			return y(d.new_cases);
-		})
-		//.curve(d3.curveCardinal);
-		.curve(d3.curveCatmullRom);	
 		 
 		//console.log(pp); 
 		  
   		linegraph = conf_cases.append("path")
 		.data([pp.values])
   		.attr("class","line")
-  		.style("stroke","red")
+  		//.style("stroke","red")
 		.attr("d", valueline);	
 		
-		var rain = conf_cases.append("path")
-		.data([pp.values])
-  		.attr("class","line")
-  		.style("stroke","red")
-		.style("fill","#ccc")
-		.attr("d", valueline_rain);
+		var rain = rainfall.filter(function(d){return d.Country == country_title;})[0];	
+		var ms = [rain.JANUARY,rain.FEBRUARY,rain.MARCH,rain.APRIL,rain.MAY,rain.JUNE,rain.JULY,rain.AUGUST,rain.SEPTEMBER,rain.OCTOBER,rain.NOVEMBER,rain.DECEMBER];
+		
+		var avg = d3.mean(ms);
+		
+	  	var valueline_rain = d3.line()
+	  	  	.x(function(d) { return x(d.date); })
+	  	  	.y(function(d) { 
+				//console.log(d.month);
+				//console.log(ms[d.month-1]);
+				//return y_rain(ms[d.month-1]);
+				if(ms[d.month-1]>=avg){
+					return y_rain(1);
+				}else{
+					return y_rain(0);	
+				}
+			})
+			//.curve(d3.curveCardinal);
+			.curve(d3.curveCatmullRom);	
+		
+		// define the area
+		var area = d3.area()
+		    .x(function(d) { return x(d.date); })
+		    .y0(height)
+		    .y1(function(d) { 
+				/*if(ms[d.month-1]>=avg){
+					return y_rain(1);
+				}else{
+					return y_rain(0);	
+				}*/
+				return y_rain(ms[d.month-1]); 
+			});
 	 	    
 	  var xaxis = conf_cases.append("g")
 		.attr("class","axis")	
@@ -2841,7 +2932,6 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			//return d.key == "SLV";});
 			//console.log("now");
 			//console.log(dat);
-			
 
 		
   	  c_new_confirmed = d3.select("#nationalData").append("div")
@@ -3777,6 +3867,10 @@ function drawSmallMultiples(){
 				dists_charts_mout(d);
 			}
 		});
+		
+		//layer awards
+		
+		
 	}
 
 
