@@ -98,4 +98,14 @@
 {"Partner_name":"Horace Goldsmith Foundation","project_name":"AMP Health","amount":0.00,"City":"New York","State":"NY","COR":"David Milestone","CD_num":12},
 {"Partner_name":"Margaret A. Cargill Foundation","project_name":"AMP Health","amount":0.00,"City":"Eden Praire","State":"MN","COR":"David Milestone","CD_num":3},
 {"Partner_name":"MDG Health Alliance","project_name":"AMP Health","amount":0.00,"City":"New York","State":"NY","COR":"David Milestone","CD_num":12},
-{"Partner_name":"Rotary International ","project_name":"International H20 Collaboration ","amount":0.00,"City":"Evanston","State":"IL","COR":"","CD_num":9}]
+{"Partner_name":"Rotary International ","project_name":"International H20 Collaboration ","amount":0.00,"City":"Evanston","State":"IL","COR":"","CD_num":9},
+{"Partner_name":"American Academy of Pediatrics","project_name":"Survive and Thrive","amout":null,"City":"Elk Grove Village","State":"IL","COR":"Lily Kak(lkak@usaid.gov)","CD_num":8},
+{"Partner_name":"Laerdal","project_name":"Survive and Thrive","amout":null,"City":"Wappingers Falls","State":"NY","COR":"Lily Kak (lkak@usaid.gov)","CD_num":18},
+{"Partner_name":"Sigma Theta Tau International Honor Society of Nursing","project_name":"Survive and Thrive","amout":null,"City":"Indianapolis","State":"IN","COR":"Lily Kak(lkak@usaid.gov)","CD_num":7},
+{"Partner_name":"American Heart Association","project_name":"Survive and Thrive","amout":null,"City":"Dallas","State":"TX","COR":"Lily Kak(lkak@usaid.gov)","CD_num":5},
+{"Partner_name":"Latter-Day Saint Charities","project_name":"Survive and Thrive","amout":null,"City":"Salt Lake City","State":"UT","COR":"Lily Kak(lkak@usaid.gov)","CD_num":2},
+{"Partner_name":"International Pediatric Association","project_name":"Survive and Thrive","amout":null,"City":"Webster Groves","State":"MO","COR":"Lily Kak(lkak@usaid.gov)","CD_num":2},
+{"Partner_name":"Global Health Media","project_name":"Survive and Thrive","amout":null,"City":"Waitsfield","State":"VT","COR":"Lily Kak(lkak@usaid.gov)","CD_num":0},
+{"Partner_name":"American College of Nurse-Midwives","project_name":"Survive and Thrive","amout":null,"City":"Silver Spring","State":"MD","COR":"Lily Kak(lkak@usaid.gov)","CD_num":8},
+{"Partner_name":"Every Mother Counts","project_name":"SMGL","amout":null,"City":"New York City","State":"NY","COR":"Claudia Conlon(cconlon@usaid.gov)","CD_num":10},
+{"Partner_name":"Elma Foundation","project_name":"SMGL","amout":null,"City":"New York City","State":"NY","COR":"Claudia Conlon(cconlon@usaid.gov)","CD_num":12}]
