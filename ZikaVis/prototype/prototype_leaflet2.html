@@ -32,6 +32,7 @@
 <script src="topojson.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
 
 <script>
 
@@ -896,6 +897,8 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  var paho_sub;
 	  var c_scale;
 	  var prev_menu;
+	  var bc_dx;
+	  var bc_dy;
 	  
 	  //var global_indicators_1;
 	  //var global_indicators_2;
@@ -921,10 +924,20 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
  	var mx_ht = d3.max(globaldata,function(f){return f.autochthonous_cases_confirmed/f.pop_x_1000;});
  	var	mn_ht = d3.min(globaldata,function(f){return f.autochthonous_cases_confirmed/f.pop_x_1000;});  
 	  
- 	choropleth_global = d3.scaleLog()
- 	.domain([1,mx])
+ 	
+	var plotRange = globaldata;
+	plotRange.sort(function(a,b){return a.autochthonous_cases_confirmed - b.autochthonous_cases_confirmed;});
+	
+	//console.log(plotRange);
+	//console.log(mx);
+	//console.log(mx_c);
+	//console.log(globaldata);
+	
+	choropleth_global = d3.scaleLog()
+ 	.domain([0.1,100,500,1000,5000,10000,mx])
 	//.range([d3.interpolateOrRd(0),d3.interpolateOrRd(1)]);
- 	.range(['#fef0d9', '#b30000']);	
+ 	.range(d3.schemeReds[7]);
+	//.range(['#fef0d9', '#b30000']);	
 	
 	//console.log(d3.interpolateReds(0));
 	
@@ -934,9 +947,17 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
  	.domain([0.001,mx_ht])
  	.range(['#fef0d9', '#b30000']);	  
 	  
-  	choropleth4 = d3.scaleLog()
+  	/*choropleth4 = d3.scaleLog()
   	.domain([1,mx_c])
-  	.range(['#fee8c8','#b30000'])
+  	.range(['#fee8c8','#b30000'])*/
+	
+choropleth4 = d3.scaleLog()
+.domain([0.1,10,50,100,500,1000,5000])
+	  .range(d3.schemeReds[7]);	 
+	  
+choropleth4_ht = d3.scaleLog()
+.domain([0.1,0.5,1,5,10,50,100,500])
+	  .range(d3.schemeReds[8]);	  
 	
 	/*color4 = d3.scaleThreshold()
     .domain([1, 5, 10, 50, 100, 500, 1000, 5000, 25000])
@@ -951,11 +972,11 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	.range(d3.schemeReds[9]);
 	//schemeReds
 	//schemeOrRd
-	global_choropleth = color_global;//choropleth_global;//color_global;
+	global_choropleth = choropleth_global;//color_global;
 	global_choropleth_ht = color_global;
 	
-	country_choropleth = color4;//choropleth4;//color4;
-	country_choropleth_ht = color4;//choropleth4;//color4;
+	country_choropleth = choropleth4;//color4;
+	country_choropleth_ht = choropleth4_ht;//color4;
 	 
 	 draw_country_view();
 	 draw_global_view();
@@ -1051,14 +1072,16 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			//if(priority_countries.indexOf(d.properties.ADMIN)==-1){return "rgb(220,220,220)";}
 			var c = globaldata.filter(function(v){return v.country == d.properties.ADMIN;});
 			if(c[0] != undefined){
+				//c.sort(function(a,b){return a.date - b.date;})
 				//console.log(d.properties.ADMIN);
 				//console.log(d.properties.ADM0_A3);
-				//console.log(c[0]);
+				//console.log(d.properties.ADMIN);
+				//console.log(c);
 				if(ht){
-				return global_choropleth_ht(c[0].autochthonous_cases_confirmed/(c[0].pop_x_1000));	
+				return global_choropleth_ht(c[c.length-1].autochthonous_cases_confirmed/(c[c.length-1].pop_x_1000));	
 					//return choropleth_global_ht(c[0].autochthonous_cases_confirmed/(c[0].pop_x_1000));
 				}else{
-				return global_choropleth(c[0].autochthonous_cases_confirmed);	
+				return global_choropleth(c[c.length-1].autochthonous_cases_confirmed);	
 				//return choropleth_global(c[0].autochthonous_cases_confirmed);
 				}
 			}else{
@@ -1099,6 +1122,13 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 			}
 		});
 		
+global_svg.append("text")
+		.attr("id","tagline")
+		.attr("class","mapview_title")
+		.attr("x",10)
+		.attr("y",365)
+		.text("Cumulative Zika cases as of 3/9/2017");
+		
 		//console.log(geodata_admin0.features);
 		
 		var vv = geodata_admin0.features.filter(function(d){return priority_countries.indexOf(d.properties.ADMIN) != -1;});
@@ -1111,6 +1141,7 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 		.append("text")
 		.attr("class","gl_labels")
 		.attr("x",function(d){
+			//return global_path.centroid(d)[0];
 			if(d.properties.ADMIN == "Dominican Republic"){
 				return global_path.centroid(d)[0]+40;
 			}else{
@@ -1284,6 +1315,25 @@ pp.selectAll("svg")
 	.on("mouseout",function(d){
 		d3.select(this).style("fill","url(#diagonalHatch)");
 	})*/
+		
+	  global_svg.append("g")
+	    .attr("class", "legendLog")
+	    .attr("transform", "translate(10,375)");
+
+	  var logLegend = d3.legendColor()
+		  .shapeWidth(20)
+		  .shapeHeight(5)
+		  .shapePadding(0.5)
+		  .orient('horizontal')
+		  .labelOffset(5)
+		  .labelFormat(d3.format(""))
+		  //.cells(10)
+		  .cells([0.1, 5, 10, 50, 100, 500, 1000, 5000, 10000])
+	      .scale(choropleth_global);
+
+	  global_svg.select(".legendLog")
+	    .call(logLegend);
+		
 		
 		//draw award data
 		draw_global_awards(partnersbyLinebyPartner);
@@ -1996,19 +2046,40 @@ var xaxis = global_indicators_3.append("g")
 		  //console.log(country_adm1_features);
 		  //country_povbyfips = country_povbyfips2;
 		  //console.log(country_povbyfips);
+		  //set country variables
+		  //add these to country info. 
+		bc_dx = 0;
+		bc_dy = 0; 
 		  
 		  if(country_title=="Colombia"){
 		  	country_map.setView([4.5, -74],5);
 		  }else if(country_title=="El Salvador"){
 		  	country_map.setView([14, -89],7);
+			bc_dy = 25;
 		  }else if(country_title=="Venezuela"){
 		  	country_map.setView([6.4, -67],5);
 		  }else if(country_title=="Honduras"){
-		  	country_map.setView([15, -86],7);
+		  	country_map.setView([15, -86],5.5);
+			bc_dy = -25;
 		  }else if(country_title=="Guatemala"){
-		  	country_map.setView([16, -90],6);
+		  	country_map.setView([16, -90],5.5);
+			bc_dy = 10;
 		  }else if(country_title=="Dominican Republic"){
-		  	country_map.setView([19, -70],6);
+		  	country_map.setView([19, -70],7);
+			bc_dx = 50;
+		  }else if(country_title=="Nicaragua"){
+		  	country_map.setView([13, -85],6);
+			bc_dy = 25;
+		  }else if(country_title=="Ecuador"){
+		  	country_map.setView([-1.8, -83],5);
+		  }else if(country_title=="Peru"){
+		  	country_map.setView([-9, -75],4.5);
+			bc_dx = -10;
+		  }else if(country_title=="Jamaica"){
+		  	country_map.setView([18, -77],8);
+			bc_dy = -10;
+		  }else if(country_title=="Haiti"){
+		  	country_map.setView([19, -72],8);
 		  }
 		  
 		  
@@ -2026,14 +2097,23 @@ var xaxis = global_indicators_3.append("g")
 		  mx_c_ht = d3.max(paho_sub.values, function(v){return d3.max(v.values,function(g){return g.Rate;});});
 		  //console.log(paho_sub.values);
 		  
+		  console.log("max ht");
+		  console.log(mx_c_ht);
 		  //set keys
-  	choropleth4 = d3.scaleLog()
+  	/*choropleth4 = d3.scaleLog()
   	.domain([1,mx_c])
-		  .range(['#fee8c8','#b30000']);
+		  .range(['#fee8c8','#b30000']);*/
+		  //console.log("max");
+		  //console.log(mx_c);
+		  
+   choropleth4 = d3.scaleLog()
+  	.domain([0.1,10,50,100,500,1000,5000])
+		  .range(d3.schemeReds[7]);	  
+		  
 		  
   	choropleth4_ht = d3.scaleLog()
-  	.domain([0.1,mx_c_ht])
-		  .range(['#fee8c8','#b30000']);
+  	.domain([0.1,0,5,1,5,10,50,100,500])
+		  .range(d3.schemeReds[8]);
 		  
 		  
 		  
@@ -2409,30 +2489,37 @@ var b2 = path.bounds(country_centroid[0]),
 		
 		var formatDate = d3.timeFormat("%m/%e/%y");
 		
-		//var t = (ht)?"Cumulative Zika cases (per 100,000) as of 8/1/2016":"Cumulative Zika cases (per 100,000) as of 8/1/2016";
 		
-		/*mapview_svg.append("text")
+		mapview_svg.append("text")
 		.attr("id","tagline")
 		.attr("class","mapview_title")
 		.attr("x",10)
-		.attr("y",390)
-		.text("Cumulative Zika cases as of 8/1/2016");*/
+		.attr("y",365)
+		.text("Cumulative Zika cases as of 8/1/2016");
 		//.text(function(d){ return formatDate(new Date(""+d.key+""));});
 		
-	var x_key = d3.scaleLinear()
-	    .domain([0, 1])
-	    .range([0, 200]);
+	  mapview_svg.append("g")
+	    .attr("class", "legendLog")
+	    .attr("transform", "translate(10,375)");
+
+	  var logLegend_c = d3.legendColor()
+		  .shapeWidth(20)
+		  .shapeHeight(5)
+		  .shapePadding(0.5)
+		  .orient('horizontal')
+		  .labelOffset(5)
+		  .labelFormat(d3.format(""))
+		  //.cells(10)
+		  .cells([0.1,10,50,100,500,1000,5000])
+	      .scale(country_choropleth);
+
+	  mapview_svg.select(".legendLog")
+	    .call(logLegend_c);
 		
-		var xAxis = d3.axisBottom(x_key)
-  	  	.tickSize(13)
-   	 	.tickValues(color4.domain())
 		
-		/*var key = mapview_svg.append("rect")
-		.attr("x",200)
-		.attr("y",385)
-		.attr("width",200)
-		.attr("height",10)
-		.attr("fill","steelblue");*/
+		
+		//var t = (ht)?"Cumulative Zika cases (per 100,000) as of 8/1/2016":"Cumulative Zika cases (per 100,000) as of 8/1/2016";
+		
 		
 		//var key = mapview_svg.append("g");
 		
@@ -3790,9 +3877,9 @@ var linegraph = global_indicators_2.append("path")
 			
 			if(num!=undefined){
 				if(ht){
-					if(num.values[0].values[0].value==0){return "#ccebad";}else{return color4(num.values[0].values[0].p_ht);}
+					if(num.values[0].values[0].value==0){return "#ccebad";}else{return country_choropleth_ht(num.values[0].values[0].p_ht);}
 				}else{
-					if(num.values[0].values[0].value==0){return "#ccebad";}else{return color4(num.values[0].values[0].value);}
+					if(num.values[0].values[0].value==0){return "#ccebad";}else{return country_choropleth(num.values[0].values[0].value);}
 				}
 				//return choropleth4(num.values[0].values[0].value);} //add green for 0 cases
 			}else{

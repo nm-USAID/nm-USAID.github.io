@@ -490,6 +490,14 @@
 	font: 10px sans-serif;
 }
 
+.legendLog{
+	font: 10px sans-serif;
+}
+
+.legendLog text{
+	y:-20px;
+}
+
 #gl_mapview{
 	float:left;
     width:600px;
