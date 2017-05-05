@@ -987,8 +987,8 @@ choropleth4_ht = d3.scaleLog()
 	 function draw_country_view(){
 	 drawMenu();  
 	 setLeaflet();
- 	overview_tab.selected = true;
- 	temporalview_tab.selected = false;
+ 	//overview_tab.selected = true;
+ 	//temporalview_tab.selected = false;
 	 setCountry(ADM0);
 	 }
 	 
@@ -996,6 +996,13 @@ choropleth4_ht = d3.scaleLog()
 	 //need to set this up here
 	 over_view = d3.select("#mapview").append("div")
 	 	.attr("id","overview");
+		
+	 d3.select("#mapview").append("svg")
+		.attr("width","200px")
+		.attr("height","100px")
+		.attr("x",375)
+		.attr("y",10)
+		.attr("id","legend_svg");
 	
 	 country_map = L.map('overview').setView([14, -89], 7)		
 	 	.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png?access_token={accessToken}",{
@@ -1328,7 +1335,7 @@ pp.selectAll("svg")
 		  .labelOffset(5)
 		  .labelFormat(d3.format(""))
 		  //.cells(10)
-		  .cells([0.1, 5, 10, 50, 100, 500, 1000, 5000, 10000])
+		  .cells([1, 5, 10, 50, 100, 500, 1000, 5000, 10000])
 	      .scale(choropleth_global);
 
 	  global_svg.select(".legendLog")
@@ -2097,8 +2104,8 @@ var xaxis = global_indicators_3.append("g")
 		  mx_c_ht = d3.max(paho_sub.values, function(v){return d3.max(v.values,function(g){return g.Rate;});});
 		  //console.log(paho_sub.values);
 		  
-		  console.log("max ht");
-		  console.log(mx_c_ht);
+		  //console.log("max ht");
+		  //console.log(mx_c_ht);
 		  //set keys
   	/*choropleth4 = d3.scaleLog()
   	.domain([1,mx_c])
@@ -2199,8 +2206,8 @@ var b2 = path.bounds(country_centroid[0]),
 	//drawOverview();
 	//drawTemporalView();
 	//temporalview_tab.style("background","#ccc");
-	//overview_tab.selected = true;
-	//temporalview_tab.selected = false;
+	overview_tab.selected = true;
+	temporalview_tab.selected = false;
 	//overview_tab.selected = 0;
 		  
 	  	//start with overview 
@@ -2490,8 +2497,8 @@ var b2 = path.bounds(country_centroid[0]),
 		var formatDate = d3.timeFormat("%m/%e/%y");
 		
 		
-		mapview_svg.append("text")
-		.attr("id","tagline")
+		/*mapview_svg.append("text")
+		.attr("id","c_legend")
 		.attr("class","mapview_title")
 		.attr("x",10)
 		.attr("y",365)
@@ -2514,7 +2521,7 @@ var b2 = path.bounds(country_centroid[0]),
 	      .scale(country_choropleth);
 
 	  mapview_svg.select(".legendLog")
-	    .call(logLegend_c);
+	    .call(logLegend_c);*/
 		
 		
 		

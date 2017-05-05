@@ -490,12 +490,20 @@
 	font: 10px sans-serif;
 }
 
+/*.mapview_title{
+	position:absolute;
+}*/
+
 .legendLog{
 	font: 10px sans-serif;
 }
 
 .legendLog text{
 	y:-20px;
+}
+
+#legend_svg{
+	position:absolute;
 }
 
 #gl_mapview{
