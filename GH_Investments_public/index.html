@@ -485,10 +485,10 @@ var popup = d3.select("body").append("div")
 //load data
 queue()
     .defer(d3.json, "us.json")
-    .defer(d3.json, "us-congress-115d.json")
-	.defer(d3.json, "reps3.json")
+    .defer(d3.json, "us-congress-115.json")
+	.defer(d3.json, "reps.json")
 	.defer(d3.json, "awards_USAID_public.json")
-	.defer(d3.json, "state_ids2.json")
+	.defer(d3.json, "state_ids.json")
 	.defer(d3.json, "us-states.json")
     .await(ready);
 
