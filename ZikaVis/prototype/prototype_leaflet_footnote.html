@@ -3,6 +3,7 @@
 <title>Zika Mapping - prototype 2</title>
 <link rel="stylesheet" type="text/css" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css"/>
+<link rel="stylesheet" href="../src/leaflet/Leaflet.draw.css"/>
 <style>
 </style>
 
@@ -33,6 +34,46 @@
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
+
+
+//leaflet draw stuff
+
+	<script src="../src/leaflet/Leaflet.draw.js"></script>
+    <script src="../src/leaflet/Leaflet.Draw.Event.js"></script>
+
+    <script src="../src/leaflet/Toolbar.js"></script>
+    <script src="../src/leaflet/Tooltip.js"></script>
+
+    <script src="../src/leaflet/ext/GeometryUtil.js"></script>
+    <script src="../src/leaflet/ext/LatLngUtil.js"></script>
+    <script src="../src/leaflet/ext/LineUtil.Intersect.js"></script>
+    <script src="../src/leaflet/ext/Polygon.Intersect.js"></script>
+    <script src="../src/leaflet/ext/Polyline.Intersect.js"></script>
+    <script src="../src/leaflet/ext/TouchEvents.js"></script>
+
+    <script src="../src/leaflet/draw/DrawToolbar.js"></script>
+    <script src="../src/leaflet/draw/handler/Draw.Feature.js"></script>
+    <script src="../src/leaflet/draw/handler/Draw.SimpleShape.js"></script>
+    <script src="../src/leaflet/draw/handler/Draw.Polyline.js"></script>
+    <script src="../src/leaflet/draw/handler/Draw.Circle.js"></script>
+    <script src="../src/leaflet/draw/handler/Draw.Marker.js"></script>
+    <script src="../src/leaflet/draw/handler/Draw.Polygon.js"></script>
+    <script src="../src/leaflet/draw/handler/Draw.Rectangle.js"></script>
+
+
+    <script src="../src/leaflet/edit/EditToolbar.js"></script>
+    <script src="../src/leaflet/edit/handler/EditToolbar.Edit.js"></script>
+    <script src="../src/leaflet/edit/handler/EditToolbar.Delete.js"></script>
+
+    <script src="../src/leaflet/Control.Draw.js"></script>
+
+    <script src="../src/leaflet/edit/handler/Edit.Poly.js"></script>
+    <script src="../src/leaflet/edit/handler/Edit.SimpleShape.js"></script>
+    <script src="../src/leaflet/edit/handler/Edit.Circle.js"></script>
+    <script src="../src/leaflet/edit/handler/Edit.Rectangle.js"></script>
+    <script src="../src/leaflet/edit/handler/Edit.Marker.js"></script>
+
+
 
 <script>
 
@@ -401,7 +442,6 @@ queue()
 	.defer(d3.json, "epidata_all.json")
 	.defer(d3.json, "fips2.json")
 	.defer(d3.json, "rainfall_national.json")
-	//for csv - defer.csv
 	//.defer(d3.json, "elsalve.json")
     .await(ready);	
 		
@@ -1005,7 +1045,7 @@ choropleth4_ht = d3.scaleLog()
 		.attr("y",10)
 		.attr("id","legend_svg");
 	
-	 country_map = L.map('overview').setView([14, -89], 7)		
+	 country_map = L.map('overview'/*,{drawControl: true}*/).setView([14, -89], 7)		
 	 	.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png?access_token={accessToken}",{
 			id: 'your.mapbox.project.id',
     		accessToken: 'your.mapbox.public.access.token'
@@ -1013,9 +1053,166 @@ choropleth4_ht = d3.scaleLog()
 	 	}));
 		
 		
-		country_map.on('contextmenu',function(e){
-			var marker = new L.marker(e.latlng).bindPopup('add comment').addTo(country_map);
-		});
+		/*var drawnItems = new L.FeatureGroup();
+		     
+			 country_map.addLayer(drawnItems);
+		     var drawControl = new L.Control.Draw({
+		         edit: {
+		             featureGroup: drawnItems
+		         }
+		     });
+		     
+			 country_map.addControl(drawControl);*/
+		
+		
+		/*country_map.on('contextmenu',function(e){
+			var marker = new L.marker(e.latlng).bindPopup('<form role="form" id="form" enctype="multipart/form-data" class = "form-horizontal" onsubmit="addMarker()">'+
+              //...
+              '<div class="form-group">'+
+                  '<textarea class="form-control" rows="6" id="descrip" name="descript">add comment</textarea>'+
+              '</div>'+
+              '<div class="form-group">'+
+                '<div style="text-align:center;" class="col-xs-4"><button type="submit" value="submit" class="btn btn-primary trigger-submit">Submit</button></div>'+
+              '</div>'+
+              '</form>').addTo(country_map);
+		});*/
+			
+	  //create temp layer to store new features
+	  //create temp layer to store new features
+	        var featureGroup = L.featureGroup().addTo(country_map);
+
+	        //create drawing controls and toolbar
+	        var drawControl = new L.Control.Draw({
+	          draw: {
+	            circle: false,
+	            marker: true,
+	            polyline: false, 
+	            polygon: false,
+	            rectangle: false
+	          },
+	         edit: {
+	             featureGroup: featureGroup
+	         }
+			  
+	        }).addTo(country_map);	
+			
+		
+		country_map.on('draw:created', function(e) {
+		          var coords = e.layer._latlng;
+		          console.log(coords);
+		          var tempMarker = featureGroup.addLayer(e.layer);
+		          var popupContent = 
+				  //'<form action="https://docs.google.com/forms/d/e/1FAIpQLSe63rT_PcCjDCMebQ3ToqUU5TH9hacCR1Bcv76c-IY3oC_lZw/formResponse" target="_self" method="POST" id="mG61Hd" onsubmit="">'+
+				  '<form id="callus" target="_self" onsubmit="">'+
+				  //'<form role="form" id="form" enctype="multipart/form-data" class = "form-horizontal">'+
+				  //'<form role="form" id="form" enctype="multipart/form-data" class = "form-horizontal" onsubmit="">'+
+		          /*'<div class="form-group">'+
+		              '<label class="control-label col-sm-5"><strong>Date: </strong></label>'+
+		              '<input type="date" placeholder="Required" id="date" name="date" class="form-control"/>'+ 
+		          '</div>'+
+		          '<div class="form-group">'+
+		              '<label class="control-label col-sm-5"><strong>Gender: </strong></label>'+
+		              '<select class="form-control" id="gender" name="gender">'+
+		                '<option value="Male">Male</option>'+
+		                '<option value="Female">Female</option>'+
+		                '<option value="Other">Other</option>'+
+		              '</select>'+ 
+		          '</div>'+
+		          '<div class="form-group">'+
+		              '<label class="control-label col-sm-5"><strong>Age: </strong></label>'+
+		              '<input type="number" min="0" class="form-control" id="age" name="age">'+ 
+		          '</div>'+*/
+		          //...
+		          '<div class="form-group">'+
+		              //'<label class="control-label col-sm-5"><strong>Description: </strong></label>'+
+		              '<textarea class="form-control" rows="6" id="comment" name="comment">add comment</textarea>'+
+		          '</div>'+
+		          '<input style="display: none;" type="text" id="lat" name="lat" value="'+coords.lat.toFixed(6)+'" />'+
+		          '<input style="display: none;" type="text" id="lng" name="lng" value="'+coords.lng.toFixed(6)+'" />'+
+		          '<div class="form-group">'+
+		            //'<div style="text-align:center;" class="col-xs-4 col-xs-offset-2"><button type="button" class="btn">Cancel</button></div>'+
+		            '<div style="text-align:center;" class="col-xs-4"><button type="submit" value="submit" name="M2UYVd">Submit</button></div>'+
+		          '</div>'+
+		          '</form>';
+		          tempMarker.bindPopup(popupContent,{
+		            keepInView: true,
+		            closeButton: false
+		            }).openPopup();
+
+		      /*  $("#form").submit(function(e){
+		            e.preventDefault();
+		            var comment =$("#comment").val();
+					var lat =$("#lat").val();
+					var lng =$("#lng").val();
+			if ((name !== "") && (email !== "") && (feed !== "")){		
+					$j.ajax({
+						url:"https://docs.google.com/forms/d/e/1FAIpQLSe63rT_PcCjDCMebQ3ToqUU5TH9hacCR1Bcv76c-IY3oC_lZw/formResponse",
+						data: {"entry.1":lat, "entry.2":lng, "entry.3":comment},
+						type: "POST",
+						dataType:"xml",
+						statusCode: {
+						        0: function (){
+ 
+									$j('#lat').val("");
+									$j('#lng').val("");
+									$j('#comment').val("");
+						                        //Success message
+								},
+								200: function (){
+									$j('#lat').val("");
+									$j('#lng').val("");
+									$j('#comment').val("");
+									//Success Message
+								}
+							}
+						
+					});
+				}else{
+					//error message
+				}
+					
+				});*/
+				  
+	 		 	 $("#form").submit(function(e){
+					  e.preventDefault();
+				 //function postFormToGoogle(){
+	 		          var comment =$j("#comment").val();
+	 		 		var lat =$j("#lat").val();
+	 		 		var lng =$j("#lng").val();
+	 		 if ((lat !== "") && (lng !== "") && (comment !== "")){		
+	 		 		$j.ajax({
+	 		 			url:"https://docs.google.com/forms/d/e/1FAIpQLSe63rT_PcCjDCMebQ3ToqUU5TH9hacCR1Bcv76c-IY3oC_lZw/formResponse",
+	 		 			data: {"entry.1":lat, "entry.2":lng, "entry.3":comment},
+	 		 			type: "POST",
+	 		 			dataType:"xml",
+	 		 			statusCode: {
+	 		 			        0: function (){
+
+	 		 						$j('#lat').val("");
+	 		 						$j('#lng').val("");
+	 		 						$j('#comment').val("");
+	 		 			                        //Success message
+	 		 					},
+	 		 					200: function (){
+	 		 						$j('#lat').val("");
+	 		 						$j('#lng').val("");
+	 		 						$j('#comment').val("");
+	 		 						//Success Message
+	 		 					}
+	 		 				}		
+	 		 		});
+	 		 	}else{
+	 		 		//error message
+	 		 	}	
+	 		 }
+		 );
+				  
+				  
+				  
+		      });
+			  
+			  //class="btn btn-primary trigger-submit"
+		
 		
 			/*function highlightFeature(e) {
 			    var layer = e.target;
