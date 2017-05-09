@@ -443,14 +443,20 @@ var popmap_zoom = d3.zoom()
 		footnotes = new L.FeatureGroup();
 		for(i=0;i<footnote_data.length;i++){
 			console.log(footnote_data[i]);
-			var _marker = L.marker([+footnote_data[i].lat,+footnote_data[i].lng]).bindPopup(footnote_data[i].comment);
-			if(_marker != undefined){
+		  	if(footnote_data[i].lat != "" && footnote_data[i].lng != "" && footnote_data[i].comment != ""){
+			_marker = L.marker([+footnote_data[i].lat,+footnote_data[i].lng]).bindPopup(footnote_data[i].comment);
+			console.log(_marker);
 			footnotes.addLayer(_marker);
 			}
 		}
+		//console.log("break");
+		console.log(country_map);
+		if(country_map != undefined){
 		footnotes.addTo(country_map);
+		}
 	  }
-	  window.addEventListener('DOMContentLoaded', init)
+	  
+	  //window.addEventListener('DOMContentLoaded', init);
 	
 	/*var url = "https://docs.google.com/spreadsheet/pub?key=0ApMOA8U0y53_dGJpUzdMTGYyLWVGckZMOWRGNXB1Vnc&output=csv";
 	d3.csv(url, function(data, error) {
@@ -1091,6 +1097,8 @@ choropleth4_ht = d3.scaleLog()
 			//onEachFeature: onEachFeature
 	 	}));
 		
+		init();
+		
 		//var footnotes = new L.FeatureGroup();
 		
 		/*footnote_data.each(function(d,i){
@@ -1186,11 +1194,12 @@ choropleth4_ht = d3.scaleLog()
 		            closeButton: false
 		            }).openPopup();
 
-		        $("#form").submit(function(e){
+		        /*$("#form").submit(function(e){
 		            e.preventDefault();
-		            console.log("didnt submit");
-		            var comment =$("#comment").val();
-		            console.log(comment);});
+		            //console.log("didnt submit");
+		            //var comment =$("#comment").val();
+		            console.log(comment);
+				});*/
 		      });
 			  
 			  //class="btn btn-primary trigger-submit"
@@ -4242,7 +4251,7 @@ var spectrum = d3.scaleThreshold()
 	  regions.attr("d", path_leaflet);
 	}*/
 	
-//end ready
+//end ready		
 }	
 
 
