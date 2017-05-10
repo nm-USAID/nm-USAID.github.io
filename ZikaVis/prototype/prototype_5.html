@@ -3742,6 +3742,9 @@ var linegraph = global_indicators_2.append("path")
 	
 		var dd = byCountrybyIndbyRegion.filter(function(v){return v.key == country_title;})[0];
 		
+		//console.log(dd);
+		//dd = dd.values.filter(function(v){return })
+		
 		dd.values.sort(function(a,b){return b.values.length - a.values.length;});
 		//console.log("ok");
 		//console.log(byCountrybyIndbyRegion);
@@ -3788,8 +3791,8 @@ var linegraph = global_indicators_2.append("path")
 		.style("stroke",function(d,i){return colors[i%colors.length];})
 		.style("fill","none")
 		.attr("d", function(d){
-			//console.log(d);
 			if(d.key!="null"){
+				console.log(d);
 				y.domain([0,d3.max(d.values, function(e){return e.value;})]);	
 			return valueline_dists(d.values);
 		}
