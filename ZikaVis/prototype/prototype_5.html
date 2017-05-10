@@ -24,9 +24,6 @@
            patternUnits="userSpaceOnUse" patternTransform="scale(5)">
 <circle cx="0.3" cy="0.3" r="0.15" style="stroke: none; fill:white" /></pattern></defs></svg>
 
-<body>	
-	<div id="container"></div>
-	<div id="global_container"></div>
 
 <script src="d3.min.js"></script>
 <script src="//d3js.org/queue.v1.min.js"></script>
@@ -36,8 +33,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-legend/2.24.0/d3-legend.js"></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
 
-
-//leaflet draw stuff
 
 	<script src="../src/leaflet/Leaflet.draw.js"></script>
     <script src="../src/leaflet/Leaflet.Draw.Event.js"></script>
@@ -75,6 +70,9 @@
     <script src="../src/leaflet/edit/handler/Edit.Marker.js"></script>
 
 
+<body>	
+	<div id="container"></div>
+	<div id="global_container"></div>
 
 <script>
 
@@ -436,21 +434,21 @@ var popmap_zoom = d3.zoom()
 
 	  function addMarkers(data, tabletop) {
 	    //alert('Successfully processed!')
-		console.log("adding markers");
-		console.log(data);
-		console.log(data.length);
+		//console.log("adding markers");
+		//console.log(data);
+		//console.log(data.length);
 		footnote_data = data;
 		footnotes = new L.FeatureGroup();
 		for(i=0;i<footnote_data.length;i++){
-			console.log(footnote_data[i]);
+			//console.log(footnote_data[i]);
 		  	if(footnote_data[i].lat != "" && footnote_data[i].lng != "" && footnote_data[i].comment != ""){
 			_marker = L.marker([+footnote_data[i].lat,+footnote_data[i].lng]).bindPopup(footnote_data[i].comment);
-			console.log(_marker);
+			//console.log(_marker);
 			footnotes.addLayer(_marker);
 			}
 		}
 		//console.log("break");
-		console.log(country_map);
+		//console.log(country_map);
 		if(country_map != undefined){
 		footnotes.addTo(country_map);
 		}
@@ -1148,10 +1146,10 @@ choropleth4_ht = d3.scaleLog()
 	            polyline: false, 
 	            polygon: false,
 	            rectangle: false
-	          },
+	          }/*,
 	         edit: {
 	             featureGroup: featureGroup
-	         }
+	         }*/
 			  
 	        }).addTo(country_map);	
 			
@@ -1310,7 +1308,9 @@ choropleth4_ht = d3.scaleLog()
 		.on("click", function(d){
 			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
 				ADM0 = 	d.properties.ADM0_A3;
-				setCountry(ADM0);
+				d3.select("#"+d.properties.ADMIN.replace(" ","_")+"_0").dispatch("click");
+				//console.log("#"+d.properties.ADMIN+"_0");
+				//setCountry(ADM0);
 			d3.select("#container").moveToFront();
 		 if(overview_tab.selected){
 			 d3.select("#overview").style("opacity",1);
@@ -2072,12 +2072,14 @@ var xaxis = global_indicators_3.append("g")
 			.text(function(d){return d.key;})
 			.on("click",function(d,i){
 				//console.log(d.key);
-				var t = ADM0_A3_lookup.filter(function(v){console.log(v.key); return v.key == d.key;});
+				var t = ADM0_A3_lookup.filter(function(v){//console.log(v.key); 
+					return v.key == d.key;});
 				//var t2 = ADM0_A3_lookup.filter(function(v){return v.key == "Venezuela";});
-				//console.log(t[0].value+" "+i);
+				//var title = ADM0_A3_lookup.filter(function(v){return v.value == adm0;})[0].key;
 				
 				
 				ADM0 = t[0].value;
+				
 				setCountry(ADM0);
 			});
 			
@@ -2089,7 +2091,8 @@ var xaxis = global_indicators_3.append("g")
 	      .enter().append("rect")
 			//.attr("id",function(d){return "b1"+d.country;})
 	        .attr("class", "bar")
-			.attr("id",function(d,i){return d.key+"_"+i;})	
+			.attr("id",function(d,i){//console.log(d.key.replace(" ","_")+"_"+i); 
+			return d.key.replace(" ","_")+"_"+i;})	
 	        //.attr("x", function(d) { return x(d.sales); })
 			.attr("width", function(d,i) {
 				if(i==0){
@@ -2129,12 +2132,12 @@ var xaxis = global_indicators_3.append("g")
 					d3.select("#"+prev_menu).style("fill",b_colors[c]);
 				}
 				
-				
-				prev_menu = d.key+"_"+i;
+				prev_menu = d.key.replace(" ","_")+"_"+i;
 				d3.select("#"+prev_menu).style("fill",hover_color);
 				
 				//console.log(d.key);
-				var t = ADM0_A3_lookup.filter(function(v){console.log(v.key); return v.key == d.key;});
+				var t = ADM0_A3_lookup.filter(function(v){//console.log(v.key); 
+					return v.key == d.key;});
 				//var t2 = ADM0_A3_lookup.filter(function(v){return v.key == "Venezuela";});
 				//console.log(t[0].value+" "+i);
 				//d3.select(this).style("fill","steelblue");
@@ -3433,13 +3436,13 @@ var linegraph = global_indicators_2.append("path")
 				var dd = byRegion.filter(function(v){return v.key == FIPS0;});	
 				
 				console.log(FIPS0);
-				console.log(dd);
-				console.log(byRegion);
+				//console.log(dd);
+				//console.log(byRegion);
 				
 
 				//scale domain		
 				var max = totalByRegion.filter(function(v){return v.key == FIPS0;});	
-				console.log(max);	
+				//console.log(max);	
 		
 				x.domain(d3.extent(country_epi, function(v) { return v.report_date; }));
 				y.domain([0,max[0].value.max_cumulative_orig+10]);
