@@ -6,6 +6,7 @@
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCukYnSkgIttWhAzy_U2YpbhsxU6wS0pbY" async defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+<script src="https://d3js.org/d3-timer.v1.min.js"></script>
 
 <link rel="stylesheet" href="../src/leaflet/leaflet.draw.css"/>
 <script src='https://unpkg.com/leaflet.gridlayer.googlemutant@latest/Leaflet.GoogleMutant.js'></script>
@@ -110,10 +111,44 @@ var ADM0_A3_lookup = [{key:"Haiti",value:"HTI"/*{country_code:"HTI",lat:,long:,z
 
 var glMapView;
 
+var global_map;
+var wait = false;
+var country_map;
+var footnote_data;	
+var global_data;
+var country_featureGroup;
+var global_featureGroup;
+var comments_data;
+var gl_countries;
+
+
+
+
+function retrieveComments(_callback){
+	console.log("retrieving comments");
+	//https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/edit?usp=sharing
+	//https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml
+
+	d3.csv("https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv", function(error,data){
+		console.log(data);
+		comments_data = data;
+		
+		_callback(comments_data);
+		//_callback();
+		//drawMessageBoard();
+		//global_drawMessageBoard();
+	});
+}
+
+//retrieveComments();	
+
 function initGlobalView(){
 //set up global view divs	
 d3.select("#global_container").append("div")
 	.attr("id","gl_mapview");
+
+/*d3.select("#global_container").append("div")
+	.attr("id","gl_mapLeaflet");*/	
 	
 glMapview = document.getElementById("gl_mapview");	
 	
@@ -145,11 +180,23 @@ d3.select("#gl_comments").append("div")
 d3.select("#gl_chartview").append("div")
 	.attr("id","gl_epiData");
 	
-d3.select("#gl_epiData").append("div")
+var WEDtitle = d3.select("#gl_epiData").append("div")
 	.attr("id","epiDataTitle")
 	.attr("class","chartTitle")
 	.append("text")
 	.text("WEEKLY EPIDEMIOLOGICAL DATA");	
+	
+var infoImage = WEDtitle.append("svg:image")
+	.attr("xlink:href","./images/infoIcon.png")
+	.attr("width",20)
+	.attr("height",20)
+	.on("mouseover",function(d){
+		d3.select(this).attr("cursor","pointer");
+		console.log("information!");
+	})
+	.on("mouseout",function(d){
+		d3.select(this).attr("cursor","default");
+	});	
 	
 d3.select("#gl_epiData").append("div")
 	.attr("class","epiTab")
@@ -191,6 +238,10 @@ d3.select("#newConfirmedData").append("div")
 	
 d3.select("#gl_epiData").append("div")
 	.attr("id","byIndicatorData");	
+	
+//move new confirmed to fron
+	d3.select("#newConfirmedData").moveToFront();	
+	
 }	
 
 
@@ -430,7 +481,7 @@ d3.select("#awardview").append("div")
 //maybe just one svg...
 	var mapview_svg;
 	var over_view;
-	var country_map;
+	//var country_map;
 	var footnotes;
 	var sm_view;
 	var sm_multiples;
@@ -462,7 +513,9 @@ d3.select("#awardview").append("div")
 	var global_bcharts;	
 	var global_labels;	
 	
-	var global_map;
+	//var global_map;
+	//var footnote_data;	
+	//var global_data;
 	
 //country variables	
 	var path_leaflet;
@@ -473,7 +526,6 @@ d3.select("#awardview").append("div")
 	var projection;
 	var path;
 	var clinicSymbol;	
-
 	
 	
 function globalProjections(){	
@@ -495,7 +547,7 @@ global_projection = d3.geoMercator()
     .scale(500)
 	//.scale(100)
     .center([0,0]) //projection center
-	.translate([1025,300]) //translate to center the map in view	
+	.translate([1025,350]) //translate to center the map in view	
 	//.translate([width/2,height/2]);
 
 //Generate paths based on projection
@@ -510,7 +562,8 @@ global_svg = d3.select("#gl_mapview").append("svg")
 
 //Group for the map features
 global_land = global_svg.append("g")
-    .attr("class","gl_land");
+    .attr("class","gl_land")
+	.attr("id","gl_regions");
 	
 //Group for the map features
 global_features = global_svg.append("g")
@@ -579,7 +632,8 @@ var gl_zoom = d3.zoom()
     .on("zoom",gl_zoomed);		
 				
 	//var lat_longs - just enter manually SVL:14, 89; 
-	var footnote_data;	
+//	var footnote_data;	
+//	var global_data;
 //enable zoom
 var popmap_zoom = d3.zoom()
     .scaleExtent([0.3, Infinity])
@@ -587,25 +641,43 @@ var popmap_zoom = d3.zoom()
 	
 	
 	var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/18xaJk0uObdu5WNgd2yMSxzgyS3Oz2oJ5qBMEkR0z1QI/pubhtml';
+	var publicSpreadsheetUrl2 = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml';
 	
 	function init() {
-	    Tabletop.init( { key: publicSpreadsheetUrl,
-	                     callback: addMarkers,
-	                     simpleSheet: true } )
+		retrieveFootnotes();
+		
+	    /*Tabletop.init( { key: publicSpreadsheetUrl,
+	                     callback: initMarkers,
+	                     simpleSheet: true })*/	
+	  }
+	  
+	  function initMarkers(data,tabletop){
+		  addMarkers(data);
+		  console.log(data);
+	  }
+	  
+	  function initComments(data,tabletop){
+		  console.log(data);
 	  }
 
-	  function addMarkers(data, tabletop) {
+	  function addMarkers(data) {
 	    //alert('Successfully processed!')
 		//console.log("adding markers");
 		console.log("DATA");
-		console.log(data);
+		//console.log(data.filter(function(d){return d.country!="ALL";}));
+		//console.log(data.filter(function(d){return d.country=="ALL";}));
 		//console.log(data.length);
-		footnote_data = data;
+		footnote_data = data.filter(function(d){return d.country!="ALL";});
+		global_data = data.filter(function(d){return d.country=="ALL";});
+		
+		//L.Icon.Default.prototype.options.iconSize = "[20,20]";
+		
+		//add country-level footnotes
 		footnotes = new L.FeatureGroup();
 		for(i=0;i<footnote_data.length;i++){
 			//console.log(footnote_data[i]);
 		  	if(footnote_data[i].lat != "" && footnote_data[i].lng != "" && footnote_data[i].comment != ""){
-			_marker = L.marker([+footnote_data[i].lat,+footnote_data[i].lng]).bindPopup(footnote_data[i].comment);
+			_marker = L.marker([+footnote_data[i].lat,+footnote_data[i].lng]/*,{icon:L.icon({iconSize:[20,20]})}*/).bindPopup(footnote_data[i].comment);
 			//console.log(_marker);
 			footnotes.addLayer(_marker);
 			}
@@ -615,6 +687,18 @@ var popmap_zoom = d3.zoom()
 		if(country_map != undefined){
 		footnotes.addTo(country_map);
 		}
+		//add global footnotes
+		
+		global_footnotes = new L.FeatureGroup();
+		for(i=0;i<global_data.length;i++){
+			//console.log(footnote_data[i]);
+		  	if(global_data[i].lat != "" && global_data[i].lng != "" && global_data[i].comment != ""){
+			_marker = L.marker([+global_data[i].lat,+global_data[i].lng]).bindPopup(global_data[i].comment);
+			//console.log(_marker);
+			global_footnotes.addLayer(_marker);
+			}
+		}
+		global_footnotes.addTo(global_map);
 	  }
 	  
 	  //window.addEventListener('DOMContentLoaded', init);
@@ -634,7 +718,7 @@ queue()
 	.defer(d3.json, "poverty2.json")
 	.defer(d3.json, "usaidawards.json")
 	.defer(d3.json,"IPPFClinics.json")
-	.defer(d3.json, "globalData2.json")
+	.defer(d3.json, "globalData10_14.json")
 	.defer(d3.json, "Partners.json")
 	.defer(d3.json, "PAHO_subnational_cleaned.json")
 	.defer(d3.json, "award_info_assist.json")
@@ -643,11 +727,10 @@ queue()
 	.defer(d3.json, "epidata_all.json")
 	.defer(d3.json, "fips2.json")
 	.defer(d3.json, "rainfall_national.json")
-	//.defer(d3.csv,"https://docs.google.com/spreadsheets/d/18xaJk0uObdu5WNgd2yMSxzgyS3Oz2oJ5qBMEkR0z1QI/pub?output=csv")
-	//.defer(d3.json, "elsalve.json")
+	.defer(d3.csv, "https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
     .await(ready);	
 		
-function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes, places, epidata_all,fips,rainfall){	
+function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes, places, epidata_all,fips,rainfall,comments_data){	
 	  if (error) throw error;	
 	  
 	  //console.log(globaldata);
@@ -723,13 +806,16 @@ function ready(error, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, 
 	  epidata_all.sort(function(a,b){return a.report_date - b.report_date;});
 	  
 	  globaldata.forEach(function(d,i){
-	  		  d.date = parseTime2(d.date);
+	  		  d.date = parseTime(d.date);
 	  		  d.year = parseYear(d.date);
 			  d.month = parseMonth_n(d.date);
 	  		  //console.log(parseYear(d.report_date));
 	  	  });
 		  
 	globaldata.sort(function(a,b){return a.date - b.date;}); 
+	
+	//console.log(gl_countries);
+	var priorityCountryData = globaldata.filter(function(v){return priority_countries.indexOf(v.country) != -1;});
 	  
 	//console.log(globaldata.filter(function(d){return d.country == "El Salvador";}));  
 	  //var globaldataF = globaldata.filter(function(d){return priority_countries.indexOf(d.country) != -1;}).sort(function(a, b){ return d3.descending(a.country, b.country);});
@@ -1367,7 +1453,7 @@ choropleth4_ht = d3.scaleLog()
 			
 	  //create temp layer to store new features
 	  //create temp layer to store new features
-	        var featureGroup = L.featureGroup().addTo(country_map);
+	        country_featureGroup = L.featureGroup().addTo(country_map);
 
 	        //create drawing controls and toolbar
 	        var drawControl = new L.Control.Draw({
@@ -1388,34 +1474,26 @@ choropleth4_ht = d3.scaleLog()
 		country_map.on('draw:created', function(e) {
 		          var coords = e.layer._latlng;
 		          //console.log(coords);
-		          var tempMarker = featureGroup.addLayer(e.layer);
+		          country_featureGroup.addLayer(e.layer);
 		          //var popupContent = '<form action="https://docs.google.com/forms/d/e/1FAIpQLSe63rT_PcCjDCMebQ3ToqUU5TH9hacCR1Bcv76c-IY3oC_lZw/formResponse" target="formDestination" method="POST" id="mG61Hd" onsubmit="">'+
-				  var popupContent = '<form target="_self" onsubmit="" action="javascript: postToGoogle()">'+
+				  var popupContent = '<form target="_self" onsubmit="" action="javascript: postToGoogleC()">'+
 		          '<div class="form-group">'+
 		              //'<label class="control-label col-sm-5"><strong>Description: </strong></label>'+
 		              '<textarea class="form-control" rows="6" id="comment" name="comment">add comment</textarea>'+
 		          '</div>'+
 		          '<input style="display: none;" type="text" id="lat" name="lat" value="'+coords.lat.toFixed(6)+'" />'+
 		          '<input style="display: none;" type="text" id="lng" name="lng" value="'+coords.lng.toFixed(6)+'" />'+
+				  '<input style="display: none;" type="text" id="country" name="country" value="'+ADM0+'" />'+
 		          '<div class="form-group">'+
 		            //'<div style="text-align:center;" class="col-xs-4 col-xs-offset-2"><button type="button" class="btn">Cancel</button></div>'+
 		            '<div style="text-align:center;" class="col-xs-4"><button type="submit" value="submit" name="M2UYVd">Submit</button></div>'+
 		          '</div>'+
-				  ' <div style="width: 100%; display: block; float: right; padding-top: 15px;">'+
-            '<div class="requestSubmited" style="display:none; text-align: center;">Your request has been sent!</div>'+
-        '</div>'+
 		          '</form>';
-		          tempMarker.bindPopup(popupContent,{
+				  
+				  country_featureGroup.getLayers()[country_featureGroup.getLayers().length-1].bindPopup(popupContent,{
 		            keepInView: true,
-		            closeButton: false
-		            }).openPopup();
-
-		        /*$("#form").submit(function(e){
-		            e.preventDefault();
-		            //console.log("didnt submit");
-		            //var comment =$("#comment").val();
-		            console.log(comment);
-				});*/
+					  closeButton: true
+		            }).openPopup();	
 		      });
 			  
 			  //class="btn btn-primary trigger-submit"
@@ -1454,6 +1532,7 @@ choropleth4_ht = d3.scaleLog()
  		//console.log(gl_epi_tab);
  		d3.select("#byIndicator").style("background","none");
  		d3.select(this).style("background","#78bcf0");
+		d3.select("#newConfirmedData").moveToFront();
  		draw_global_chartview();
  	});		
 	
@@ -1461,6 +1540,7 @@ choropleth4_ht = d3.scaleLog()
  	.on("click",function(d){
  		gl_epi_tab = 1;
  		//console.log(gl_epi_tab);
+		d3.select("#byIndicator").moveToFront();
  		d3.select("#confCases").style("background","none");
  		d3.select(this).style("background","#78bcf0");
  		draw_global_chartview();
@@ -1473,20 +1553,35 @@ choropleth4_ht = d3.scaleLog()
 		 draw_global_mapview(); 
 		 draw_leaflet_layer();
 		 draw_global_chartview();
+		 draw_global_MessageBoard();
 		 draw_global_MessageForm();
 		 
 	 	//global_svg.call(gl_zoom);
 	 }
 	 
 	 function draw_leaflet_layer(){
-		 global_map = L.map('gl_mapview',{zoomControl:false}).setView([14, -89], 7);
-	 	/*.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png?access_token={accessToken}",{
-			id: 'your.mapbox.project.id',
-    		accessToken: 'your.mapbox.public.access.token'
-			//onEachFeature: onEachFeature
-	 	}));*/
+		 
+		 global_map = L.map('gl_mapview',{zoomControl:false,trackResize:false}).setView([0, 0], 4);
+		 
+		 /*.addLayer(new L.TileLayer("http://{s}.www.toolserver.org/tiles/bw-mapnik/{z}/{x}/{y}.png?access_token={accessToken}",{
+ 			id: 'your.mapbox.project.id',
+     		accessToken: 'your.mapbox.public.access.token'
+ 			//onEachFeature: onEachFeature
+ 	 	}));*/
+		
+		 global_map.touchZoom.disable();
+		 global_map.doubleClickZoom.disable();
+		 global_map.scrollWheelZoom.disable();
+		 global_map.dragging.disable();
+		 //global_map.trackResize.disable();
 			
-		var featureGroup = L.featureGroup().addTo(global_map);	
+		global_featureGroup = L.featureGroup().addTo(global_map);	
+		
+		/*global_map.on("resize", function(){
+			
+			console.log("resizing");
+		});*/
+		
 		
         var drawControl = new L.Control.Draw({
           draw: {
@@ -1499,26 +1594,27 @@ choropleth4_ht = d3.scaleLog()
         }).addTo(global_map);	
 		
 		global_map.on('draw:created', function(e) {
-		          var coords = e.layer._latlng;
-		          //console.log(coords);
-		          var tempMarker = featureGroup.addLayer(e.layer);
-		          var popupContent = '<form action="https://docs.google.com/forms/d/e/1FAIpQLSe63rT_PcCjDCMebQ3ToqUU5TH9hacCR1Bcv76c-IY3oC_lZw/formResponse" target="formDestination" method="POST" id="mG61Hd" onsubmit="">'+
-		          '<div class="form-group">'+
-		              '<textarea class="form-control" rows="6" id="entry.997428847" name="entry.997428847">add comment</textarea>'+
-		          '</div>'+
-		          '<input style="display: none;" type="text" id="entry.603752285" name="entry.603752285" value="'+coords.lat.toFixed(6)+'" />'+
-		          '<input style="display: none;" type="text" id="entry.1307082079" name="entry.1307082079" value="'+coords.lng.toFixed(6)+'" />'+
-		          '<div class="form-group">'+
-		            '<div style="text-align:center;" class="col-xs-4"><button type="submit" value="submit" name="M2UYVd">Submit</button></div>'+
-		          '</div>'+
-		          '</form>';
-		          tempMarker.bindPopup(popupContent,{
-		            keepInView: true,
-		            closeButton: false
-		            }).openPopup();
-		      });
-		
-		
+			  		          var coords = e.layer._latlng;
+			  		          global_featureGroup.addLayer(e.layer);
+			  				  var popupContent = '<form target="_self" onsubmit="" action="javascript: postToGoogleG()">'+
+			  		          '<div class="form-group">'+
+			  		              //'<label class="control-label col-sm-5"><strong>Description: </strong></label>'+
+			  		              '<textarea class="form-control" rows="6" id="comment" name="comment">add comment</textarea>'+
+			  		          '</div>'+
+			  		          '<input style="display: none;" type="text" id="lat" name="lat" value="'+coords.lat.toFixed(6)+'" />'+
+			  		          '<input style="display: none;" type="text" id="lng" name="lng" value="'+coords.lng.toFixed(6)+'" />'+
+			  				  '<input style="display: none;" type="text" id="country" name="country" value="ALL" />'+
+			  		          '<div class="form-group">'+
+			  		            //'<div style="text-align:center;" class="col-xs-4 col-xs-offset-2"><button type="button" class="btn">Cancel</button></div>'+
+			  		            '<div style="text-align:center;" class="col-xs-4"><button type="submit" value="submit" name="M2UYVd">Submit</button></div>'+
+			  		          '</div>'+
+			  		          '</form>';
+			  		          global_featureGroup.getLayers()[global_featureGroup.getLayers().length-1].bindPopup(popupContent,{
+			  		            keepInView: false,
+								  closeButton: true,
+								  autoPan:false
+			  		            }).openPopup();
+			  		      });
 		
 	 }
 	 
@@ -1527,12 +1623,10 @@ choropleth4_ht = d3.scaleLog()
 	 function draw_global_mapview(){
 	 	//countries
  	 	var gl_regions;
- 	 	var gl_countries;
  	 	var gl_efforts;
 		
 		
-		
-	  var gl_countries = global_land.selectAll("path")
+	  gl_countries = global_land.selectAll("path")
 	      .data(geodata_admin0.features.filter(function(d){return d.properties.CONTINENT == "North America" || d.properties.CONTINENT == "South America" || d.properties.CONTINENT == "Central America"; })) //generate features from TopoJSON
 	  	.enter()
 	      .append("path")
@@ -1588,6 +1682,7 @@ choropleth4_ht = d3.scaleLog()
 			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
 				
 				d3.select("#global_container").style("pointer-events","none");
+				global_featureGroup.bringToBack();
 				filtercharts(d);
 				
 				ADM0 = 	d.properties.ADM0_A3;
@@ -1595,6 +1690,10 @@ choropleth4_ht = d3.scaleLog()
 				//console.log("#"+d.properties.ADMIN+"_0");
 				setCountry(ADM0);
 			d3.select("#popup").moveToFront();
+			/*global_featureGroup.eachLayer(function(layer){
+				layer.setOpacity(0);
+			});*/
+			
 		 if(overview_tab.selected){
 			 d3.select("#overview").style("opacity",1);
 		 }		
@@ -1788,10 +1887,11 @@ pp.selectAll("svg")
 		d3.select(this).style("fill","url(#diagonalHatch)");
 	})*/
 			
+	
 		
 	  global_svg.append("g")
 	    .attr("class", "legendLog")
-	    .attr("transform", "translate(490,350)");//"translate(240,500)");
+	    .attr("transform", "translate(260,500)");//"translate(240,500)");
 
 	  var logLegend = d3.legendColor()
 		  .shapeWidth(10)
@@ -1807,18 +1907,23 @@ pp.selectAll("svg")
 	  global_svg.select(".legendLog")
 	    .call(logLegend);
 		
+global_svg.append("div")
+		.attr("class","legend")
+		.attr("width",100)
+		.attr("height",100)
+				
 		
 global_svg.append("text")
 		.attr("id","tagline")
 		.attr("class","mapview_title")
-		.attr("x",490)
-		.attr("y",330)
+		.attr("x",260)
+		.attr("y",480)
 		.text("Cumulative Zika cases");
 		
 global_svg.append("text")
 		.attr("class","mapview_title")
-		.attr("x",490)
-		.attr("y",340)
+		.attr("x",260)
+		.attr("y",490)
 		.text("as of: 3/9/2017");
 		
 		
@@ -1830,9 +1935,83 @@ global_svg.append("text")
 	}	//end draw country mapview 
 	
 	
+	function draw_global_MessageBoard(){
+		console.log("globalMessageBoard");
+		d3.select("#gl_messageBoard").selectAll("*").remove();
+		
+		var postsG = d3.select("#gl_messageBoard").append("g");
+		
+		//if(comments_data==undefined){console.log("second try...");retrieveComments();}
+		//console.log(comments_data);
+		
+		var filteredCommentsG = comments_data.filter(function(d){return d.country=="all";});
+		
+		var pdivs = postsG.selectAll("div")
+		.data(filteredCommentsG)
+		.enter()
+		.append("div")
+		.attr("class","postsC")
+		.attr("id", function(d,i){return "g_post_"+i;})
+		.style("background", function(d,i){if(i%2==0){return "#dae4ed";}else{ return "none";}});
+		
+		pdivs.append("text")
+		.html(function(d){return "<font color=\"#4e677c\">"+d.username+"</font>" + ": "+ d.comment;})
+		.attr("x","0px")
+		.attr("y","20px")
+		.attr("class", "postText");
+		
+		
+		/*var posts=feed.selectAll("div")
+		.data(comments_data)
+		.enter().append("div")
+		.attr("class","post");
+		
+		posts.append("text")
+		.text(function(d){return d.username + ": "+ d.comment;})
+		.attr("class", "postText");*/
+		
+		
+	}
+	
+	
+	function update_global_MessageBoard(new_comments_data){
+		console.log("globalMessageBoard");
+		d3.select("#gl_messageBoard").selectAll("*").remove();
+		
+		var postsG = d3.select("#gl_messageBoard").append("g");
+		
+		var filteredCommentsG = new_comments_data.filter(function(d){return d.country=="all";});
+		
+		var pdivs = postsG.selectAll("div")
+		.data(filteredCommentsG)
+		.enter()
+		.append("div")
+		.attr("class","postsC")
+		.attr("id", function(d,i){return "g_post_"+i;})
+		.style("background", function(d,i){if(i%2==0){return "#dae4ed";}else{ return "none";}});
+		
+		pdivs.append("text")
+		.html(function(d){return "<font color=\"#4e677c\">"+d.username+"</font>" + ": "+ d.comment;})
+		.attr("x","0px")
+		.attr("y","20px")
+		.attr("class", "postText");
+		
+	}
+	
 	function draw_global_MessageForm(){
 		
-		d3.select("#gl_postMessage").selectAll("*").remove();
+		/*if(wait){
+			console.log("waiting for database to update");
+			wait = false;	
+			setTimeout(function(){
+				retrieveComments(update_global_MessageBoard);
+			},1000);
+			//setTimeout(draw_global_MessageBoard,200);
+		}else{
+		//retrieveComments(); 
+		}*/
+		
+		d3.select("#gl_postMessage").selectAll("*").remove(); 
 				  
 				var form = d3.select("#gl_postMessage").append("form")
 				.attr("id","gl_postComment");
@@ -1842,33 +2021,43 @@ global_svg.append("text")
 				.style("width","385px")
 				.style("height","30px")
 				.style("background","rgba(250,250,250,0.75)")
-				.text("submit comment, (e.g.\"significant data missing from...\")");
+				.attr("placeholder","submit comment, (e.g.\"significant data missing from...\")");
 	
 				form.append("input")
 				.attr("name","username")
 				.attr("type","text")
 				.style("background","rgba(250,250,250,0.75)")
-				.attr("value","username");
+				.attr("placeholder","username");
 				
 				form.append("input")
 				.attr("name","country")
 				.attr("type","hidden")
 				.attr("value","all");
 				
-				form.append("button").attr('type', 'submit').attr("id","submit-form").text('post');	
+				form.append("button").attr('type', 'submit').attr("id","submit-global-form").text('post');	
 				
-				$("#submit-form").on("click", function(e){
+				
+				$("#submit-global-form").on("click", function(e){
 					e.preventDefault();
 				    var jqxhr = $.ajax({
 				      url: 'https://script.google.com/macros/s/AKfycbyCpuPg6s5sqEAatoRYIRHygF-VV6Zx-PJU9pEAeXCrAQyrZkEx/exec',
 				      method: "GET",
 				      dataType: "json",
-				      data: $('form#postComment').serializeObject()
+				      data: $('form#gl_postComment').serializeObject()
 				    }).success(
 				      // do something
 				    );
-					//updateMessageBoard();
+					
+					setTimeout(function(){
+						retrieveComments(update_global_MessageBoard);
+					},1500);
+					
 					draw_global_MessageForm();
+					
+					//updateMessageBoard();
+					//wait = true;
+					//draw_global_MessageForm();
+					
 			});
 				   
 			
@@ -1906,6 +2095,10 @@ global_svg.append("text")
 		d3.select("#overview").style("opacity",0); 
 		d3.select("#global_container").style("pointer-events","all");
 		d3.select("#global_container").moveToFront();
+		global_featureGroup.bringToFront();
+		/*global_featureGroup.eachLayer(function(layer){
+			layer.setZindex(0);
+		});*/
 	});
 	
 	function restorecharts(){
@@ -2033,6 +2226,7 @@ global_svg.append("text")
 		d3.select("#byIndicatorData").selectAll("*").remove();
 		draw_new_confirmed_chart(globalbycountry);
 		draw_cumulative_confirmed_chart(globalbycountry);
+		
 	}else if(gl_epi_tab ==1){
 		d3.select("#cum_conf").selectAll("*").remove();	
 		d3.select("#new_conf").selectAll("*").remove();	
@@ -2130,8 +2324,11 @@ global_svg.append("text")
 	  
 	  var yaxis = global_indicators_1.append("g")
 		.attr("class","axis")	  
-         .call(d3.axisLeft(y).ticks(4))	
+			  .call(d3.axisLeft(y).ticks(4));	
 	}
+	
+	
+	
 	
 	function draw_new_confirmed_chart(dat){
 		
@@ -2185,12 +2382,14 @@ global_svg.append("text")
 			.attr("id",function(d,i){return "line"+d.key})
 			.attr("class","line")
 			.style("stroke",function(d,i){return colors[i%colors.length];})
+			.style("stroke-width",1)
 			.style("fill","none")	
 			.attr("d", function(d){ 
 				//console.log(d.values);
-				return valueline(d.values);})
-				.on("mouseover",function(d){
-					//console.log(d);
+				return valueline(d.values);
+			});
+			
+			linegraph.on("mouseover",function(d){
 					d3.select(this).style("stroke-width",3);
 					
 					var ADM = ADM0_A3_lookup.filter(function(v){return v.key == d.key;});
@@ -2199,8 +2398,8 @@ global_svg.append("text")
 					}
 					
 				})
-				.on("mouseout",function(d){
-					d3.select(this).style("stroke-width",0.75);
+			.on("mouseout",function(d){
+					d3.select(this).style("stroke-width",1);
 					
 					var ADM = ADM0_A3_lookup.filter(function(v){return v.key == d.key;});
 					if(ADM[0]!=undefined && ADM[0].value !=undefined){
@@ -2220,8 +2419,82 @@ global_svg.append("text")
 	  
 	  var yaxis = global_indicators_2.append("g")
 		.attr("class","axis")	  
-         .call(d3.axisLeft(y).ticks(4))	
+			  .call(d3.axisLeft(y).ticks(4));
+			  
+			  
+	  var selector = global_indicators_2.append("g")
+			  .attr("id","selector1");
+			  
+		 selector.append("rect")
+		 .attr("x",width)
+		 .attr("y",0)
+		 .attr("width",5)
+		 .attr("height",height+10)
+		 .attr("fill","none")
+	     .attr("stroke","black")	 
+		 .on("mouseover",function(){
+			 
+			 d3.select(this).attr("cursor","pointer").attr("fill","black");
+		 }) 
+		 .on("mouseout",function(){
+			 if(d3.select(this).classed("active")==false)
+			 d3.select(this).attr("cursor","default").attr("fill","none");
+		 })  
+		 .call(d3.drag()
+			  .on("start",dragstarted)
+			  .on("drag",dragged)
+		 	  .on("end",dragended));	
+			  
+			  
+		  	function dragstarted(d) {
+		  	  d3.select(this).raise().classed("active", true);
+			  linegraph.attr("pointer-events","none");
+			  d3.select(this).attr("cursor","pointer").attr("fill","black");
+		  	}
+
+		  	function dragged(d) {
+				if(d3.event.x<=width && d3.event.x>=0){	
+		  	  d3.select(this).attr("x", d3.event.x);
+			  //update_gl_basecolor();
+			  //have to calculate date - for fill
+			  //x.invert(d3.event.x) - new fill date
+			  update_gl_basecolor(x.invert(d3.event.x));
+		  	  }
+		  	}
+
+		  	function dragended(d) {
+		  	  d3.select(this).classed("active", false);
+			  linegraph.attr("pointer-events","all");
+			  d3.select(this).attr("cursor","default").attr("fill","none");
+		  	}	  
+			  
+			  
+			    
 	}
+	
+	function update_gl_basecolor(max_date){
+		
+		gl_countries.each(function(d){
+			var c = priorityCountryData.filter(function(v){return v.country == d.properties.ADMIN && v.date < max_date;});
+			if(c[0]!=undefined){
+				var color;
+				if(ht){
+					color = global_choropleth_ht(c[c.length-1].autochthonous_cases_confirmed/(c[c.length-1].pop_x_1000));
+				//return global_choropleth_ht(c[c.length-1].autochthonous_cases_confirmed/(c[c.length-1].pop_x_1000));	
+				}else{
+				color = global_choropleth(c[c.length-1].autochthonous_cases_confirmed);	
+				//color = global_choropleth(c[c.length-1].new_autochthonous_cases_confirmed);	
+				//return global_choropleth(c[c.length-1].autochthonous_cases_confirmed);	
+				}
+				d3.select("#gl_country"+d.properties.ADM0_A3).style("fill",color);
+				return color;
+			}
+		})
+		/*d3.select("#gl_regions").selectAll("path").attr("basecolor",function(){
+			console.log(d3.select(this));
+		});*/
+	}
+	
 	
 	function draw_by_indicators(dat){
 		
@@ -2681,7 +2954,6 @@ var xaxis = global_indicators_3.append("g")
 		  }
 		  
 		  
-		  
 		 // country_map.setView([30, -89],5);
 		  
 		
@@ -2824,8 +3096,8 @@ var b2 = path.bounds(country_centroid[0]),
 	//overview_tab.dispatch("click");
 	
 	  	drawChartView();
-		initMessageBoard();
-		//drawMessageBoard();
+		//initMessageBoard();
+		drawMessageBoard();
 		drawMessageForm();
 		
 		
@@ -2957,25 +3229,82 @@ var b2 = path.bounds(country_centroid[0]),
 	}
 	
 	
-	var messageBoardURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml';
+	//var messageBoardURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml';
 	  
 	  
-  	function initMessageBoard() {
+  	/*function initMessageBoard() {
   	    Tabletop.init( { key: messageBoardURL,
   	                     callback: drawMessageBoard, 
                    		 simpleSheet: true })
-  	  }
+  	  }*/
 	
 	
-	function drawMessageBoard(data, tabletop){
-		console.log("ok2...");
-		console.log(data);
+	function drawMessageBoard(){
+		d3.select("#messageBoard").selectAll("*").remove();
 		
 		
+		//console.log("messageBoard");
+		//console.log(comments_data);
+		
+		var filteredComments = comments_data.filter(function(d){return d.country==ADM0;});
+		
+		/*if(comments_data==undefined){console.log("second try...");
+		retrieveComments();
+		//setTimeout(function(){filteredComments = comments_data.filter(function(d){return d.country==ADM0;});},3000);	
+		}else{
+			filteredComments = comments_data.filter(function(d){return d.country==ADM0;});
+		}*/
+		
+		//console.log("filteredComments");
+		//console.log(filteredComments);
+		
+		var postsC = d3.select("#messageBoard").append("g")
+		.attr("id","thisone");
+		
+		var pdivs = postsC.selectAll("div")
+		.data(filteredComments)
+		.enter()
+		.append("div")
+		.attr("class","postsC")
+		.attr("id", function(d,i){return "c_post_"+i;})
+		.style("background", function(d,i){if(i%2==0){return "#e1ecf4";}else{ return "white";}});
+		
+		pdivs.append("text")
+		.html(function(d){return "<font color=\"#3f596f\">"+d.username + "</font>: "+ d.comment;})
+		.attr("x","0px")
+		.attr("y","20px")
+		.attr("class", "postText");
+		
+		
+		/*var pdivs = posts.append("div")
+		.attr("class","postsC")
+		.attr("id", function(d,i){return "c_post_"+i;})*/
+		
+		
+		/*pdivs.append("text")
+		.text(function(d){return d.username + ": "+ d.comment;})
+		.attr("class", "postText");*/
+		/*var post = feed.selectAll("div")
+		.data(comments_data)
+		.enter().append("div")
+		.attr("class","post");
+		
+		post.append("text")
+		.text(function(d){return d.username + ": "+ d.comment;})
+		.attr("class", "postText");*/
 	}
 	
 	
 	function drawMessageForm(){
+		/*if(wait){
+			console.log("waiting for database to update");
+			wait = false;	
+			retrieveComments(drawMessageBoard);	
+		//setTimeout(retrieveComments,1000);
+		//setTimeout(drawMessageBoard,200);
+		//drawMessageBoard();
+		}else{
+		}*/	
 		
 		d3.select("#postMessage").selectAll("*").remove();
 				  
@@ -2985,20 +3314,22 @@ var b2 = path.bounds(country_centroid[0]),
 				form.append("textarea")
 				.attr("name","comment")
 				.style("width","515px")
-				.style("height","50px")
-				.text("submit comment, (e.g.\"significant data missing from...\")");
+				.style("height","30px")
+				.attr("placeholder","submit comment, (e.g.\"significant data missing from...\")")				
+				//.text("submit comment, (e.g.\"significant data missing from...\")");
 	
 				form.append("input")
 				.attr("name","username")
 				.attr("type","text")
-				.attr("value","username");
+				.attr("placeholder","username");
 				
 				form.append("input")
 				.attr("name","country")
 				.attr("type","hidden")
-				.attr("value","all");
+				.attr("value",ADM0);
 				
-				form.append("button").attr('type', 'submit').attr("id","submit-form").text('post');	
+				form.append("button").attr('type', 'submit').attr("id","submit-form").text('post');
+				
 				
 				$("#submit-form").on("click", function(e){
 					e.preventDefault();
@@ -3008,20 +3339,44 @@ var b2 = path.bounds(country_centroid[0]),
 				      dataType: "json",
 				      data: $('form#postComment').serializeObject()
 				    }).success(
-				      // do something
 				    );
 					//updateMessageBoard();
+					//console.log("rerun messageBoard")
+					//wait = true;
+					setTimeout(function(){
+						retrieveComments(update_MessageBoard);
+					},2000);
 					drawMessageForm();
+					
 			});
-				   
-			
-		
 	}
 	
-	function updateMessageBoard(){
-		d3.select("#postMessage").selectAll("*").remove();
-		//refresh message board
-		drawMessageForm();
+	function update_MessageBoard(new_comments_data){
+		
+		//d3.select("body").style("cursor","wait");
+		d3.select("#messageBoard").selectAll("*").remove();
+		
+		var filteredComments = new_comments_data.filter(function(d){return d.country==ADM0;});
+		
+		var postsC = d3.select("#messageBoard").append("g")
+		.attr("id","thisone");
+		
+		var pdivs = postsC.selectAll("div")
+		.data(filteredComments)
+		.enter()
+		.append("div")
+		.attr("class","postsC")
+		.attr("id", function(d,i){return "c_post_"+i;})
+		.style("background", function(d,i){if(i%2==0){return "#e1ecf4";}else{ return "white";}});
+		
+		pdivs.append("text")
+		.html(function(d){return "<font color=\"#3f596f\">"+d.username + "</font>: "+ d.comment;})
+		.attr("x","0px")
+		.attr("y","20px")
+		.attr("class", "postText");
+		
+
+		
 	}
 	
 	function drawChartView(){
@@ -3791,12 +4146,12 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		    .x(function(d) { return x(d.date); })
 		    .y0(height)
 		    .y1(function(d) { 
-				/*if(ms[d.month-1]>=avg){
+				if(ms[d.month-1]>=avg){
 					return y_rain(1);
 				}else{
 					return y_rain(0);	
-				}*/
-				return y_rain(ms[d.month-1]); 
+				}
+				//return y_rain(ms[d.month-1]); 
 			});
 			
 			
@@ -3836,7 +4191,8 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 			.style("fill","#ccc")
 			.attr("opacity",0.5)	
 			.attr("d", function(d){ 
-				//console.log(d.values);
+				console.log("rainfall");
+				console.log(d.values);
 				return area(d.values);});	
 				
 				global_indicators_2.append("text")
@@ -4895,8 +5251,6 @@ d3.selection.prototype.moveToFront = function() {
   });
 };
 
-
-
 /*var svg_p1 = d3.select("body").append("svg").attr("id", "p3");
 //Pattern injection
 var pattern1 = svg_p1.append("defs")
@@ -4906,56 +5260,41 @@ var pattern1 = svg_p1.append("defs")
 		.attr("d","M-0.15,0.15 l0.3,-0.3, M0,0.6 l0.6,-0.6, M0.45,1 l0.3,-0.3");*/
 
 
+function retrieveComments2(){
+	console.log("retrieving comments");
+	//https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/edit?usp=sharing
+	//https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml
+	
+	d3.csv("https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv", function(error,data){
+		console.log(data);
+		//drawMessageBoard(data);
+	})
+}
+
+function updateTempMarkerC(comment){
+	country_featureGroup.getLayers()[country_featureGroup.getLayers().length-1].bindPopup(comment).openPopup();
+}
+
+function updateTempMarkerG(comment){
+	global_featureGroup.getLayers()[global_featureGroup.getLayers().length-1].bindPopup(comment).openPopup();
+}
+
+function retrieveFootnotes(){
+	
+	console.log("retrieving Footnotes");
+	/*if(global_featureGroup!=undefined){
+	global_featureGroup.eachLayer(function(layer){
+		global_featureGroup.removeLayer(layer);
+	});}*/
+	//https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/edit?usp=sharing
+	//https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml
+	
+	d3.csv("https://docs.google.com/spreadsheets/d/18xaJk0uObdu5WNgd2yMSxzgyS3Oz2oJ5qBMEkR0z1QI/export?format=csv", function(error,data){
+		console.log(data);
+		addMarkers(data);
+	})
+}
+
 </script>
-
-
-/*'<div class="form-group">'+
-		              //'<label class="control-label col-sm-5"><strong>Description: </strong></label>'+
-		              '<textarea class="form-control" rows="6" id="entry.997428847" name="entry.997428847">add comment</textarea>'+
-		          '</div>'+
-		          '<input style="display: none;" type="text" id="entry.603752285" name="entry.603752285" value="'+coords.lat.toFixed(6)+'" />'+
-		          '<input style="display: none;" type="text" id="entry.1307082079" name="entry.1307082079" value="'+coords.lng.toFixed(6)+'" />'+
-		          '<div class="form-group">'+
-		            //'<div style="text-align:center;" class="col-xs-4 col-xs-offset-2"><button type="button" class="btn">Cancel</button></div>'+
-		            '<div style="text-align:center;" class="col-xs-4"><button type="submit" value="submit" name="M2UYVd">Submit</button></div>'+
-		          '</div>'+
-		          '</form>';*/
-
-
-<script type="text/javascript">
-    function postToGoogle(){
-        var comment = $('#comment').val();
-        var lat = $('#lat').val();
-        var lng = $('#lng').val();
-        if ((comment !== "") && (lat !== "") && (lng !== "")) {
-            $.ajax({
-                url: "https://docs.google.com/forms/d/e/1FAIpQLSe63rT_PcCjDCMebQ3ToqUU5TH9hacCR1Bcv76c-IY3oC_lZw/formResponse",
-                data: {"entry.997428847" : comment, "entry.603752285" : lat, "entry.1307082079": lng},
-                type: "POST",
-                dataType: "xml",
-                statusCode: {
-                    0: function (){
- 
-                        $('#comment').val("");
-                        $('#lat').val("");
-                        $('#lng').val("");
-                        //Success message
-                    },
-                    200: function (){
-                        $('#comment').val("");
-                        $('#lat').val("");
-                        $('#lng').val("");
-                        //Success Message
-                    }
-                }
-            });
-        }
-        else {
-            //Error message
-        }
-    }
-</script>
-
-
 
 </body>

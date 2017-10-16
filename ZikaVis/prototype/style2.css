@@ -249,6 +249,7 @@ body {
     border-style: solid;
     border-width: 0.5px;	
     border-color: grey;
+	border-radius:2px;
 	margin:2px;	
 	padding:2px;
 	font: 10px sans-serif;
@@ -346,7 +347,7 @@ body {
 #messageBoard{
 	float:left;
 	width:515px;
-	height:150px;
+	height:170px;
     border-style: solid;
     border-width: 0.5px;	
     border-color: grey;
@@ -683,11 +684,26 @@ body {
 /*.mapview_title{
 	position:absolute;
 }*/
+.legend{
+	background:white;
+}
 
 .legendLog{
 	font: 10px sans-serif;
 	padding:2px;
 	background:white;
+}
+
+.postsC{
+	float:left;
+	width:98%;
+	padding:2px;
+}
+
+.postText{
+	font-family: sans-serif;
+	font: 11pt;
+	fill: black;
 }
 
 .legendLog text{
@@ -708,6 +724,20 @@ body {
     border-color: grey;
 	background:none;
 	margin:0px;
+	margin-top:20px;
+}
+
+#gl_mapLeaflet{
+	position:absolute;
+	float:left;
+    width:100%;
+	height:100%;
+    border-style: none;
+    border-width: 0.5px;	
+    border-color: grey;
+	background:none;
+	margin:0px;
+	margin-top:40px;
 }
 
 #gl_mapview path {
