@@ -546,10 +546,18 @@ body {
     border-style: none;
     border-width: 0.5px;	
     border-color: grey;
-	padding:5px;
+	padding-bottom:5px;
 	stroke:grey;
 	background:none;
 	font-weight:bold;
+}
+
+.chartTitleText{
+	float:left;
+	stroke:grey;
+	background:none;
+	font-weight:bold;
+	padding:5px;
 }
 
 .chartTitle_tab{
@@ -644,7 +652,7 @@ body {
 	width:100%;
 	height:50px;
 	margin:2px;
-	margin-left:20px;
+	margin-left:0px;
 	font:14px sans-serif;
 }
 
@@ -684,9 +692,6 @@ body {
 /*.mapview_title{
 	position:absolute;
 }*/
-.legend{
-	background:white;
-}
 
 .legendLog{
 	font: 10px sans-serif;
@@ -724,7 +729,7 @@ body {
     border-color: grey;
 	background:none;
 	margin:0px;
-	margin-top:20px;
+	margin-top:25px;
 }
 
 #gl_mapLeaflet{
@@ -879,4 +884,61 @@ cursor:pointer;
     border-color: grey;
 	margin:2px;
 	padding:0px;
+}
+
+.progress-meter .background {
+  fill: #ccc;
+}
+
+.progress-meter .foreground {
+  fill: #000;
+}
+
+.progress-meter text {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.legend {
+    line-height: 12px;
+	font-size:10px;
+    color: black;
+	background:rgba(250,250,250,0.5);
+	padding:5px;
+}
+.legend i {
+    width: 10px;
+    height: 10px;
+    float: left;
+    margin-right: 5px;
+	margin-bottom: 2px;
+    opacity: 1;
+}
+
+.toggle{
+	position:absolute;
+	background:white;
+	border-radius:5px;
+	font-size:10px;
+	padding:2px;
+	padding-left:5px;
+	padding-right:5px;
+}
+
+.toggle:hover{
+	cursor:pointer;
+}
+
+#commentsOn{
+	margin-top:50px;
+	margin-left:0px;
+	border-top-right-radius:0px;
+	border-bottom-right-radius:0px;
+}
+#commentsOff{
+	margin-top:50px;
+	margin-left:73px;
+	border-top-left-radius:0px;
+	border-bottom-left-radius:0px;
 }
