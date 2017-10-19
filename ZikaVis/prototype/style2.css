@@ -318,6 +318,7 @@ body {
 	background:#e6e7e8;
 	margin-top:2px;	
 	font: 10px sans-serif;
+	overflow-y:scroll;
 }
 #awardData{
 	float:left;
@@ -840,7 +841,7 @@ cursor:pointer;
 
 .gl_labels {
 	font: 8px sans-serif;
-	text-anchor:middle;
+	text-anchor:left;
 	fill:black;
 	text-transform:uppercase;
 	pointer-events:none;
@@ -1009,3 +1010,26 @@ cursor:pointer;
 	border-top-left-radius:0px;
 	border-bottom-left-radius:0px;
 }
+.tooltip {	
+    position: absolute;			
+    text-align: left;								
+    padding: 5px;	
+	width:200px;			
+    font: 12px sans-serif;		
+    background:white;	
+    border:1px solid #cc9;				
+    pointer-events: none;
+    /*-moz-box-shadow: 2px 2px 11px #666;*/
+    -webkit-box-shadow: 2px 2px 11px #666;
+	word-wrap: break-word;		
+}
+
+/*div.tooltip {
+    position: absolute;
+    background-color:#ffa;
+    border:1px solid #cc9;
+    padding:3px;
+    font-size:13px;
+    -moz-box-shadow: 2px 2px 11px #666;
+    -webkit-box-shadow: 2px 2px 11px #666;
+}*/
