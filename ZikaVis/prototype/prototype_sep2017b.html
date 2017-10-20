@@ -208,17 +208,9 @@ var iDiv2 = d3.select("body").append("div")
 
 function retrieveComments(_callback,prevLength){
 	console.log("retrieving comments");
-	//https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/edit?usp=sharing
-	//https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml
-
-	//console.log(comments_data);
-	//var lngth = (comments_data!=undefined)?comments_data.length:0;
-	
-	//console.log(prevLength);
 	var new_comments_data = [];
 	var t = d3.timer(function(elapsed){
 		//console.log(elapsed);
-		
 		d3.csv("https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv", function(error,data){
 		new_comments_data = data;
 		});
@@ -228,16 +220,11 @@ function retrieveComments(_callback,prevLength){
 			t.stop();
 			_callback(new_comments_data);
 		}
-		
 	},150);	
-		//_callback(comments_data);
-		//_callback();
-		//drawMessageBoard();
-		//global_drawMessageBoard();
-		//});
 }
 
 var data_info;
+var comments_data;
 
 //retrieveComments();	
 
@@ -824,9 +811,9 @@ var popmap_zoom = d3.zoom()
 		  console.log(data);
 	  }
 	  
-	  function initComments(data,tabletop){
+	  /*function initComments(data,tabletop){
 		  console.log(data);
-	  }
+	  }*/
 
 	  function addMarkers(data) {
 	    //alert('Successfully processed!')
@@ -918,15 +905,14 @@ var popmap_zoom = d3.zoom()
 	d3.csv(url, function(data, error) {
 			console.log(data);
 		});*/	
-	
 //load data
 queue()
 	.defer(d3.json, "data_info.json")
-	.defer(d3.json, "admin_0_countries.json")
-	.defer(d3.json, "admin_1_states_provinces.json")
+	.defer(d3.json, "admin_0_countries_filtered.json")
+	.defer(d3.json, "admin_1_states_provinces_filtered.json")
     .defer(d3.json, "el_salvador_epi.json")
 	.defer(d3.json, "countryData.json")
-	.defer(d3.json, "populated_places2.json")
+	.defer(d3.json, "populated_places_filtered.json")
 	.defer(d3.json, "poverty4.json")
 	.defer(d3.json, "usaidawards.json")
 	.defer(d3.json,"IPPFClinics.json")
@@ -935,8 +921,6 @@ queue()
 	.defer(d3.json, "PAHO_subnational_cleaned.json")
 	.defer(d3.json, "award_info_assist.json")
 	.defer(d3.json, "adm2_shapes.json")
-	.defer(d3.json, "populated_places.json")
-	//.defer(d3.json, "epidata_all.json")
 	.defer(d3.json, "epidata10_17b.json")
 	.defer(d3.json, "fips2.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
@@ -960,10 +944,33 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes, places, epidata_all,fips,comments_data,rainfall){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall){	
 	  if (error) throw error;	
+	   
 	  
 	  data_info = dat_info;
+	  
+	  
+	function initComments(){
+		console.log("retrieving comments");
+		var new_comments_data = [];
+		var t = d3.timer(function(elapsed){
+			//console.log(elapsed);
+			d3.csv("https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv", function(error,data){
+			new_comments_data = data;
+			});
+	
+			console.log(new_comments_data.length);
+			if(new_comments_data.length>0){
+				comments_data = new_comments_data;
+				t.stop();
+			}else if(elapsed > 2000){
+				console.log("ERORR: google docs timeout");
+				t.stop();
+			}
+		},150);	
+	}	
+	  
 	  
 	  
 	  
@@ -2310,8 +2317,10 @@ global_svg.append("text")
 		
 		var postsG = d3.select("#gl_messageBoard").append("g");
 		
-		//if(comments_data==undefined){console.log("second try...");retrieveComments();}
+		//if(comments_data==undefined){initComments();}
 		//console.log(comments_data);
+		
+		
 		
 		var filteredCommentsG = comments_data.filter(function(d){return d.country=="all";});
 		
@@ -3713,14 +3722,15 @@ var b2 = path.bounds(country_centroid[0]),
   	                     callback: drawMessageBoard, 
                    		 simpleSheet: true })
   	  }*/
+		
 	
 	
 	function drawMessageBoard(){
 		d3.select("#messageBoard").selectAll("*").remove();
 		
-		
 		//console.log("messageBoard");
 		//console.log(comments_data);
+		if(comments_data==undefined){initComments();};
 		
 		var filteredComments = comments_data.filter(function(d){return d.country==ADM0;});
 		
