@@ -969,6 +969,9 @@ cursor:pointer;
 	width:440px;
 	height:335px;
 }
+#NApovchart{
+	background:rgba(0,0,0,0.25);
+}
 
 .NArect{
 	width:100%;
