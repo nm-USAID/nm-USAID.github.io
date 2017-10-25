@@ -938,7 +938,7 @@ queue()
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
 	.defer(d3.json, "rainfall_national.json")
 	.defer(d3.json, "award_info3.json")
-	.defer(d3.json, "adm2_all.json")
+	//.defer(d3.json, "adm2_all.json")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
 			console.log('progress');
@@ -958,7 +958,7 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail){	
 	  if (error) throw error;	
 	   
 	  
@@ -1010,7 +1010,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  
 	 var filtered_awards = [];
 	  
-	 console.log(adm2_shapes2); 
+	 //console.log(adm2_shapes2); 
 	  
    	 var awards_byCountry2 = d3.nest()
    	 .key(function(d){return d.Country;})
