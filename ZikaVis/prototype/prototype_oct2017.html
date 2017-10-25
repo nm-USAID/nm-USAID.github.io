@@ -169,8 +169,8 @@ var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left",inline:false
 {country:"Guatemala",dx:-50,dy:5,t_align:"left",inline:false},{country:"Colombia",dx:-15,dy:0,t_align:"left",inline:false},{country:"Nicaragua",dx:0,dy:10,t_align:"left",inline:false},{country:"Peru",dx:-20,dy:0,t_align:"left",inline:false},{country:"Ecuador",dx:-15,dy:0,t_align:"left",inline:false},
 {country:"Jamaica",dx:-15,dy:-10,t_align:"left",inline:false},{country:"Venezuela",dx:-15,dy:0,t_align:"left",inline:false},{country:"Paraguay",dx:-15,dy:0,t_align:"left",inline:false},{country:"Guyana",dx:-15,dy:0,t_align:"left",inline:false},{country:"Belize",dx:0,dy:-10,t_align:"left",inline:false},
 {country:"Brazil",dx:-15,dy:0,t_align:"left",inline:false},{country:"Panama",dx:0,dy:0,t_align:"left",inline:false},{country:"Costa Rica",dx:0,dy:0,t_align:"left",inline:false},{country:"Caribbean Regional",dx:0,dy:0,t_align:"left",inline:false},
-{country:"Barbados",dx:5,dy:-3,t_align:"left",inline:true},{country:"Dominica",dx:5,dy:-2,t_align:"left",inline:true},{country:"Antigua and Barbuda",dx:5,dy:5,t_align:"left",inline:true},{country:"Grenada",dx:15,dy:6,t_align:"left",inline:true},
-{country:"Saint Vincent and the Grenadines",dx:15,dy:6,t_align:"left",inline:true},{country:"Saint Lucia",dx:8,dy:-6,t_align:"left",inline:true},{country:"Trinidad and Tobago",dx:5,dy:0,t_align:"left",inline:true},{country:"Saint Kitts and Nevis",dx:10,dy:-5,t_align:"left",inline:true},{country:"E/S Caribbean",dx:0,dy:0,t_align:"left",inline:false},{country:"Surinam",dx:0,dy:0,t_align:"left",inline:false}];
+{country:"Barbados",dx:5,dy:-3,t_align:"left",inline:true, lngth:45},{country:"Dominica",dx:5,dy:-2,t_align:"left",inline:true,lngth:40},{country:"Antigua and Barbuda",dx:5,dy:5,t_align:"left",inline:true,lngth:84},{country:"Grenada",dx:15,dy:6,t_align:"left",inline:true,lngth:40},
+{country:"Saint Vincent and the Grenadines",dx:15,dy:6,t_align:"left",inline:true,lngth:142},{country:"Saint Lucia",dx:8,dy:-6,t_align:"left",inline:true,lngth:50},{country:"Trinidad and Tobago",dx:5,dy:0,t_align:"left",inline:true,lngth:82},{country:"Saint Kitts and Nevis",dx:10,dy:-5,t_align:"left",inline:true,lngth:83},{country:"E/S Caribbean",dx:0,dy:0,t_align:"left",inline:false},{country:"Surinam",dx:0,dy:0,t_align:"left",inline:false}];
 
 var central = ["El Salvador", "Honduras","Guatemala", "Nicaragua", "Ecuador"];
 var south = ["Colombia", "Peru", "Venezuela"];
@@ -938,7 +938,7 @@ queue()
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
 	.defer(d3.json, "rainfall_national.json")
 	.defer(d3.json, "award_info3.json")
-	//.defer(d3.json, "adm2_all.json")
+	.defer(d3.json, "adm2_all.json")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
 			console.log('progress');
@@ -958,7 +958,7 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all){	
 	  if (error) throw error;	
 	   
 	  
@@ -1010,7 +1010,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  
 	 var filtered_awards = [];
 	  
-	 //console.log(adm2_shapes2); 
+	 console.log(adm2_shapes2); 
 	  
    	 var awards_byCountry2 = d3.nest()
    	 .key(function(d){return d.Country;})
@@ -2171,7 +2171,13 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 				var sz = 7;
 				var r = 5;
 		
+		/*var lbs = gl_labels.nodes();
+		
 		var lbs = gl_labels.nodes();
+		for(var i = 0; i < lbs.length;i++){
+			console.log(lbs[i]);
+			console.log(lbs[i].getComputedTextLength());
+		}*/
 		
 		var symbols = pp.selectAll("svg")  
 		  .data(function(d){
@@ -2195,16 +2201,17 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 		  }))	  	  	  
 		  .attr("transform",function(d,i,j){//
 			  var nm = j[i].parentNode.id.replace("gl_bchart_","");
+			  var lb = country_labels.filter(function(z){return z.country == nm;})[0];
 			  
 			  var x = i*(sz+0.5)+sz/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;	
 			  var y = -sz-3+country_labels.filter(function(z){return z.country == nm;})[0].dy;
 			  
-			  if(country_labels.filter(function(z){return z.country == nm;})[0].inline==true){
+			  if(lb.inline==true){
 				 //x += nm.replace("and","&").length*5;
 				 
 				 //var lngth = d3.select("#label_"+nm).getBBox();
 				  
-				  x += 85;//nm.replace("and","&").length*5;
+				  x += lb.lngth;//nm.replace("and","&").length*5;
 				  
 				  y += sz+3;
 			  }
