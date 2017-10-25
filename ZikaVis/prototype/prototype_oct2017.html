@@ -143,7 +143,7 @@ var ht = false;
 	
 //var bchart_colors =["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"];	
 var bchart_colors = ["#e7298a","#377eb8","#4daf4a","#984ea3","#ffff99"];
-var level_colors = ["#252525","#636363","#969696","#253494"];	
+var level_colors = ["#252525","#636363","#d9d9d9","#253494"];	
 	
 //var colors = ["#3a44c7","#1f78b4","#b2df8a","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
 var colors = ["#db8869",
@@ -165,10 +165,12 @@ var priority_countries = ["Belize","Haiti","El Salvador","Dominican Republic", "
 var got_data = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala",
  /*"Colombia",*/ "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela"];
 
-var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left"},{country:"El Salvador",dx:-40,dy:20,t_align:"left"},{country:"Dominican Republic",dx:10,dy:0,t_align:"right"},{country:"Honduras",dx:0,dy:-10,t_align:"left"},
-{country:"Guatemala",dx:-50,dy:5,t_align:"left"},{country:"Colombia",dx:-15,dy:0,t_align:"left"},{country:"Nicaragua",dx:0,dy:10,t_align:"left"},{country:"Peru",dx:-20,dy:0,t_align:"left"},{country:"Ecuador",dx:-15,dy:0,t_align:"left"},
-{country:"Jamaica",dx:-15,dy:-10,t_align:"left"},{country:"Venezuela",dx:-15,dy:0,t_align:"left"},{country:"Paraguay",dx:-15,dy:0,t_align:"left"},{country:"Guyana",dx:-15,dy:0,t_align:"left"},{country:"Belize",dx:0,dy:-10,t_align:"left"},
-{country:"Brazil",dx:-15,dy:0,t_align:"left"},{country:"Panama",dx:0,dy:0,t_align:"left"},{country:"Costa Rica",dx:0,dy:0,t_align:"left"},{country:"Caribbean Regional",dx:0,dy:0,t_align:"left"}];
+var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left",inline:false},{country:"El Salvador",dx:-40,dy:20,t_align:"left",inline:false},{country:"Dominican Republic",dx:10,dy:0,t_align:"right",inline:false},{country:"Honduras",dx:0,dy:-10,t_align:"left",inline:false},
+{country:"Guatemala",dx:-50,dy:5,t_align:"left",inline:false},{country:"Colombia",dx:-15,dy:0,t_align:"left",inline:false},{country:"Nicaragua",dx:0,dy:10,t_align:"left",inline:false},{country:"Peru",dx:-20,dy:0,t_align:"left",inline:false},{country:"Ecuador",dx:-15,dy:0,t_align:"left",inline:false},
+{country:"Jamaica",dx:-15,dy:-10,t_align:"left",inline:false},{country:"Venezuela",dx:-15,dy:0,t_align:"left",inline:false},{country:"Paraguay",dx:-15,dy:0,t_align:"left",inline:false},{country:"Guyana",dx:-15,dy:0,t_align:"left",inline:false},{country:"Belize",dx:0,dy:-10,t_align:"left",inline:false},
+{country:"Brazil",dx:-15,dy:0,t_align:"left",inline:false},{country:"Panama",dx:0,dy:0,t_align:"left",inline:false},{country:"Costa Rica",dx:0,dy:0,t_align:"left",inline:false},{country:"Caribbean Regional",dx:0,dy:0,t_align:"left",inline:false},
+{country:"Barbados",dx:5,dy:-3,t_align:"left",inline:true},{country:"Dominica",dx:5,dy:-2,t_align:"left",inline:true},{country:"Antigua and Barbuda",dx:5,dy:5,t_align:"left",inline:true},{country:"Grenada",dx:15,dy:6,t_align:"left",inline:true},
+{country:"Saint Vincent and the Grenadines",dx:15,dy:6,t_align:"left",inline:true},{country:"Saint Lucia",dx:8,dy:-6,t_align:"left",inline:true},{country:"Trinidad and Tobago",dx:5,dy:0,t_align:"left",inline:true},{country:"Saint Kitts and Nevis",dx:10,dy:-5,t_align:"left",inline:true},{country:"E/S Caribbean",dx:0,dy:0,t_align:"left",inline:false},{country:"Surinam",dx:0,dy:0,t_align:"left",inline:false}];
 
 var central = ["El Salvador", "Honduras","Guatemala", "Nicaragua", "Ecuador"];
 var south = ["Colombia", "Peru", "Venezuela"];
@@ -176,7 +178,8 @@ var caribbean = ["Dominican Republic", "Jamaica", "Haiti"];
 
 var Caribbean_regional = ["Cuba","Dominican Republic","French Guiana","Guadeloupe","Haiti","Martinique","Puerto Rico","Saint Barthelemy","Saint Martin"];
 
-var CR = ["Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia"];
+var CR = ["Barbados","Dominica","Antigua and Barbuda","Grenada","Saint Vincent and the Grenadines","Saint Lucia","Trinidad and Tobago","Saint Kitts and Nevis"];
+var CR_ADM0 = ["BRB","DMA","ATG","GRD","VCT","Saint Lucia","TTO","KNA"];
 
 //var regional_assoc = [{key:"HN"}]
 var hover_color = "#536878";//"#a1d99b";//"tomato";
@@ -934,6 +937,8 @@ queue()
 	.defer(d3.json, "fips2.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
 	.defer(d3.json, "rainfall_national.json")
+	.defer(d3.json, "award_info3.json")
+	.defer(d3.json, "adm2_all.json")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
 			console.log('progress');
@@ -953,11 +958,20 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all){	
 	  if (error) throw error;	
 	   
 	  
 	  data_info = dat_info;
+	  
+	  //console.log(awards_detail);
+	  //console.log(geodata_admin0);
+	 
+	  
+	 //build award shapes and add details
+	  /*awards_detail.forEach(function(d,i){
+		  d.shape = 
+	  });*/
 	  
 	  
 	function initComments(){
@@ -993,6 +1007,33 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  {key:"PER", value:topojson.feature(adm2_shapes,adm2_shapes.objects.PER_adm2).features},
 	  {key:"SLV", value:topojson.feature(adm2_shapes,adm2_shapes.objects.SLV_adm2).features},
 	  {key:"VEN", value:topojson.feature(adm2_shapes,adm2_shapes.objects.VEN_adm2).features}];
+	  
+	 var filtered_awards = [];
+	  
+	 console.log(adm2_shapes2); 
+	  
+   	 var awards_byCountry2 = d3.nest()
+   	 .key(function(d){return d.Country;})
+   	 .entries(awards_detail);
+	 
+ 	  awards_byCountry2.forEach(function(d){
+		  //console.log(d);
+		  var c = adm2_shapes2.filter(function(e){return e.value[0].properties.NAME_0==d.key;});
+		  if(c[0]!=undefined){
+		  d.values.forEach(function(e,i){
+			  //e.shape = c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2;})[0];
+			  var award = c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2;})[0];
+			  if(award!=undefined){
+			  award.properties.award_info = e;
+		  	  }	
+			  filtered_awards.push(award);
+		  });
+	  	}
+ 	  });
+	  
+	  console.log(filtered_awards);
+	  //console.log(awards_byCountry2);
+	  //console.log(adm2_shapes2);
 	  
  	 var award_shapes = [];
  	 var award_info2 = [];
@@ -1471,6 +1512,8 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  var country_places;
 	  var country_pov;
 	  var country_awards;
+	  var country_awards_detail;
+	  var country_awards_shapes;
 	  var country_povbyfips;
 	  var country_povbyfips2;
 	  var country_byDatebyRegion;
@@ -2063,6 +2106,7 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 		.enter()
 		.append("text")
 		.attr("class","gl_labels")
+		.attr("id",function(d){return "label_"+d.properties.ADMIN;})
 		.attr("x",function(d){
 			//return global_path.centroid(d)[0];
 			/*if(d.properties.ADMIN == "Dominican Republic"){
@@ -2084,45 +2128,26 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 		}
 		})
 		//.attr("y",function(d){return global_path.centroid(d)[1]+3;})
-		.text(function(d){return d.properties.ADMIN;});
-		
-		/*global_land.selectAll("text")
-		.data(geodata_admin0.features)
-		.enter()
-		.append("text")
-		//.attr("class","country_labels")
-		//.attr("x",function(d){return global_path.centroid(d)[0];})
-		//.attr("y",function(d){return global_path.centroid(d)[1];})
-		.text(function(d){return d.properties.ADM0_A3;});*/	
-		
-		/*//console.log(geodata_admin0.features);
-		var features = geodata_admin0.features;//topojson.feature(geodata_admin0, world.objects.countries).features;
-		  var centroids = features.map(function (feature){
-		    return path.centroid(feature);
-		  });*/
-		
-		//console.log(geodata_admin0.features);
-		  
-	//generate centroids
-		/*var centroids = d3.map();
-		geodata_admin0.features.forEach(function(d){
-		//	console.log(d.properties.ADM0_A3 + " "+path.centroid(d));
-			centroids.set(d.properties.ADM0_A3,path.centroid(d));
-		});
-		
-		var features = geodata_admin0.features;
-		  var centroids = features.map(function (feature){
-		    return path.centroid(feature);
-		  });*/
-		  
-		  //console.log(vv); UNCOMMENT
-		//var bchart_colors = ["steelblue","orange","green"];
-		//var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
+		.text(function(d){
+			return d.properties.ADMIN.replace("and","&");
+			/*if(d.properties.ADMIN == "Saint Vincent and the Grenadines"){
+				//console.log("yep...");
+				return "Saint Vincent &"+"<br/>"+"the Grenadines"; 
+				}else{
+					return d.properties.ADMIN.replace("and","&");
+				}*/
+		})
+		//.attr("length",function(d){
+		//	return d3.select(this).getComputedTextLength();
+		//})
+		.on("mouseover",function(d){
+			d3.select(this).attr("cursor","pointer");
+			return d3.select("#gl_country"+d.properties.ADM0_A3).dispatch("mouseover");})
+		.on("mouseout",function(d){
+			d3.select(this).attr("cursor","default");
+			return d3.select("#gl_country"+d.properties.ADM0_A3).dispatch("mouseout");});//trigger hover country
 
-		//var bchart_colors = ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00"];
-		
-		//var bchart_colors = [{key:"Vector Control", value:"#1b9e77"},{"#e6ab02"},{"#7570b3"}}];
-		  
+		//barcharts
 		 var pp = global_bcharts.selectAll("g")
 		  .data(vv)
 		  .enter().append("g")
@@ -2134,30 +2159,23 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 				  return "translate(" +global_path.centroid(d)+ ")";//"translate(["+(cc[0]+100)+","+cc[1]+"])";
 			  }else{
 				  return "translate(" +global_path.centroid(d)+ ")";
-				  }
-				  
-				  	  
-		  		});
-		  
-		  var sz = 7;
-		  var r = 5;
-		  /*pp.append("rect")
-			  .attr("class","bchart_border")
-			  .attr("x","-10px")
-			  .attr("y","-15px");*/
-		  	    	  	  
-		  //console.log(partnersbyLine.filter(function(v){return v.values.key == j[i].parentNode.id.replace("gl_bchart","");}));
-		  //var sz = 5;
-		  //console.log(partnersbyLine);
-		  //console.log(partnersbyCountrybyLinebyPartner);
-		  
-var symbols = pp.selectAll("svg")
-		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
-		  //.data(partnersbyCountrybyLinebyPartner.filter(function(d,i,j){return d.key == j[i].parentNode.id.replace("gl_bchart_","");}))	  
+				  }	  
+		  		});  
+				
+			//add Caribbean	
+	  		  global_bcharts.append("g")
+	  		  .attr("id","gl_bchart_ES_Caribbean")
+				.attr("transform", "translate(425,228)");
+				
+				
+				var sz = 7;
+				var r = 5;
+		
+		var lbs = gl_labels.nodes();
+		
+		var symbols = pp.selectAll("svg")  
 		  .data(function(d){
-			  //return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;
 			  if(partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0]!=undefined){
-				  //console.log(partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values.filter(function(t){return t.key != "Programming level";}));
 			  return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;
 		  	}else{
 		  		return [];
@@ -2176,23 +2194,26 @@ var symbols = pp.selectAll("svg")
 			  }
 		  }))	  	  	  
 		  .attr("transform",function(d,i,j){//
-			  //console.log(d);
-			  //console.log(j[i].parentNode.id+" "+i); console.log(d);
-			  /*if(j[i].parentNode.id.replace("gl_bchart_","")=="Dominican Republic"){
-				  return -(sz*2)+i*(sz+0.5)+20;
-			  } else{
-				  return -(sz*2)+i*(sz+0.5);
-			  }*/
 			  var nm = j[i].parentNode.id.replace("gl_bchart_","");
+			  
 			  var x = i*(sz+0.5)+sz/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;	
 			  var y = -sz-3+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+			  
+			  if(country_labels.filter(function(z){return z.country == nm;})[0].inline==true){
+				 //x += nm.replace("and","&").length*5;
+				 
+				 //var lngth = d3.select("#label_"+nm).getBBox();
+				  
+				  x += 85;//nm.replace("and","&").length*5;
+				  
+				  y += sz+3;
+			  }
 			  
 			  var cx = r/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;
 			  var cy = -r*2-15+country_labels.filter(function(z){return z.country == nm;})[0].dy;
 			  
 			  var sx = 5+country_labels.filter(function(z){return z.country == nm;})[0].dx;
 			  var sy = 10+country_labels.filter(function(z){return z.country == nm;})[0].dy;	
-			  
 			  
 			  if(d.key=="Programming level"){
 				  return "translate("+x+","+y+")";
@@ -2204,16 +2225,6 @@ var symbols = pp.selectAll("svg")
 			  }  
 				  
 		  })
-		  /*.attr("y",function(d,i,j){
-			  var nm = j[i].parentNode.id.replace("gl_bchart_","");
-			  return -sz-7+country_labels.filter(function(z){return z.country == nm;})[0].dy;
-		  })
-		  .attr("width",sz)
-		  .attr("height",function(d,i,j){
-			  return sz;
-			  //console.log(d);
-			  //console.log(j[i].parentNode.id.replace("gl_bchart_",""));
-		  })*/
 		  .style("fill",function(d,i){
 			  if(d.key == "SBCC"){return bchart_colors[0];}
 			  if(d.key == "Service Delivery"){return bchart_colors[1];}
@@ -2228,9 +2239,111 @@ var symbols = pp.selectAll("svg")
 		  .style("stroke","none")
 		  .style("stroke-weight",0.25);
 		  
+		  var dd = partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == "E/S Caribbean";})[0].values;
+		  //console.log(dd);
 		  
-	symbols.append("title")
-		  .text()	  
+		  
+		  
+		  
+		  //***********append caribbean bchart**********
+		 
+		  
+		  d3.select("#gl_bchart_ES_Caribbean").selectAll("svg")
+		  .data(dd)
+		  .enter()
+		  .append("path")
+		  .attr("d",d3.symbol().size(49).type(function(d){
+			  //console.log(d);
+			  if(d.key=="Programming level"){
+				  return d3.symbolCircle;
+			  }else if(d.key=="Research and Innovation"){
+				  return d3.symbolStar;
+			  }else{
+				  return d3.symbolSquare;
+			  }
+		  }))	  	  	  
+		  .attr("transform",function(d,i){//
+			  var nm = "E/S Caribbean";
+			  var x = i*(sz+0.5)+sz/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;	
+			  var y = -sz-3+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+			  
+			  var cx = r/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;
+			  var cy = -r*2-15+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+			  
+			  var sx = 5+country_labels.filter(function(z){return z.country == nm;})[0].dx;
+			  var sy = 10+country_labels.filter(function(z){return z.country == nm;})[0].dy;	
+			  if(d.key=="Programming level"){
+				  return "translate("+x+","+y+")";
+			  }else if(d.key=="Research and Innovation"){
+				  //return "translate("+sx+","+sy+")scale(0.8)";
+				  return "translate("+(x+7)+","+y+")";
+			  }else{
+				  return "translate("+(3+x)+","+y+")";	
+			  }  
+				  
+		  })
+		  .style("fill",function(d){
+			  if(d.key == "SBCC"){return bchart_colors[0];}
+			  if(d.key == "Service Delivery"){return bchart_colors[1];}
+			  if(d.key == "Vector Control"){return bchart_colors[2];}
+			  if(d.key == "Community Engagement"){return bchart_colors[3];}
+			  if(d.key == "Research and Innovation"){return bchart_colors[4];}
+			  if(d.values[0].key == "Full Programming"){return level_colors[0];}
+			  if(d.values[0].key == "Moderate Programming"){return level_colors[1];}
+			  if(d.values[0].key == "Limited/Community Programming"){return level_colors[2];}
+			  if(d.values[0].key == "Research Collaborative"){return level_colors[3];}
+		  })
+		  .style("stroke","none")
+		  .style("stroke-weight",0.25);
+		  
+		  
+  		global_labels.append("text")
+  		.attr("class","gl_labels")
+  		.attr("x",425)
+  		.attr("y",230)
+  		.text("E/S Caribbean")
+  		.on("mouseover",function(){
+			CR_ADM0.forEach(function(d){
+				return d3.select("#gl_country"+d).style("fill",hover_color);
+			});
+			d3.select(this).attr("cursor","pointer");
+			filterCaribbean();
+  		})
+  		.on("mouseout",function(){
+			CR_ADM0.forEach(function(d){
+				d3.select("#gl_country"+d).style("fill",function(){
+					return d3.select("#gl_country"+d).attr("basecolor");
+				});
+			});
+			d3.select(this).attr("cursor","default");
+			restorecharts();
+		});//trigger hover country
+		  
+		  
+		  
+		/*.on("mouseover",function(d){
+			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
+			//if(d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor") != "rgb(220,220,220)"){
+			//if(d3.select("#gl_country"+d.properties.ADMIN).attr("basecolor") != "rgb(220,220,220)"){
+			d3.select(this).style("fill",hover_color);
+			//d3.select(this).style("stroke-width","2");
+			//}
+			filtercharts(d);
+			}
+		})
+		.on("mouseout",function(d){
+			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
+			//d3.select(this).style("stroke-width","0.25");	
+			d3.select(this).style("fill",function(d){
+				//return d3.select("#gl_country"+d.properties.ADMIN).attr("basecolor");
+				return d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor");
+			})
+			restorecharts();
+			}
+		})*/  
+		  
+		 //*******end caribbean*******
+		    
 /*var circles = pp.selectAll("svg")
 		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
 		  //.data(partnersbyCountrybyLinebyPartner.filter(function(d,i,j){return d.key == j[i].parentNode.id.replace("gl_bchart_","");}))	  
@@ -2566,6 +2679,31 @@ global_svg.append("text")
 		}
 		//filter award data
 		var da = partnersbyCountrybyLinebyPartner.filter(function(c){return c.key == d.properties.ADMIN;})
+		//console.log(da[0].values);
+		//console.log(partnersbyLinebyPartner);
+		
+		if(da[0]!=undefined){
+			//console.log(da[0].values);
+		draw_global_awards(da[0].values);
+		}
+		
+	}
+	
+	function filterCaribbean(){
+		//console.log(d);
+		//console.log(globalbycountry);
+		//filter charts
+		var dd = globalbycountry.filter(function(c){return CR.indexOf(c.key)!=-1;});
+		if(dd[0]!=undefined){
+			if(gl_epi_tab==0){	
+		draw_new_confirmed_chart(dd);
+		draw_cumulative_confirmed_chart(dd);
+		}else if(gl_epi_tab==1){
+		draw_by_indicators(dd);
+	}
+		}
+		//filter award data
+		var da = partnersbyCountrybyLinebyPartner.filter(function(c){return c.key == "E/S Caribbean";})
 		//console.log(da[0].values);
 		//console.log(partnersbyLinebyPartner);
 		
@@ -3498,6 +3636,7 @@ var xaxis = global_indicators_3.append("g")
 		  
 			  
 		  //console.log(places_topo);
+		  //console.log(adm0);
 		  
 		  //filter data to country
 		  country_adm1_features = geodata_admin1.features.filter(function(d){return d.properties.adm0_a3 == adm0;}); //prev el_salvador
@@ -3508,6 +3647,14 @@ var xaxis = global_indicators_3.append("g")
 		  //country_awards = topojson.feature(awards,awards.objects.usaidawards).features.filter(function(d){return d.properties.ISO == adm0;});
 		  country_title = ADM0_A3_lookup.filter(function(v){return v.value == adm0;})[0].key;
 		  country_awards = award_shapes.filter(function(v){return v.properties.ISO == adm0;});
+		  
+		  //country_awards_shapes = adm2_shapes2.filter(function(v){return v.key==adm0;})[0].value;
+		  
+		  country_awards_shapes = filtered_awards.filter(function(v){return v!=undefined && v.properties.NAME_0==country_title;});
+		  
+		  
+		  
+		  //country_awards_detail = awards_byCountry2.filter(function(v){return v.key == country_title;})[0].values;
 		  country_awards_info = award_info2.filter(function(v){return v.ADM0 == adm0;});
 		  country_povbyfips = povertyByCountryByRegion.filter(function(d){return d.key == adm0;})[0];
 		  if(country_povbyfips != undefined){country_povbyfips = country_povbyfips.values.sort(function(a, b){ return d3.descending(a.value.latest,b.value.latest);});}else{country_povbyfips = [];};
@@ -3516,7 +3663,11 @@ var xaxis = global_indicators_3.append("g")
 		  
 		  paho_sub = pahobycountry.filter(function(d){return d.key == adm0;})[0];
 		  
+		  //console.log(country_awards_shapes);
+		  //console.log(country_awards_detail);
 		  
+		  //console.log(adm2_shapes2.filter(function(v){return v.key==adm0;}));
+		  //console.log(country_awards_detail);
 		  //console.log("adm0");
 		  //console.log(adm0);
 		  //console.log(pahobycountry);
@@ -4476,9 +4627,54 @@ var b2 = path.bounds(country_centroid[0]),
 			//d3.select("#diagonalHatch").attr("transform", "translate([0,0])"+"scale(0.5)");	
 		//console.log(country_awards);	
 		//console.log(country_awards_info);
+		
+		//console.log(country_awards);
+		/*efforts = awards_shp.selectAll("path")
+		.data(country_awards_detail)
+		.enter()
+		.append("path")
+		.attr("id", function(d){return "award"+d.properties.HASC_2;})
+		.style("pointer-events","all")
+		.attr("d",path_leaflet)*/
+		
+		//console.log(country_awards_detail.filter(function(v){return v.shape != undefined;}));
+		
+efforts = awards_shp.selectAll("path")
+		.data(country_awards_shapes)
+		.enter()
+		.append("path")
+		.attr("id", function(d,i){return "award"+d.properties.HASC_2;})
+		.style("pointer-events","all")
+		.attr("d",path_leaflet)
+		/*.attr("d",function(d){
+			console.log(d.shape);
+			return path_leaflet(d.shape);
+		})*/
+		.style("stroke","white")
+		.style("stroke-width","0.25")
+		.attr("basecolor","url(#diagonalHatch)")
+		/*.attr("basecolor",function(d,i){
+			if(country_awards_info[i].Program=="ASSIST"){
+				//return "url(#diagonalHatch)";
+				return "url(#pattern2)"
+			}else if(country_awards_info[i].Program == "0"){
+				return "url(#diagonalHatch)";
+			}
+		})*/
+		.style("fill",function(d,i){
+			return d3.select(this).attr("basecolor");
+		})	
+		.on("click", function(d){
+			console.log(d);	
+		})
+		.on("mouseover",function(d){
+			d3.select(this).style("fill",hover_color);
+		} )
+		.on("mouseout",function(d){
+			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
+		})
 			
-			
-		efforts = awards_shp.selectAll("path")
+		/*efforts = awards_shp.selectAll("path")
 		.data(country_awards)
 		.enter()
 		.append("path")
@@ -4509,7 +4705,7 @@ var b2 = path.bounds(country_centroid[0]),
 		} )
 		.on("mouseout",function(d){
 			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
-		})	
+		})*/
 	}
 
 
@@ -5216,7 +5412,7 @@ var linegraph = global_indicators_2.append("path")
 		  
 		var key = all_inds_key.append("svg")
 		.attr("width",175)
-		.attr("height",200);
+		.attr("height",300);
 			//.attr("id","countryChartKey");
 			
 	var key_labels = key.selectAll("g")
