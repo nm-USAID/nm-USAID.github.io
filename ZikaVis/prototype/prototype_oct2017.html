@@ -15,6 +15,7 @@
 <script src="https://d3js.org/d3-color.v1.min.js"></script>
 <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="../src/textures/dist/textures.js"></script>
 
 
 <script src='google-sheet.js'></script>
@@ -38,7 +39,6 @@
            x="0" y="0" width="0.6" height="0.6"
            patternUnits="userSpaceOnUse" patternTransform="scale(5)">
 <circle cx="0.3" cy="0.3" r="0.15" style="stroke: none; fill:white" /></pattern></defs></svg>
-
 
 <script src="d3.min.js"></script>
 <script src="//d3js.org/queue.v1.min.js"></script>
@@ -132,6 +132,92 @@ var text = meter.append("text")
 //leaflet!
 //var map = new L.Map("map", {center: [37.8, -96.9], zoom: 4})
   //  .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));	
+  
+var t1 = textures.lines()
+  .size(7)
+  .stroke("white")
+  .thicker()
+  .strokeWidth(0.5);
+ 
+var t5 = textures.lines()
+  .size(7)
+  .lighter()
+  .stroke("white");  
+ 
+var t4 = textures.lines()
+  .size(7)
+  .orientation("vertical")
+  .strokeWidth(0.75)
+  .stroke("white")
+  .shapeRendering("crispEdges");
+  
+var t2 = textures.circles()
+  .size(7)
+  .thicker()
+  .radius(0.75)
+  .fill("white");
+  
+var t3 = textures.paths()
+  .size(9)
+  .d("caps")
+  .lighter()
+  .thicker()
+  .stroke("white");
+  
+ var t6 = textures.paths()
+  .size(7)
+  .d("crosses")
+  .lighter()
+  .thicker()
+  .strokeWidth(0.5)
+  .stroke("white");   
+  
+  
+var t1b = textures.lines()
+  .size(7)
+  .thicker()
+  .strokeWidth(0.5)
+  .shapeRendering("crispEdges");
+ 
+var t5b = textures.lines()
+  .size(7)
+  .lighter();  
+ 
+var t4b = textures.lines()
+  .size(7)
+  .orientation("vertical")
+  .strokeWidth(0.75)
+  .shapeRendering("crispEdges");
+  
+var t2b = textures.circles()
+  .size(7)
+  .thicker()
+  .radius(0.75);
+  
+var t3b = textures.paths()
+  .size(7)
+  .d("caps")
+  .lighter()
+  .thicker();
+  
+ var t6b = textures.paths()
+  //.size(4)
+  .d("crosses")
+  .lighter()
+  .thicker();   
+  
+  
+  var fills_t = [t1,t2,t3,t4,t5,t6];
+  var fills_tb = [t1b,t2b,t3b,t4b,t5b,t6b];
+  
+  var textures = d3.select("#global_container").append("svg").style("width", "100%").style("height", "100%").style("position","absolute");
+          
+  for(var x=0;x<6;x++){
+	  textures.call(fills_t[x]);
+	  textures.call(fills_tb[x]);
+  }
+ 
+var l_o_efs = ["SBCC","Service Delivery","Vector Control","Community Engagement","Research and Innovation"];  
 	
 var choropleth_date;
 var clegend;
@@ -163,7 +249,7 @@ var colors = ["#db8869",
 var priority_countries = ["Belize","Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala","Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Guyana","Paraguay",/*"Panama","Costa Rica",*/"Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia","Trinidad and Tobago","Saint Kitts and Nevis"];//"Cuba","French Guiana","Guadeloupe","Martinique"/*,"Puerto Rico"*/,"Saint Barthelemy","Saint Martin"];
 
 var got_data = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala",
- /*"Colombia",*/ "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela"];
+ "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela"];
 
 var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left",inline:false},{country:"El Salvador",dx:-40,dy:20,t_align:"left",inline:false},{country:"Dominican Republic",dx:10,dy:0,t_align:"right",inline:false},{country:"Honduras",dx:0,dy:-10,t_align:"left",inline:false},
 {country:"Guatemala",dx:-50,dy:5,t_align:"left",inline:false},{country:"Colombia",dx:-15,dy:0,t_align:"left",inline:false},{country:"Nicaragua",dx:0,dy:10,t_align:"left",inline:false},{country:"Peru",dx:-20,dy:0,t_align:"left",inline:false},{country:"Ecuador",dx:-15,dy:0,t_align:"left",inline:false},
@@ -676,7 +762,8 @@ d3.select("#awardview").append("div")
 	var path_sm;				
 	var projection;
 	var path;
-	var clinicSymbol;	
+	var clinicSymbol;
+	var dist_charts;	
 	
 	
 function globalProjections(){	
@@ -937,7 +1024,7 @@ queue()
 	.defer(d3.json, "fips2.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
 	.defer(d3.json, "rainfall_national.json")
-	.defer(d3.json, "award_info3.json")
+	.defer(d3.json, "award_info6.json")
 	.defer(d3.json, "adm2_all.json")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
@@ -972,6 +1059,10 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  /*awards_detail.forEach(function(d,i){
 		  d.shape = 
 	  });*/
+	  
+		  epidata_all = epidata_all.filter(function(d){return d.location.split("-").length < 3;});
+		  
+		  //console.log(epidata_all.filter(function(d){return d.}));
 	  
 	  
 	function initComments(){
@@ -1009,8 +1100,9 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  {key:"VEN", value:topojson.feature(adm2_shapes,adm2_shapes.objects.VEN_adm2).features}];
 	  
 	 var filtered_awards = [];
+	 var filtered_awards_detail = [];
 	  
-	 console.log(adm2_shapes2); 
+	 //console.log(adm2_shapes2); 
 	  
    	 var awards_byCountry2 = d3.nest()
    	 .key(function(d){return d.Country;})
@@ -1021,17 +1113,24 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 		  var c = adm2_shapes2.filter(function(e){return e.value[0].properties.NAME_0==d.key;});
 		  if(c[0]!=undefined){
 		  d.values.forEach(function(e,i){
+			  //console.log(e);
 			  //e.shape = c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2;})[0];
-			  var award = c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2;})[0];
-			  if(award!=undefined){
-			  award.properties.award_info = e;
-		  	  }	
+			  //console.log(c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2;}));
+			  var award = c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2 && e.program_level=="adm2";})[0];
+			  if(award!=undefined){  
 			  filtered_awards.push(award);
+			  filtered_awards_detail.push(e);
+			  //filtered_awards.push(award);
+		  	  }else{
+				  console.log(e);
+		  	  }	
 		  });
 	  	}
  	  });
+	  //console.log(awards_detail);
+	  //console.log(filtered_awards);
 	  
-	  console.log(filtered_awards);
+	  //console.log(filtered_awards);
 	  //console.log(awards_byCountry2);
 	  //console.log(adm2_shapes2);
 	  
@@ -1240,6 +1339,8 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  //console.log(globalbycountry);
 	  
 	  //awards by partners
+	  
+	  
 	  var awardsbyPartner = d3.nest()
 	  .key(function(d){return d.properties.Partner;})
 	  .entries(awards_topo);
@@ -2225,6 +2326,8 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 			  if(d.key=="Programming level"){
 				  return "translate("+x+","+y+")";
 			  }else if(d.key=="Research and Innovation"){
+				  //console.log(d);
+				  //console.log(i);
 				  //return "translate("+sx+","+sy+")scale(0.8)";
 				  return "translate("+(x+7)+","+y+")";
 			  }else{
@@ -3655,14 +3758,15 @@ var xaxis = global_indicators_3.append("g")
 		  country_title = ADM0_A3_lookup.filter(function(v){return v.value == adm0;})[0].key;
 		  country_awards = award_shapes.filter(function(v){return v.properties.ISO == adm0;});
 		  
-		  //country_awards_shapes = adm2_shapes2.filter(function(v){return v.key==adm0;})[0].value;
 		  
 		  country_awards_shapes = filtered_awards.filter(function(v){return v!=undefined && v.properties.NAME_0==country_title;});
 		  
 		  
 		  
 		  //country_awards_detail = awards_byCountry2.filter(function(v){return v.key == country_title;})[0].values;
-		  country_awards_info = award_info2.filter(function(v){return v.ADM0 == adm0;});
+		  //console.log(country_awards_detail);
+		  country_awards_info = filtered_awards_detail.filter(function(v){return v.Country == country_title;});
+		  //country_awards_info = award_info2.filter(function(v){return v.ADM0 == adm0;});
 		  country_povbyfips = povertyByCountryByRegion.filter(function(d){return d.key == adm0;})[0];
 		  if(country_povbyfips != undefined){country_povbyfips = country_povbyfips.values.sort(function(a, b){ return d3.descending(a.value.latest,b.value.latest);});}else{country_povbyfips = [];};
 		  country_povbyfips2 = povertyByCountryByRegion2.filter(function(d){return d.key == adm0;})[0];
@@ -4447,7 +4551,7 @@ var b2 = path.bounds(country_centroid[0]),
 		})*/
 		.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");})
 		//.style("opacity",0.5)	
-	    .on("click", function(d){
+	    /*.on("click", function(d){
 			d.selected = !d.selected;
 			var color = (d.selected) ? hover_color: d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");
 			d3.select(this).style("fill",color);
@@ -4455,7 +4559,7 @@ var b2 = path.bounds(country_centroid[0]),
 			//console.log(d);
 			//only allow one at a time? for now
 			selection = d.selected;
-	  })
+	  })*/
 		.on("mouseover",function(d){
 			if(!selection){
 			//d3.select(this).style("stroke-width","2px");	
@@ -4644,7 +4748,6 @@ var b2 = path.bounds(country_centroid[0]),
 		.style("pointer-events","all")
 		.attr("d",path_leaflet)*/
 		
-		//console.log(country_awards_detail.filter(function(v){return v.shape != undefined;}));
 		
 efforts = awards_shp.selectAll("path")
 		.data(country_awards_shapes)
@@ -4653,21 +4756,23 @@ efforts = awards_shp.selectAll("path")
 		.attr("id", function(d,i){return "award"+d.properties.HASC_2;})
 		.style("pointer-events","all")
 		.attr("d",path_leaflet)
-		/*.attr("d",function(d){
-			console.log(d.shape);
-			return path_leaflet(d.shape);
-		})*/
 		.style("stroke","white")
 		.style("stroke-width","0.25")
-		.attr("basecolor","url(#diagonalHatch)")
-		/*.attr("basecolor",function(d,i){
-			if(country_awards_info[i].Program=="ASSIST"){
+		//.attr("basecolor","url(#diagonalHatch)")
+		.attr("basecolor",function(d,i){
+			/*if(country_awards_info[i].program == "ASSIST" ||  country_awards_info[i].program == "ASSIST/URC"){
 				//return "url(#diagonalHatch)";
 				return "url(#pattern2)"
-			}else if(country_awards_info[i].Program == "0"){
+			}else if(country_awards_info[i].program == "null"){
 				return "url(#diagonalHatch)";
-			}
-		})*/
+			}else{
+				return "url(#diagonalHatch)";
+			}*/
+				var k = l_o_efs.indexOf(country_awards_info[i].line_of_effort);
+				
+				return (k!=-1) ? fills_t[k].url() : fills_t[0].url();
+					
+		})
 		.style("fill",function(d,i){
 			return d3.select(this).attr("basecolor");
 		})	
@@ -4680,6 +4785,21 @@ efforts = awards_shp.selectAll("path")
 		.on("mouseout",function(d){
 			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
 		})
+		
+		efforts.append("title")
+		.text(function(d,i){
+			var str = country_awards_info.filter(function(v){return v.Municpality == country_awards_info[i].Municpality && v.Municpality!="";});
+			if(str!=undefined){
+				var ps = [];
+				//console.log(str);
+				str.forEach(function(c){
+					ps.push(c.program);
+				});
+			return country_awards_info[i].Department + ", "+country_awards_info[i].Municpality + " - Program: "+ps;
+			}else{
+			return country_awards_info[i].Department + ", "+country_awards_info[i].Municpality + " - Program: "+country_awards_info[i].program;
+			}
+		});
 			
 		/*efforts = awards_shp.selectAll("path")
 		.data(country_awards)
@@ -4716,35 +4836,37 @@ efforts = awards_shp.selectAll("path")
 	}
 
 
-	function layerAwards_sm(){
-		awards_shp = mapview_svg.append("g")
+function layerAwards_sm(){
+		sm_awards_shp = mapview_svg.append("g")
 			.attr("class","awards_shp");
 			
 			//d3.select("#diagonalHatch").attr("transform", "translate([0,0])"+"scale(0.5)");	
-			
-		efforts = awards_shp.selectAll("path")
-		.data(country_awards)
+		
+	sm_efforts = awards_shp.selectAll("path")
+		.data(country_awards_shapes)
 		.enter()
 		.append("path")
-		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
+		.attr("id", function(d,i){return "award"+d.properties.HASC_2;})
 		.style("pointer-events","all")
-		.attr("d",path_leaflet)
+		.attr("d",path_sm)
+		/*.attr("d",function(d){
+			console.log(d.shape);
+			return path_leaflet(d.shape);
+		})*/
 		.style("stroke","white")
 		.style("stroke-width","0.25")
+		//.attr("basecolor","url(#diagonalHatch)")
 		.attr("basecolor",function(d,i){
-			if(country_awards_info[i].Program=="ASSIST"){
+			if(d.properties.award_info.program=="ASSIST"){
 				//return "url(#diagonalHatch)";
 				return "url(#pattern2)"
-			}else if(country_awards_info[i].Program == "0"){
+			}else if(d.properties.award_info.program == "null"){
 				return "url(#diagonalHatch)";
 			}
 		})
 		.style("fill",function(d,i){
 			return d3.select(this).attr("basecolor");
 		})	
-		//.style("fill",function(d){return "url(#diagonalHatch)";})	
-				
-		//.style("opacity","0.5")
 		.on("click", function(d){
 			console.log(d);	
 		})
@@ -4753,7 +4875,12 @@ efforts = awards_shp.selectAll("path")
 		} )
 		.on("mouseout",function(d){
 			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
-		})	
+		})
+		
+		efforts.append("title")
+		.text(function(d){return "Dept_Tpop: "+d.properties.award_info.Dept_Tpop + " Program: "+d.properties.award_info.program;});
+		
+		
 	}
 
 	
@@ -5592,6 +5719,11 @@ var linegraph = global_indicators_2.append("path")
 			//change opacity of shapes
 			efforts.each(function(){
 				d3.select(this).attr("opacity",op);
+				if(op==0){
+					d3.select(this).style("pointer-events","none");
+				}else{
+					d3.select(this).style("pointer-events","all");
+				}
 			});	
 		});
 		
@@ -5645,7 +5777,10 @@ var linegraph = global_indicators_2.append("path")
 			.attr("basecolor",function(d,i,j){
 				var n = j[i].parentNode.id.replace("line_","");
 				//console.log(n);
-				return bchart_colors[n];
+				var k = l_o_efs.indexOf(d.values[0].values[0].line_of_effort);
+				
+				return (k!=-1)?fills_tb[k].url():bchart_colors[n];//bchart_colors[n];
+				
 			})
 			.attr("fill",function(d){
 				return d3.select(this).attr("basecolor");
@@ -5675,9 +5810,11 @@ var linegraph = global_indicators_2.append("path")
 	    graph_height = 150 - graph_margin.top - graph_margin.bottom;
 	
 		//d3.select("#subnationalData").selectAll("*").remove();
-		d3.select("#subnationalData").selectAll("*").remove();
+		//d3.select("#subnationalData").selectAll("*").remove();
+		//d3.select("#subnationalData").selectAll("*").remove();
 		
 		if(sm_indicator=="paho"){
+		d3.select("#subnationalData").selectAll("*").remove();	
 		NAdiv = d3.select("#subnationalData").append("div")
 			.attr("id","subNAdiv")
 			.attr("class","NA")
@@ -5688,13 +5825,27 @@ var linegraph = global_indicators_2.append("path")
 			.text("NOT AVAILABLE");*/
 		}else{	
 		
+			if(dist_charts!=undefined){
+				d3.select("#districtData").selectAll("*").remove();	
+			}else{
+				d3.select("#subnationalData").append("div")
+				.attr("id","districtData");
+			}
+				
+				//console.log("null div?");
+				//console.log(d3.select("#districtData"));	
+			//d3.select("#districtData").selectAll("svg").remove();	
+			/*d3.select("#subnationalData").append("div")
+			.attr("id","districtData");*/
 		
+			/*d3.select("#subnationalData").append("div")
+			.attr("id","districtData");*/
 		/*d3.select("#subnationalData").append("text")
 		.text("SUBNATIONAL")
 		.attr("class","subtitle");*/
 		
-		d3.select("#subnationalData").append("div")
-		.attr("id","districtData");
+		/*d3.select("#subnationalData").append("div")
+		.attr("id","districtData");*/
 		
 		//console.log(byCountrybyIndbyRegion);
 	
@@ -5802,10 +5953,15 @@ var linegraph = global_indicators_2.append("path")
 		
 		var fips = d.properties.fips;
 	
+		//console.log(d3.select("#districtData").scrollTop);
+	
 		//d3.select("#subnationalData").selectAll("*").remove();
-		d3.select("#subnationalData").selectAll("*").remove();
+		//d3.select("#subnationalData").selectAll("*").remove();
+		
+		d3.select("#districtData").selectAll("*").remove();
 		
 		if(sm_indicator=="paho"){
+		d3.select("#subnationalData").selectAll("*").remove();	
 		NAdiv = d3.select("#subnationalData").append("div")
 			.attr("id","subNAdiv")
 			.attr("class","NA")
@@ -5857,8 +6013,8 @@ var linegraph = global_indicators_2.append("path")
 			);
 		})
 		
-		d3.select("#subnationalData").append("div")
-		.attr("id","districtData");
+		/*d3.select("#subnationalData").append("div")
+		.attr("id","districtData");*/
 		
 		//move this earlier to save compute time. 
 		dist_charts = d3.select("#districtData")
@@ -6218,7 +6374,8 @@ function drawSmallMultiples(){
 		draw_sm_legend();
 		
 	}//end else
-		
+	
+	 //layerAwards_sm();
 		//layer awards	
 	}
 	

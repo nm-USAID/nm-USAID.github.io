@@ -323,7 +323,7 @@ body {
 #awardData{
 	float:left;
 	width:96%;
-	height:120px;
+	height:400px;
     border-style: none;
     border-width: 0.5px;	
     border-color: grey;
@@ -581,8 +581,8 @@ body {
 
 .mapview_svg{
 	position:absolute;
-	width:499px;
-	height:399px;
+	width:2500px;
+	height:2500px;
 	/*background:white;*/
 }
 
