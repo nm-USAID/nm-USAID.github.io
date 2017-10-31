@@ -145,7 +145,7 @@ var t5 = textures.lines()
   .stroke("white");  
  
 var t4 = textures.lines()
-  .size(7)
+  .size(3)
   .orientation("vertical")
   .strokeWidth(0.75)
   .stroke("white")
@@ -158,7 +158,7 @@ var t2 = textures.circles()
   .fill("white");
   
 var t3 = textures.paths()
-  .size(14)
+  .size(11)
   .d("caps")
   .lighter()
   .stroke("white");
@@ -183,18 +183,18 @@ var t5b = textures.lines()
   .lighter();  
  
 var t4b = textures.lines()
-  .size(7)
+  .size(1.5)
   .orientation("vertical")
-  .strokeWidth(0.75)
+  .strokeWidth(0.5)
   .shapeRendering("crispEdges");
   
 var t2b = textures.circles()
-  .size(7)
+  .size(5)
   .thicker()
   .radius(0.75);
   
 var t3b = textures.paths()
-  .size(7)
+  .size(5)
   .d("caps")
   .lighter()
   .thicker();
@@ -278,7 +278,8 @@ var glMapView;
 var global_map;
 var wait = false;
 var country_map;
-var footnote_data;	
+var footnote_data;
+var footnotes;	
 var global_data;
 var country_featureGroup;
 var global_featureGroup;
@@ -305,7 +306,7 @@ var iDiv2 = d3.select("body").append("div")
 
 function retrieveComments(_callback,prevLength){
 	console.log("retrieving comments");
-	console.log(prevLength);
+	//console.log(prevLength);
 	var new_comments_data = [];
 	var t = d3.timer(function(elapsed){
 		//console.log(elapsed);
@@ -313,7 +314,7 @@ function retrieveComments(_callback,prevLength){
 		new_comments_data = data;
 		});
 		
-		console.log(new_comments_data.length);
+		//console.log(new_comments_data.length);
 		if(new_comments_data.length>prevLength || elapsed > 2000){
 			t.stop();
 			_callback(new_comments_data);
@@ -716,7 +717,7 @@ d3.select("#awardview").append("div")
 	var mapview_svg;
 	var over_view;
 	//var country_map;
-	var footnotes;
+	//var footnotes;
 	var sm_view;
 	var sm_multiples;
 	var sm_NAdiv;
@@ -907,7 +908,7 @@ var popmap_zoom = d3.zoom()
 	  
 	  function initMarkers(data,tabletop){
 		  addMarkers(data);
-		  console.log(data);
+		  //console.log(data);
 	  }
 	  
 	  /*function initComments(data,tabletop){
@@ -1024,7 +1025,7 @@ queue()
 	.defer(d3.json, "fips2.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
 	.defer(d3.json, "rainfall_national.json")
-	.defer(d3.json, "award_info6.json")
+	.defer(d3.json, "award_info7.json")
 	.defer(d3.json, "adm2_all.json")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
@@ -1074,7 +1075,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 			new_comments_data = data;
 			});
 	
-			console.log(new_comments_data.length);
+			//console.log(new_comments_data.length);
 			if(new_comments_data.length>0){
 				comments_data = new_comments_data;
 				t.stop();
@@ -1282,6 +1283,15 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  .key(function(d){return d.country;})
 	  .entries(partners);
 	  
+	  var partnersbyCountrybyLinebyPartner_country = d3.nest()
+	  .key(function(d){return d.Country;})
+	  .key(function(d){return d.line_of_effort;})
+	  .key(function(d){return d.program;})
+	  .key(function(d){return d.Country;})
+	  .entries(filtered_awards_detail);
+	  
+	  //console.log(partnersbyCountrybyLinebyPartner_country);
+	  
 	  //console.log(partnersbyCountrybyLinebyPartner);
 	  
 	  //console.log(partnersbyLinebyPartner2);
@@ -1485,7 +1495,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 		  
 		  //console.log(poverty.filter(function(v){return v.Country_Name.indexOf("Venezuela") != -1;}));
 		  
-		  console.log(povertyByCountryByRegion);
+		  //console.log(povertyByCountryByRegion);
 	  
 	  
 	  //nest poverty data
@@ -3747,6 +3757,26 @@ var xaxis = global_indicators_3.append("g")
 			  d3.select("#smlegend").remove();
 		  }
 		  
+		
+		if(footnote_data !=undefined){
+		footnotes.removeFrom(country_map);
+		footnotes.clearLayers();
+		
+  		footnotes = new L.FeatureGroup();
+  		for(i=0;i<footnote_data.length;i++){
+  			//console.log(footnote_data[i]);
+  		  	if(footnote_data[i].lat != "" && footnote_data[i].lng != "" && footnote_data[i].comment != "" && footnote_data[i].country == adm0){
+  			_marker = L.marker([+footnote_data[i].lat,+footnote_data[i].lng]/*,{icon:L.icon({iconSize:[20,20]})}*/).bindPopup(footnote_data[i].comment);
+  			//console.log(_marker);
+  			footnotes.addLayer(_marker);
+  			}
+  		}
+  		//console.log("break");
+  		//console.log(country_map);
+  		if(country_map != undefined){
+  		footnotes.addTo(country_map);
+  		}
+		}	
 			  
 		  //console.log(places_topo);
 		  //console.log(adm0);
@@ -4757,7 +4787,7 @@ efforts = awards_shp.selectAll("path")
 		.data(country_awards_shapes)
 		.enter()
 		.append("path")
-		.attr("id", function(d,i){return "award"+d.properties.HASC_2;})
+		.attr("id", function(d,i){console.log("award_"+d.properties.HASC_2.replace(".","_")); return "award_"+d.properties.HASC_2.replace(".","_").replace(".","_");})
 		.style("pointer-events","all")
 		.attr("d",path_leaflet)
 		.style("stroke","white")
@@ -5732,7 +5762,8 @@ var linegraph = global_indicators_2.append("path")
 		});
 		
 		
-		var da = partnersbyCountrybyLinebyPartner.filter(function(c){return c.key == country_title;})[0].values;
+		var da = partnersbyCountrybyLinebyPartner_country.filter(function(c){return c.key == country_title;})[0].values;
+		
 		
 		//console.log(da);
 		//console.log(partnersbyLinebyPartner);
@@ -5751,6 +5782,7 @@ var linegraph = global_indicators_2.append("path")
 			.data(da)
 			.enter()
 			.append("svg")
+			.attr("height",function(d){return 50+d.values.length*10;})
 			.attr("id",function(d,i){return "line_"+i;})
 			.attr("class","award_effort2");
 		
@@ -5772,8 +5804,8 @@ var linegraph = global_indicators_2.append("path")
 			.attr("transform", function(d,i){return "translate(0,"+(i*15+30)+")";});
 		
 			line_partners.append("rect")
-			.attr("width","8px")
-			.attr("height","8px")
+			.attr("width","10px")
+			.attr("height","10px")
 			.attr("id",function(d){
 				var l = d.values[0].values[0].line_of_effort;
 				return l+"_"+d.key;
@@ -5788,6 +5820,22 @@ var linegraph = global_indicators_2.append("path")
 			})
 			.attr("fill",function(d){
 				return d3.select(this).attr("basecolor");
+			})
+			.on("mouseover",function(d){
+				//console.log(d.values[0].values);
+				d3.select(this).style("cursor","pointer");
+				d3.select(this).style("fill",hover_color);
+				d.values[0].values.forEach(function(f){
+					console.log(f.HASC);
+					d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).style("fill",hover_color);
+				})
+			})
+			.on("mouseout",function(d){
+				d3.select(this).style("cursor","default");
+				d3.select(this).style("fill",d3.select(this).attr("basecolor"));
+				d.values[0].values.forEach(function(f){
+					d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).style("fill",function(e){return d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).attr("basecolor");});
+				})
 			});
 		
 			line_partners.append("text")
@@ -6278,8 +6326,8 @@ function drawSmallMultiples(){
 		.text("NOT AVAILABLE");*/
 	}else{	
 		
-		console.log(sm_indicator);
-		console.log(country_byDatebyRegion);	
+		//console.log(sm_indicator);
+		//console.log(country_byDatebyRegion);	
 	
 	sm_view = d3.select("#mapview").append("div")
 	//mapview_svg.append("div")
@@ -6693,7 +6741,7 @@ function retrieveFootnotes(){
 	//https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml
 	
 	d3.csv("https://docs.google.com/spreadsheets/d/18xaJk0uObdu5WNgd2yMSxzgyS3Oz2oJ5qBMEkR0z1QI/export?format=csv", function(error,data){
-		console.log(data);
+		//console.log(data);
 		addMarkers(data);
 	})
 }
