@@ -317,7 +317,6 @@ th {
 <script src="./src/queue.v1.min.js"></script>
 <script src="./src/topojson.v1.min.js"></script>
 <script src="./src/d3-dispatch.v1.min.js"></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
 
 
 <script>
@@ -520,44 +519,23 @@ queue()
     .defer(d3.json, "us.json")
     .defer(d3.json, "us-congress-115.json")
 	.defer(d3.json, "reps.json")
-	.defer(d3.json, "awards_USAID_public.json")
+	//.defer(d3.json, "awards_USAID_public.json")
 	.defer(d3.json, "state_ids.json")
 	.defer(d3.json, "us-states.json")
+	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1NrI43J7-4TJ9SXBtC2LKFabaX7rBNhFRUeCmKsi__PM/export?format=csv")
     .await(ready);
 
-	function ready(error, us, congress, reps, awards_2, ids, us_states, awards_sheets) {
+	function ready(error, us, congress, reps, ids, us_states, awards_2) {
   if (error) throw error;
   
-  //console.log(congress_115);
-  //console.log(tryit);
   
-  //console.log(awards_googleSheets);
-  //console.log(awards_2);
-  //init();
-  
-  
-var awards_googleSheets;
-
-var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1NrI43J7-4TJ9SXBtC2LKFabaX7rBNhFRUeCmKsi__PM/pubhtml';
-
-function init() {
-    Tabletop.init( { key: publicSpreadsheetUrl,
-                     callback: getAwards,
-                     simpleSheet: true } )
-  }
-  
-  
-  function getAwards(data, tabletop) {
-	  console.log("k");		  
-	  awards_googleSheets = data;
-	  console.log(awards_googleSheets);
-	  return data;
-  }
-  
-  init();
-  
-  
-  
+  //convert google sheets strings to numbers
+  awards_2.forEach(function(e,i){
+	  e.CD_ID = +e.CD_ID;
+	  e.District = +e.District;
+	  e.State_ID = +e.State_ID;
+	  e.Zip_Code = +e.Zip_Code;
+  });
   
   /******* filter out nulls and non us ******/
   awards = awards_2
@@ -590,6 +568,7 @@ function init() {
   })
   .entries(awards)
   .sort(function(a, b){ return d3.ascending(a.key, b.key); });
+  
   //.sort(function(a, b){ return d3.descending(a.value.total, b.value.total); });
   
   //console.log(awardsTotalByState_0);
