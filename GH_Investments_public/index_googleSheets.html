@@ -518,8 +518,7 @@ var popup = d3.select("body").append("div")
 queue()
     .defer(d3.json, "us.json")
     .defer(d3.json, "us-congress-115.json")
-	.defer(d3.json, "reps.json")
-	//.defer(d3.json, "awards_USAID_public.json")
+	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1NrI43J7-4TJ9SXBtC2LKFabaX7rBNhFRUeCmKsi__PM/export?format=csv&id=1NrI43J7-4TJ9SXBtC2LKFabaX7rBNhFRUeCmKsi__PM&gid=1781163503")
 	.defer(d3.json, "state_ids.json")
 	.defer(d3.json, "us-states.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1NrI43J7-4TJ9SXBtC2LKFabaX7rBNhFRUeCmKsi__PM/export?format=csv")
@@ -528,8 +527,14 @@ queue()
 	function ready(error, us, congress, reps, ids, us_states, awards_2) {
   if (error) throw error;
   
-  
   //convert google sheets strings to numbers
+  reps.forEach(function(e,i){
+	  e.Born_In = +e.Born_In;
+	  e.CD_ID = +e.CD_ID;
+	  e.District = +e.District;
+	  e.State_ID = +e.State_ID;
+  });
+  
   awards_2.forEach(function(e,i){
 	  e.CD_ID = +e.CD_ID;
 	  e.District = +e.District;
