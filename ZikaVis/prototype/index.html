@@ -15,6 +15,7 @@
 <script src="https://d3js.org/d3-color.v1.min.js"></script>
 <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<script src="../src/textures/dist/textures.js"></script>
 
 
 <script src='google-sheet.js'></script>
@@ -38,7 +39,6 @@
            x="0" y="0" width="0.6" height="0.6"
            patternUnits="userSpaceOnUse" patternTransform="scale(5)">
 <circle cx="0.3" cy="0.3" r="0.15" style="stroke: none; fill:white" /></pattern></defs></svg>
-
 
 <script src="d3.min.js"></script>
 <script src="//d3js.org/queue.v1.min.js"></script>
@@ -132,6 +132,91 @@ var text = meter.append("text")
 //leaflet!
 //var map = new L.Map("map", {center: [37.8, -96.9], zoom: 4})
   //  .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));	
+  
+var t1 = textures.lines()
+  .size(7)
+  .stroke("white")
+  .thicker()
+  .strokeWidth(0.5);
+ 
+var t5 = textures.lines()
+  .size(7)
+  .lighter()
+  .stroke("white");  
+ 
+var t4 = textures.lines()
+  .size(3)
+  .orientation("vertical")
+  .strokeWidth(0.75)
+  .stroke("white")
+  .shapeRendering("crispEdges");
+  
+var t2 = textures.circles()
+  .size(7)
+  .thicker()
+  .radius(0.75)
+  .fill("white");
+  
+var t3 = textures.paths()
+  .size(11)
+  .d("caps")
+  .lighter()
+  .stroke("white");
+  
+ var t6 = textures.paths()
+  .size(7)
+  .d("crosses")
+  .lighter()
+  .thicker()
+  .strokeWidth(0.5)
+  .stroke("white");   
+  
+  
+var t1b = textures.lines()
+  .size(7)
+  .thicker()
+  .strokeWidth(0.5)
+  .shapeRendering("crispEdges");
+ 
+var t5b = textures.lines()
+  .size(7)
+  .lighter();  
+ 
+var t4b = textures.lines()
+  .size(1.5)
+  .orientation("vertical")
+  .strokeWidth(0.5)
+  .shapeRendering("crispEdges");
+  
+var t2b = textures.circles()
+  .size(5)
+  .thicker()
+  .radius(0.75);
+  
+var t3b = textures.paths()
+  .size(5)
+  .d("caps")
+  .lighter()
+  .thicker();
+  
+ var t6b = textures.paths()
+  //.size(4)
+  .d("crosses")
+  .lighter()
+  .thicker();   
+  
+  
+  var fills_t = [t1,t2,t3,t4,t5,t6];
+  var fills_tb = [t1b,t2b,t3b,t4b,t5b,t6b];
+  
+  var textures = d3.select("#global_container").append("svg").style("width", "100%").style("height", "100%").style("position","absolute");
+          
+  for(var x=0;x<6;x++){
+	  textures.call(fills_t[x]);
+	  textures.call(fills_tb[x]);
+  }
+ 
+var l_o_efs = ["SBCC","Service Delivery","Vector Control","Community Engagement","Research and Innovation"];  
 	
 var choropleth_date;
 var clegend;
@@ -141,7 +226,9 @@ var infoImage3;
 	
 var ht = false;
 	
-	
+//var bchart_colors =["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"];	
+var bchart_colors = ["#e7298a","#377eb8","#4daf4a","#984ea3","#ffff99"];
+var level_colors = ["#252525","#636363","#d9d9d9","#253494"];	
 	
 //var colors = ["#3a44c7","#1f78b4","#b2df8a","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
 var colors = ["#db8869",
@@ -158,11 +245,17 @@ var colors = ["#db8869",
 "#93632b"];
 
 
-var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Guyana",/*"Paraguay",*/"Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia","Trinidad and Tobago","Saint Kitts and Nevis"];//"Cuba","French Guiana","Guadeloupe","Martinique"/*,"Puerto Rico"*/,"Saint Barthelemy","Saint Martin"];
+var priority_countries = ["Belize","Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala","Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Guyana","Paraguay","Brazil","Panama","Costa Rica","Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia","Trinidad and Tobago","Saint Kitts and Nevis"];//"Cuba","French Guiana","Guadeloupe","Martinique"/*,"Puerto Rico"*/,"Saint Barthelemy","Saint Martin"];
 
-var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left"},{country:"El Salvador",dx:-50,dy:7,t_align:"left"},{country:"Dominican Republic",dx:0,dy:-10,t_align:"left"},{country:"Honduras",dx:0,dy:-10,t_align:"left"},
-{country:"Guatemala",dx:-40,dy:-15,t_align:"left"},{country:"Colombia",dx:-15,dy:0,t_align:"left"},{country:"Nicaragua",dx:0,dy:10,t_align:"left"},{country:"Peru",dx:-20,dy:0,t_align:"left"},{country:"Ecuador",dx:-15,dy:0,t_align:"left"},
-{country:"Jamaica",dx:-15,dy:-10,t_align:"left"},{country:"Venezuela",dx:-15,dy:0,t_align:"left"},{country:"Caribbean Regional",dx:0,dy:0,t_align:"left"}];
+var got_data = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala",
+ "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela"];
+
+var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left",inline:false},{country:"El Salvador",dx:-40,dy:20,t_align:"left",inline:false},{country:"Dominican Republic",dx:10,dy:0,t_align:"right",inline:false},{country:"Honduras",dx:0,dy:-10,t_align:"left",inline:false},
+{country:"Guatemala",dx:-50,dy:5,t_align:"left",inline:false},{country:"Colombia",dx:-15,dy:0,t_align:"left",inline:false},{country:"Nicaragua",dx:0,dy:10,t_align:"left",inline:false},{country:"Peru",dx:-20,dy:0,t_align:"left",inline:false},{country:"Ecuador",dx:-15,dy:0,t_align:"left",inline:false},
+{country:"Jamaica",dx:-15,dy:-10,t_align:"left",inline:false},{country:"Venezuela",dx:-15,dy:0,t_align:"left",inline:false},{country:"Paraguay",dx:-15,dy:0,t_align:"left",inline:false},{country:"Guyana",dx:-15,dy:0,t_align:"left",inline:false},{country:"Belize",dx:0,dy:-10,t_align:"left",inline:false},
+{country:"Brazil",dx:-15,dy:0,t_align:"left",inline:false},{country:"Panama",dx:-20,dy:20,t_align:"left",inline:false},{country:"Costa Rica",dx:-45,dy:10,t_align:"left",inline:false},{country:"Caribbean Regional",dx:0,dy:0,t_align:"left",inline:false},
+{country:"Barbados",dx:5,dy:-3,t_align:"left",inline:true, lngth:45},{country:"Dominica",dx:5,dy:-2,t_align:"left",inline:true,lngth:40},{country:"Antigua and Barbuda",dx:5,dy:5,t_align:"left",inline:true,lngth:84},{country:"Grenada",dx:15,dy:6,t_align:"left",inline:true,lngth:40},
+{country:"Saint Vincent and the Grenadines",dx:15,dy:6,t_align:"left",inline:true,lngth:142},{country:"Saint Lucia",dx:8,dy:-6,t_align:"left",inline:true,lngth:50},{country:"Trinidad and Tobago",dx:5,dy:0,t_align:"left",inline:true,lngth:82},{country:"Saint Kitts and Nevis",dx:10,dy:-5,t_align:"left",inline:true,lngth:83},{country:"E/S Caribbean",dx:0,dy:0,t_align:"left",inline:false},{country:"Surinam",dx:0,dy:0,t_align:"left",inline:false}];
 
 var central = ["El Salvador", "Honduras","Guatemala", "Nicaragua", "Ecuador"];
 var south = ["Colombia", "Peru", "Venezuela"];
@@ -170,20 +263,23 @@ var caribbean = ["Dominican Republic", "Jamaica", "Haiti"];
 
 var Caribbean_regional = ["Cuba","Dominican Republic","French Guiana","Guadeloupe","Haiti","Martinique","Puerto Rico","Saint Barthelemy","Saint Martin"];
 
-var CR = ["Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia"];
+var CR = ["Barbados","Dominica","Antigua and Barbuda","Grenada","Saint Vincent and the Grenadines","Saint Lucia","Trinidad and Tobago","Saint Kitts and Nevis"];
+var CR_ADM0 = ["BRB","DMA","ATG","GRD","VCT","Saint Lucia","TTO","KNA"];
 
 //var regional_assoc = [{key:"HN"}]
 var hover_color = "#536878";//"#a1d99b";//"tomato";
 
 
-var ADM0_A3_lookup = [{key:"Haiti",value:"HTI"/*{country_code:"HTI",lat:,long:,zoom:*/},{key:"El Salvador",value:"SLV"},{key:"Dominican Republic",value:"DOM"},{key:"Honduras",value:"HND"},{key:"Guatemala",value:"GTM"},{key:"Colombia",value:"COL"},{key:"Nicaragua",value:"NIC"},{key:"Peru",value:"PER"},{key:"Ecuador",value:"ECU"},{key:"Jamaica",value:"JAM"},{key:"Venezuela",value:"VEN"},{key:"Caribbean Regional",value:""}];
+var ADM0_A3_lookup = [{key:"Haiti",value:"HTI"/*{country_code:"HTI",lat:,long:,zoom:*/},{key:"El Salvador",value:"SLV"},{key:"Dominican Republic",value:"DOM"},{key:"Honduras",value:"HND"},{key:"Guatemala",value:"GTM"},{key:"Colombia",value:"COL"},{key:"Nicaragua",value:"NIC"},{key:"Peru",value:"PER"},{key:"Ecuador",value:"ECU"},{key:"Jamaica",value:"JAM"},{key:"Venezuela",value:"VEN"},
+{key:"Caribbean Regional",value:""},{key:"Paraguay",value:"PRY"},{key:"Costa Rica",value:"CRI"},{key:"Panama",value:"PAN"},{key:"Guyana",value:"GUY"},{key:"Belize",value:"BLZ"},{key:"Brazil",value:"BRA"}];
 
 var glMapView;
 
 var global_map;
 var wait = false;
 var country_map;
-var footnote_data;	
+var footnote_data;
+var footnotes;	
 var global_data;
 var country_featureGroup;
 var global_featureGroup;
@@ -210,6 +306,7 @@ var iDiv2 = d3.select("body").append("div")
 
 function retrieveComments(_callback,prevLength){
 	console.log("retrieving comments");
+	//console.log(prevLength);
 	var new_comments_data = [];
 	var t = d3.timer(function(elapsed){
 		//console.log(elapsed);
@@ -594,7 +691,7 @@ pht_btn = d3.select("#buttons").append("div")
 d3.select("#awardview").append("div")
 	.attr("id","awardData")
 	.append("text")
-	.text("USAID AWARDS")
+	.text("USAID Partnerships")
 	.attr("class","awardsTitle");	
 	
 	
@@ -620,7 +717,7 @@ d3.select("#awardview").append("div")
 	var mapview_svg;
 	var over_view;
 	//var country_map;
-	var footnotes;
+	//var footnotes;
 	var sm_view;
 	var sm_multiples;
 	var sm_NAdiv;
@@ -666,7 +763,8 @@ d3.select("#awardview").append("div")
 	var path_sm;				
 	var projection;
 	var path;
-	var clinicSymbol;	
+	var clinicSymbol;
+	var dist_charts;	
 	
 	
 function globalProjections(){	
@@ -810,7 +908,7 @@ var popmap_zoom = d3.zoom()
 	  
 	  function initMarkers(data,tabletop){
 		  addMarkers(data);
-		  console.log(data);
+		  //console.log(data);
 	  }
 	  
 	  /*function initComments(data,tabletop){
@@ -919,7 +1017,7 @@ queue()
 	.defer(d3.json, "usaidawards.json")
 	.defer(d3.json,"IPPFClinics.json")
 	.defer(d3.json, "globalData10_14.json")
-	.defer(d3.json, "Partners.json")
+	.defer(d3.json, "Partners10_17.json")
 	.defer(d3.json, "PAHO_subnational_cleaned.json")
 	.defer(d3.json, "award_info_assist.json")
 	.defer(d3.json, "adm2_shapes.json")
@@ -927,6 +1025,8 @@ queue()
 	.defer(d3.json, "fips2.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
 	.defer(d3.json, "rainfall_national.json")
+	.defer(d3.json, "award_info7.json")
+	.defer(d3.json, "adm2_all.json")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
 			console.log('progress');
@@ -946,11 +1046,24 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all){	
 	  if (error) throw error;	
 	   
 	  
 	  data_info = dat_info;
+	  
+	  //console.log(awards_detail);
+	  //console.log(geodata_admin0);
+	 
+	  
+	 //build award shapes and add details
+	  /*awards_detail.forEach(function(d,i){
+		  d.shape = 
+	  });*/
+	  
+		  epidata_all = epidata_all.filter(function(d){return d.location.split("-").length < 3;});
+		  
+		  //console.log(epidata_all.filter(function(d){return d.}));
 	  
 	  
 	function initComments(){
@@ -962,7 +1075,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 			new_comments_data = data;
 			});
 	
-			console.log(new_comments_data.length);
+			//console.log(new_comments_data.length);
 			if(new_comments_data.length>0){
 				comments_data = new_comments_data;
 				t.stop();
@@ -986,6 +1099,41 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  {key:"PER", value:topojson.feature(adm2_shapes,adm2_shapes.objects.PER_adm2).features},
 	  {key:"SLV", value:topojson.feature(adm2_shapes,adm2_shapes.objects.SLV_adm2).features},
 	  {key:"VEN", value:topojson.feature(adm2_shapes,adm2_shapes.objects.VEN_adm2).features}];
+	  
+	 var filtered_awards = [];
+	 var filtered_awards_detail = [];
+	  
+	 //console.log(adm2_shapes2); 
+	  
+   	 var awards_byCountry2 = d3.nest()
+   	 .key(function(d){return d.Country;})
+   	 .entries(awards_detail);
+	 
+ 	  awards_byCountry2.forEach(function(d){
+		  //console.log(d);
+		  var c = adm2_shapes2.filter(function(e){return e.value[0].properties.NAME_0==d.key;});
+		  if(c[0]!=undefined){
+		  d.values.forEach(function(e,i){
+			  //console.log(e);
+			  //e.shape = c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2;})[0];
+			  //console.log(c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2;}));
+			  var award = c[0].value.filter(function(g){return e.HASC == g.properties.HASC_2 && e.program_level=="adm2";})[0];
+			  if(award!=undefined){  
+			  filtered_awards.push(award);
+			  filtered_awards_detail.push(e);
+			  //filtered_awards.push(award);
+		  	  }else{
+				  console.log(e);
+		  	  }	
+		  });
+	  	}
+ 	  });
+	  //console.log(awards_detail);
+	  //console.log(filtered_awards);
+	  
+	  //console.log(filtered_awards);
+	  //console.log(awards_byCountry2);
+	  //console.log(adm2_shapes2);
 	  
  	 var award_shapes = [];
  	 var award_info2 = [];
@@ -1135,6 +1283,15 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  .key(function(d){return d.country;})
 	  .entries(partners);
 	  
+	  var partnersbyCountrybyLinebyPartner_country = d3.nest()
+	  .key(function(d){return d.Country;})
+	  .key(function(d){return d.line_of_effort;})
+	  .key(function(d){return d.program;})
+	  .key(function(d){return d.Country;})
+	  .entries(filtered_awards_detail);
+	  
+	  //console.log(partnersbyCountrybyLinebyPartner_country);
+	  
 	  //console.log(partnersbyCountrybyLinebyPartner);
 	  
 	  //console.log(partnersbyLinebyPartner2);
@@ -1192,6 +1349,8 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  //console.log(globalbycountry);
 	  
 	  //awards by partners
+	  
+	  
 	  var awardsbyPartner = d3.nest()
 	  .key(function(d){return d.properties.Partner;})
 	  .entries(awards_topo);
@@ -1336,7 +1495,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 		  
 		  //console.log(poverty.filter(function(v){return v.Country_Name.indexOf("Venezuela") != -1;}));
 		  
-		  console.log(povertyByCountryByRegion);
+		  //console.log(povertyByCountryByRegion);
 	  
 	  
 	  //nest poverty data
@@ -1464,6 +1623,8 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  var country_places;
 	  var country_pov;
 	  var country_awards;
+	  var country_awards_detail;
+	  var country_awards_shapes;
 	  var country_povbyfips;
 	  var country_povbyfips2;
 	  var country_byDatebyRegion;
@@ -1612,7 +1773,8 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 	 removePopup();
 	 
 	 
-	 var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
+	 //var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
+	 //var bchart_colors =["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"];
 	 
 	 
 	 function draw_country_view(){
@@ -2022,7 +2184,7 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 			}
 		})
 		.on("click", function(d){
-			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
+			if(priority_countries.indexOf(d.properties.ADMIN)!=-1 && got_data.indexOf(d.properties.ADMIN)!=-1){
 				
 				d3.select("#global_container").style("pointer-events","none");
 				//global_featureGroup.bringToBack();
@@ -2055,6 +2217,7 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 		.enter()
 		.append("text")
 		.attr("class","gl_labels")
+		.attr("id",function(d){return "label_"+d.properties.ADMIN;})
 		.attr("x",function(d){
 			//return global_path.centroid(d)[0];
 			/*if(d.properties.ADMIN == "Dominican Republic"){
@@ -2076,42 +2239,26 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 		}
 		})
 		//.attr("y",function(d){return global_path.centroid(d)[1]+3;})
-		.text(function(d){return d.properties.ADMIN;});
-		
-		/*global_land.selectAll("text")
-		.data(geodata_admin0.features)
-		.enter()
-		.append("text")
-		//.attr("class","country_labels")
-		//.attr("x",function(d){return global_path.centroid(d)[0];})
-		//.attr("y",function(d){return global_path.centroid(d)[1];})
-		.text(function(d){return d.properties.ADM0_A3;});*/	
-		
-		/*//console.log(geodata_admin0.features);
-		var features = geodata_admin0.features;//topojson.feature(geodata_admin0, world.objects.countries).features;
-		  var centroids = features.map(function (feature){
-		    return path.centroid(feature);
-		  });*/
-		
-		//console.log(geodata_admin0.features);
-		  
-	//generate centroids
-		/*var centroids = d3.map();
-		geodata_admin0.features.forEach(function(d){
-		//	console.log(d.properties.ADM0_A3 + " "+path.centroid(d));
-			centroids.set(d.properties.ADM0_A3,path.centroid(d));
-		});
-		
-		var features = geodata_admin0.features;
-		  var centroids = features.map(function (feature){
-		    return path.centroid(feature);
-		  });*/
-		  
-		  //console.log(vv); UNCOMMENT
-		//var bchart_colors = ["steelblue","orange","green"];
-		var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
-		//var bchart_colors = [{key:"Vector Control", value:"#1b9e77"},{"#e6ab02"},{"#7570b3"}}];
-		  
+		.text(function(d){
+			return d.properties.ADMIN.replace("and","&");
+			/*if(d.properties.ADMIN == "Saint Vincent and the Grenadines"){
+				//console.log("yep...");
+				return "Saint Vincent &"+"<br/>"+"the Grenadines"; 
+				}else{
+					return d.properties.ADMIN.replace("and","&");
+				}*/
+		})
+		//.attr("length",function(d){
+		//	return d3.select(this).getComputedTextLength();
+		//})
+		.on("mouseover",function(d){
+			d3.select(this).attr("cursor","pointer");
+			return d3.select("#gl_country"+d.properties.ADM0_A3).dispatch("mouseover");})
+		.on("mouseout",function(d){
+			d3.select(this).attr("cursor","default");
+			return d3.select("#gl_country"+d.properties.ADM0_A3).dispatch("mouseout");});//trigger hover country
+
+		//barcharts
 		 var pp = global_bcharts.selectAll("g")
 		  .data(vv)
 		  .enter().append("g")
@@ -2124,24 +2271,27 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 			  }else{
 				  return "translate(" +global_path.centroid(d)+ ")";
 				  }	  
-		  		});
-		  
-		  var sz = 7;
-		  /*pp.append("rect")
-			  .attr("class","bchart_border")
-			  .attr("x","-10px")
-			  .attr("y","-15px");*/
-		  	    	  	  
-		  //console.log(partnersbyLine.filter(function(v){return v.values.key == j[i].parentNode.id.replace("gl_bchart","");}));
-		  //var sz = 5;
-		  //console.log(partnersbyLine);
-		  //console.log(partnersbyCountrybyLinebyPartner);
-		  
-pp.selectAll("svg")
-		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
-		  //.data(partnersbyCountrybyLinebyPartner.filter(function(d,i,j){return d.key == j[i].parentNode.id.replace("gl_bchart_","");}))	  
+		  		});  
+				
+			//add Caribbean	
+	  		  global_bcharts.append("g")
+	  		  .attr("id","gl_bchart_ES_Caribbean")
+				.attr("transform", "translate(425,228)");
+				
+				
+				var sz = 7;
+				var r = 5;
+		
+		/*var lbs = gl_labels.nodes();
+		
+		var lbs = gl_labels.nodes();
+		for(var i = 0; i < lbs.length;i++){
+			console.log(lbs[i]);
+			console.log(lbs[i].getComputedTextLength());
+		}*/
+		
+		var symbols = pp.selectAll("svg")  
 		  .data(function(d){
-			  //return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;
 			  if(partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0]!=undefined){
 			  return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;
 		  	}else{
@@ -2149,34 +2299,207 @@ pp.selectAll("svg")
 		  	}
 		  })
 		  .enter()
-		  .append("rect")	  	  	  
-		  .attr("x",function(d,i,j){//
+		  .append("path")
+		  .attr("d",d3.symbol().size(49).type(function(d){
 			  //console.log(d);
-			  //console.log(j[i].parentNode.id+" "+i); console.log(d);
-			  /*if(j[i].parentNode.id.replace("gl_bchart_","")=="Dominican Republic"){
-				  return -(sz*2)+i*(sz+0.5)+20;
-			  } else{
-				  return -(sz*2)+i*(sz+0.5);
-			  }*/
+			  if(d.key=="Programming level"){
+				  return d3.symbolCircle;
+			  }else if(d.key=="Research and Innovation"){
+				  return d3.symbolStar;
+			  }else{
+				  return d3.symbolSquare;
+			  }
+		  }))	  	  	  
+		  .attr("transform",function(d,i,j){//
 			  var nm = j[i].parentNode.id.replace("gl_bchart_","");
-			  return /*-(sz*2)+*/i*(sz+0.5)+country_labels.filter(function(z){return z.country == nm;})[0].dx;	  
+			  var lb = country_labels.filter(function(z){return z.country == nm;})[0];
+			  
+			  var x = i*(sz+0.5)+sz/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;	
+			  var y = -sz-3+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+			  
+			  if(lb.inline==true){
+				 //x += nm.replace("and","&").length*5;
+				 
+				 //var lngth = d3.select("#label_"+nm).getBBox();
+				  
+				  x += lb.lngth;//nm.replace("and","&").length*5;
+				  
+				  y += sz+3;
+			  }
+			  
+			  var cx = r/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;
+			  var cy = -r*2-15+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+			  
+			  var sx = 5+country_labels.filter(function(z){return z.country == nm;})[0].dx;
+			  var sy = 10+country_labels.filter(function(z){return z.country == nm;})[0].dy;	
+			  
+			  if(d.key=="Programming level"){
+				  return "translate("+x+","+y+")";
+			  }else if(d.key=="Research and Innovation"){
+				  //console.log(d);
+				  //console.log(i);
+				  //return "translate("+sx+","+sy+")scale(0.8)";
+				  return "translate("+(x+7)+","+y+")";
+			  }else{
+				  return "translate("+(3+x)+","+y+")";	
+			  }  
 				  
 		  })
-		  .attr("y",function(d,i,j){
-			  var nm = j[i].parentNode.id.replace("gl_bchart_","");
-			  return -sz-7+country_labels.filter(function(z){return z.country == nm;})[0].dy;
-		  })
-		  .attr("width",sz)
-		  .attr("height",function(d,i,j){
-			  return sz;
-			  //console.log(d);
-			  //console.log(j[i].parentNode.id.replace("gl_bchart_",""));
-		  })
 		  .style("fill",function(d,i){
-			  if(d.key == "Vector Control"){return bchart_colors[0];}
-			  if(d.key == "Maternal and Child Health/Service Delivery"){return bchart_colors[1];}
-			  if(d.key == "Social and Behavior Change Communication"){return bchart_colors[2];}
-		  });
+			  if(d.key == "SBCC"){return bchart_colors[0];}
+			  if(d.key == "Service Delivery"){return bchart_colors[1];}
+			  if(d.key == "Vector Control"){return bchart_colors[2];}
+			  if(d.key == "Community Engagement"){return bchart_colors[3];}
+			  if(d.key == "Research and Innovation"){return bchart_colors[4];}
+			  if(d.values[0].key == "Full Programming"){return level_colors[0];}
+			  if(d.values[0].key == "Moderate Programming"){return level_colors[1];}
+			  if(d.values[0].key == "Limited/Community Programming"){return level_colors[2];}
+			  if(d.values[0].key == "Research Collaborative"){return level_colors[3];}
+		  })
+		  .style("stroke","none")
+		  .style("stroke-weight",0.25);
+		  
+		  var dd = partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == "E/S Caribbean";})[0].values;
+		  //console.log(dd);
+		  
+		  
+		  
+		  
+		  //***********append caribbean bchart**********
+		 
+		  
+		  d3.select("#gl_bchart_ES_Caribbean").selectAll("svg")
+		  .data(dd)
+		  .enter()
+		  .append("path")
+		  .attr("d",d3.symbol().size(49).type(function(d){
+			  //console.log(d);
+			  if(d.key=="Programming level"){
+				  return d3.symbolCircle;
+			  }else if(d.key=="Research and Innovation"){
+				  return d3.symbolStar;
+			  }else{
+				  return d3.symbolSquare;
+			  }
+		  }))	  	  	  
+		  .attr("transform",function(d,i){//
+			  var nm = "E/S Caribbean";
+			  var x = i*(sz+0.5)+sz/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;	
+			  var y = -sz-3+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+			  
+			  var cx = r/2+country_labels.filter(function(z){return z.country == nm;})[0].dx;
+			  var cy = -r*2-15+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+			  
+			  var sx = 5+country_labels.filter(function(z){return z.country == nm;})[0].dx;
+			  var sy = 10+country_labels.filter(function(z){return z.country == nm;})[0].dy;	
+			  if(d.key=="Programming level"){
+				  return "translate("+x+","+y+")";
+			  }else if(d.key=="Research and Innovation"){
+				  //return "translate("+sx+","+sy+")scale(0.8)";
+				  return "translate("+(x+7)+","+y+")";
+			  }else{
+				  return "translate("+(3+x)+","+y+")";	
+			  }  
+				  
+		  })
+		  .style("fill",function(d){
+			  if(d.key == "SBCC"){return bchart_colors[0];}
+			  if(d.key == "Service Delivery"){return bchart_colors[1];}
+			  if(d.key == "Vector Control"){return bchart_colors[2];}
+			  if(d.key == "Community Engagement"){return bchart_colors[3];}
+			  if(d.key == "Research and Innovation"){return bchart_colors[4];}
+			  if(d.values[0].key == "Full Programming"){return level_colors[0];}
+			  if(d.values[0].key == "Moderate Programming"){return level_colors[1];}
+			  if(d.values[0].key == "Limited/Community Programming"){return level_colors[2];}
+			  if(d.values[0].key == "Research Collaborative"){return level_colors[3];}
+		  })
+		  .style("stroke","none")
+		  .style("stroke-weight",0.25);
+		  
+		  
+  		global_labels.append("text")
+  		.attr("class","gl_labels")
+  		.attr("x",425)
+  		.attr("y",230)
+  		.text("E/S Caribbean")
+  		.on("mouseover",function(){
+			CR_ADM0.forEach(function(d){
+				return d3.select("#gl_country"+d).style("fill",hover_color);
+			});
+			d3.select(this).attr("cursor","pointer");
+			filterCaribbean();
+  		})
+  		.on("mouseout",function(){
+			CR_ADM0.forEach(function(d){
+				d3.select("#gl_country"+d).style("fill",function(){
+					return d3.select("#gl_country"+d).attr("basecolor");
+				});
+			});
+			d3.select(this).attr("cursor","default");
+			restorecharts();
+		});//trigger hover country
+		  
+		  
+		  
+		/*.on("mouseover",function(d){
+			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
+			//if(d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor") != "rgb(220,220,220)"){
+			//if(d3.select("#gl_country"+d.properties.ADMIN).attr("basecolor") != "rgb(220,220,220)"){
+			d3.select(this).style("fill",hover_color);
+			//d3.select(this).style("stroke-width","2");
+			//}
+			filtercharts(d);
+			}
+		})
+		.on("mouseout",function(d){
+			if(priority_countries.indexOf(d.properties.ADMIN)!=-1){
+			//d3.select(this).style("stroke-width","0.25");	
+			d3.select(this).style("fill",function(d){
+				//return d3.select("#gl_country"+d.properties.ADMIN).attr("basecolor");
+				return d3.select("#gl_country"+d.properties.ADM0_A3).attr("basecolor");
+			})
+			restorecharts();
+			}
+		})*/  
+		  
+		 //*******end caribbean*******
+		    
+/*var circles = pp.selectAll("svg")
+		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
+		  //.data(partnersbyCountrybyLinebyPartner.filter(function(d,i,j){return d.key == j[i].parentNode.id.replace("gl_bchart_","");}))	  
+		  .data(function(d){
+			  //return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;
+			  if(partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0]!=undefined){
+			  return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values.filter(function(t){return t.key == "Programming level";});
+		  	}else{
+		  		return [];
+		  	}
+		  })
+		  .enter()
+		  .append("circle")	  	  	  
+		  .attr("cx",function(d,i,j){//
+			
+			  var nm = j[i].parentNode.id.replace("gl_bchart_","");
+			  return i*(r+0.5)+r+country_labels.filter(function(z){return z.country == nm;})[0].dx;	  
+				  
+		  })
+		  .attr("cy",function(d,i,j){
+			  var nm = j[i].parentNode.id.replace("gl_bchart_","");
+			  return -r*2-12+country_labels.filter(function(z){return z.country == nm;})[0].dy;
+		  })
+		  .attr("r",r)
+		  .style("fill",function(d,i){
+			  if(d.values[0].key == "Full Programming"){return level_colors[0];}
+			  if(d.values[0].key == "Moderate Programming"){return level_colors[1];}
+			  if(d.values[0].key == "Limited/Community Programming"){return level_colors[2];}
+			  if(d.values[0].key == "Research Collaborative"){return level_colors[3];}
+		  })
+		  .style("stroke","black")
+		  .style("stroke-width",0.5);
+		  
+		  circles.append("title")
+		  .text(function(d){return d.values[0].key;});*/		  
+		  
 		  
 		  /*pp.selectAll("svg")
 		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
@@ -2257,8 +2580,8 @@ pp.selectAll("svg")
 		d3.select(this).style("fill","url(#diagonalHatch)");
 	})*/
 		
-		var _x = 175;//450;
-		var _y = 450;//400;
+		var _x = 225;//450;
+		var _y = 550;//400;
 		
 		global_svg.append("rect")
 		.attr("class","legend_rect")
@@ -2373,6 +2696,9 @@ global_svg.append("text")
 	
 	function update_global_MessageBoard(new_comments_data){
 		console.log("globalMessageBoard");
+		
+		comments_data = new_comments_data;
+		
 		d3.select("#gl_messageBoard").selectAll("*").remove();
 		
 		var postsG = d3.select("#gl_messageBoard").append("g");
@@ -2486,6 +2812,31 @@ global_svg.append("text")
 		
 	}
 	
+	function filterCaribbean(){
+		//console.log(d);
+		//console.log(globalbycountry);
+		//filter charts
+		var dd = globalbycountry.filter(function(c){return CR.indexOf(c.key)!=-1;});
+		if(dd[0]!=undefined){
+			if(gl_epi_tab==0){	
+		draw_new_confirmed_chart(dd);
+		draw_cumulative_confirmed_chart(dd);
+		}else if(gl_epi_tab==1){
+		draw_by_indicators(dd);
+	}
+		}
+		//filter award data
+		var da = partnersbyCountrybyLinebyPartner.filter(function(c){return c.key == "E/S Caribbean";})
+		//console.log(da[0].values);
+		//console.log(partnersbyLinebyPartner);
+		
+		if(da[0]!=undefined){
+			//console.log(da[0].values);
+		draw_global_awards(da[0].values);
+		}
+		
+	}
+	
 	close_btn.on("click", function(d){
 		restorecharts();
 		d3.select("#overview").style("opacity",0); 
@@ -2528,7 +2879,7 @@ global_svg.append("text")
 	
 		awardsTitle.append("text")
 		.attr("class","chartTitleText")
-		.text("USAID AWARDS");	
+		.text("USAID Partnerships");	
 	
 		var infoImage4 = awardsTitle.append("svg")
 		.attr("width",15)
@@ -2562,7 +2913,10 @@ global_svg.append("text")
 		
 		
 		//var bchart_colors = ["steelblue","orange","green"];
-		var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
+		//var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
+		//var bchart_colors =["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"];
+		
+		//var bchart_colors = ["#e41a1c","#377eb8","#4daf4a","#984ea3","#ff7f00"];
 		
 		var awardsDiv = d3.select("#gl_awardview").append("div")
 		.attr("class","gl_awards_div");
@@ -2587,8 +2941,9 @@ global_svg.append("text")
 		});*/
 		
 		var line_partners = award_efforts.selectAll("g")
-			.data(function(d){//console.log(d.values); 
-				return d.values;})
+			.data(function(d){ 
+				return d.values;//filter(function(g){return g.key != "Programming Level";})[0].values;
+			})
 		.enter()
 		.append("g")
 		.attr("id",function(d,i,j){return "line_"+j[i].parentNode.id.replace("line_","");})
@@ -2608,8 +2963,79 @@ global_svg.append("text")
 	}
 		});
 		
-		line_partners.append("rect")
-		.attr("width","8px")
+		//.attr("d",d3.symbol().size(10).type(d3.symbolCross))
+		
+		
+		//.attr("d",d3.symbol().size(10).type(d3.symbolCross))
+		
+		
+line_partners.append("path")
+		.attr("d",d3.symbol().size(49).type(function(d){
+			if(d.values[0].values[0].line_of_effort=="Programming level"){
+				return d3.symbolCircle;
+			}else if(d.values[0].values[0].line_of_effort=="Research and Innovation"){
+				return d3.symbolStar;
+			}else{
+				return d3.symbolSquare;
+			}
+		}))
+		.attr("transform","translate(8,4)")//function(d){
+			/*console.log(d.values[0].values[0].line_of_effort);
+			if(d.values[0].values[0].line_of_effort=="Programming level"){
+				return d3.symbol().size([100]).type(d3.symbolCircle);
+			}else if(d.values[0].values[0].line_of_effort=="Research and Innovation"){
+				return d3.symbol().size([100]).type(d3.symbolStar);
+			}else{
+				return d3.symbol().size([100]).type(d3.symbolSquare);
+			}*/
+		//	return d3.symbol().size([100]).type(d3.symbolSquare);
+		//})	
+		.attr("basecolor",function(d,i,j){
+			var n = j[i].parentNode.id.replace("line_","");
+			//console.log(n);
+			//return bchart_colors[n];
+			
+			if(d.values[0].values[0].line_of_effort=="Programming level"){
+				return level_colors[i];
+			}else{
+				return bchart_colors[n-1];
+			}
+			
+			
+			
+		})
+		.attr("fill",function(d,i,j){
+			//console.log(d);
+			return d3.select(this).attr("basecolor");
+		})
+		.on("mouseover",function(d){
+			d3.select(this).attr("fill",hover_color);
+			//console.log(d);
+			d.values.forEach(function(f){
+				var ADM = ADM0_A3_lookup.filter(function(v){return v.key == f.key;});
+				if(ADM[0]!=undefined && ADM[0].value !=undefined){
+				d3.select("#gl_country"+ADM[0].value).style("fill",hover_color);//dispatch("mouseover");//style("stroke-width","2")//
+				}
+			});
+		})
+		.on("mouseout",function(d){
+			d3.select(this).attr("fill",function(e){return d3.select(this).attr("basecolor");});
+			d.values.forEach(function(f){
+				var ADM = ADM0_A3_lookup.filter(function(v){return v.key == f.key;});
+				if(ADM[0]!=undefined && ADM[0].value !=undefined){
+				//d3.select("#gl_country"+ADM[0].value).dispatch("mouseout");
+				//d3.select("#gl_country"+ADM[0].value).style("stroke-width","0.25")
+				d3.select("#gl_country"+ADM[0].value).style("fill",function(e){return d3.select("#gl_country"+ADM[0].value).attr("basecolor");});
+				}
+			});
+		});
+		
+		
+		/*line_partners.append("rect")
+		.attr("width",function(d){
+			//console.log(d.values[0].values[0].line_of_effort);
+			if(d.values[0].values[0].line_of_effort=="Programming level"){return "0px";}else{return "8px";}
+		})
 		.attr("height","8px")
 		.attr("id",function(d){
 			var l = d.values[0].values[0].line_of_effort;
@@ -2644,7 +3070,7 @@ global_svg.append("text")
 				d3.select("#gl_country"+ADM[0].value).style("fill",function(e){return d3.select("#gl_country"+ADM[0].value).attr("basecolor");});
 				}
 			});
-		});
+		});*/
 		
 		line_partners.append("text")
 		.attr("x","15px")
@@ -3331,8 +3757,29 @@ var xaxis = global_indicators_3.append("g")
 			  d3.select("#smlegend").remove();
 		  }
 		  
+		
+		if(footnote_data !=undefined){
+		footnotes.removeFrom(country_map);
+		footnotes.clearLayers();
+		
+  		footnotes = new L.FeatureGroup();
+  		for(i=0;i<footnote_data.length;i++){
+  			//console.log(footnote_data[i]);
+  		  	if(footnote_data[i].lat != "" && footnote_data[i].lng != "" && footnote_data[i].comment != "" && footnote_data[i].country == adm0){
+  			_marker = L.marker([+footnote_data[i].lat,+footnote_data[i].lng]/*,{icon:L.icon({iconSize:[20,20]})}*/).bindPopup(footnote_data[i].comment);
+  			//console.log(_marker);
+  			footnotes.addLayer(_marker);
+  			}
+  		}
+  		//console.log("break");
+  		//console.log(country_map);
+  		if(country_map != undefined){
+  		footnotes.addTo(country_map);
+  		}
+		}	
 			  
 		  //console.log(places_topo);
+		  //console.log(adm0);
 		  
 		  //filter data to country
 		  country_adm1_features = geodata_admin1.features.filter(function(d){return d.properties.adm0_a3 == adm0;}); //prev el_salvador
@@ -3343,7 +3790,16 @@ var xaxis = global_indicators_3.append("g")
 		  //country_awards = topojson.feature(awards,awards.objects.usaidawards).features.filter(function(d){return d.properties.ISO == adm0;});
 		  country_title = ADM0_A3_lookup.filter(function(v){return v.value == adm0;})[0].key;
 		  country_awards = award_shapes.filter(function(v){return v.properties.ISO == adm0;});
-		  country_awards_info = award_info2.filter(function(v){return v.ADM0 == adm0;});
+		  
+		  
+		  country_awards_shapes = filtered_awards.filter(function(v){return v!=undefined && v.properties.NAME_0==country_title;});
+		  
+		  
+		  
+		  //country_awards_detail = awards_byCountry2.filter(function(v){return v.key == country_title;})[0].values;
+		  //console.log(country_awards_detail);
+		  country_awards_info = filtered_awards_detail.filter(function(v){return v.Country == country_title;});
+		  //country_awards_info = award_info2.filter(function(v){return v.ADM0 == adm0;});
 		  country_povbyfips = povertyByCountryByRegion.filter(function(d){return d.key == adm0;})[0];
 		  if(country_povbyfips != undefined){country_povbyfips = country_povbyfips.values.sort(function(a, b){ return d3.descending(a.value.latest,b.value.latest);});}else{country_povbyfips = [];};
 		  country_povbyfips2 = povertyByCountryByRegion2.filter(function(d){return d.key == adm0;})[0];
@@ -3351,7 +3807,11 @@ var xaxis = global_indicators_3.append("g")
 		  
 		  paho_sub = pahobycountry.filter(function(d){return d.key == adm0;})[0];
 		  
+		  //console.log(country_awards_shapes);
+		  //console.log(country_awards_detail);
 		  
+		  //console.log(adm2_shapes2.filter(function(v){return v.key==adm0;}));
+		  //console.log(country_awards_detail);
 		  //console.log("adm0");
 		  //console.log(adm0);
 		  //console.log(pahobycountry);
@@ -3869,6 +4329,7 @@ var b2 = path.bounds(country_centroid[0]),
 					setTimeout(function(){
 						retrieveComments(update_MessageBoard,comments_data.length);
 					},150);
+					
 					drawMessageForm();
 					
 			});
@@ -3876,6 +4337,8 @@ var b2 = path.bounds(country_centroid[0]),
 	
 	function update_MessageBoard(new_comments_data){
 		
+		console.log("updateding messageBoard");
+		comments_data = new_comments_data;
 		//d3.select("body").style("cursor","wait");
 		d3.select("#messageBoard").selectAll("*").remove();
 		
@@ -3897,8 +4360,6 @@ var b2 = path.bounds(country_centroid[0]),
 		.attr("x","0px")
 		.attr("y","20px")
 		.attr("class", "postText");
-		
-
 		
 	}
 	
@@ -4124,7 +4585,7 @@ var b2 = path.bounds(country_centroid[0]),
 		})*/
 		.style("fill", function(d){return d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");})
 		//.style("opacity",0.5)	
-	    .on("click", function(d){
+	    /*.on("click", function(d){
 			d.selected = !d.selected;
 			var color = (d.selected) ? hover_color: d3.select("#region"+d.properties.code_hasc.replace(".","")).attr("basecolor");
 			d3.select(this).style("fill",color);
@@ -4132,7 +4593,7 @@ var b2 = path.bounds(country_centroid[0]),
 			//console.log(d);
 			//only allow one at a time? for now
 			selection = d.selected;
-	  })
+	  })*/
 		.on("mouseover",function(d){
 			if(!selection){
 			//d3.select(this).style("stroke-width","2px");	
@@ -4311,9 +4772,70 @@ var b2 = path.bounds(country_centroid[0]),
 			//d3.select("#diagonalHatch").attr("transform", "translate([0,0])"+"scale(0.5)");	
 		//console.log(country_awards);	
 		//console.log(country_awards_info);
+		
+		//console.log(country_awards);
+		/*efforts = awards_shp.selectAll("path")
+		.data(country_awards_detail)
+		.enter()
+		.append("path")
+		.attr("id", function(d){return "award"+d.properties.HASC_2;})
+		.style("pointer-events","all")
+		.attr("d",path_leaflet)*/
+		
+		
+efforts = awards_shp.selectAll("path")
+		.data(country_awards_shapes)
+		.enter()
+		.append("path")
+		.attr("id", function(d,i){console.log("award_"+d.properties.HASC_2.replace(".","_")); return "award_"+d.properties.HASC_2.replace(".","_").replace(".","_");})
+		.style("pointer-events","all")
+		.attr("d",path_leaflet)
+		.style("stroke","white")
+		.style("stroke-width","0.25")
+		//.attr("basecolor","url(#diagonalHatch)")
+		.attr("basecolor",function(d,i){
+			/*if(country_awards_info[i].program == "ASSIST" ||  country_awards_info[i].program == "ASSIST/URC"){
+				//return "url(#diagonalHatch)";
+				return "url(#pattern2)"
+			}else if(country_awards_info[i].program == "null"){
+				return "url(#diagonalHatch)";
+			}else{
+				return "url(#diagonalHatch)";
+			}*/
+				var k = l_o_efs.indexOf(country_awards_info[i].line_of_effort);
+				
+				return (k!=-1) ? fills_t[k].url() : fills_t[0].url();
+					
+		})
+		.style("fill",function(d,i){
+			return d3.select(this).attr("basecolor");
+		})	
+		.on("click", function(d){
+			console.log(d);	
+		})
+		.on("mouseover",function(d){
+			d3.select(this).style("fill",hover_color);
+		} )
+		.on("mouseout",function(d){
+			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
+		})
+		
+		efforts.append("title")
+		.text(function(d,i){
+			var str = country_awards_info.filter(function(v){return v.Municpality == country_awards_info[i].Municpality && v.Municpality!="";});
+			if(str!=undefined){
+				var ps = [];
+				//console.log(str);
+				str.forEach(function(c){
+					ps.push(c.program);
+				});
+			return country_awards_info[i].Department + ", "+country_awards_info[i].Municpality + " - Program: "+ps;
+			}else{
+			return country_awards_info[i].Department + ", "+country_awards_info[i].Municpality + " - Program: "+country_awards_info[i].program;
+			}
+		});
 			
-			
-		efforts = awards_shp.selectAll("path")
+		/*efforts = awards_shp.selectAll("path")
 		.data(country_awards)
 		.enter()
 		.append("path")
@@ -4344,39 +4866,41 @@ var b2 = path.bounds(country_centroid[0]),
 		} )
 		.on("mouseout",function(d){
 			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
-		})	
+		})*/
 	}
 
 
-	function layerAwards_sm(){
-		awards_shp = mapview_svg.append("g")
+function layerAwards_sm(){
+		sm_awards_shp = mapview_svg.append("g")
 			.attr("class","awards_shp");
 			
 			//d3.select("#diagonalHatch").attr("transform", "translate([0,0])"+"scale(0.5)");	
-			
-		efforts = awards_shp.selectAll("path")
-		.data(country_awards)
+		
+	sm_efforts = awards_shp.selectAll("path")
+		.data(country_awards_shapes)
 		.enter()
 		.append("path")
-		.attr("id", function(d){return "award"+d.properties.OBJECTID;})
+		.attr("id", function(d,i){return "award"+d.properties.HASC_2;})
 		.style("pointer-events","all")
-		.attr("d",path_leaflet)
+		.attr("d",path_sm)
+		/*.attr("d",function(d){
+			console.log(d.shape);
+			return path_leaflet(d.shape);
+		})*/
 		.style("stroke","white")
 		.style("stroke-width","0.25")
+		//.attr("basecolor","url(#diagonalHatch)")
 		.attr("basecolor",function(d,i){
-			if(country_awards_info[i].Program=="ASSIST"){
+			if(d.properties.award_info.program=="ASSIST"){
 				//return "url(#diagonalHatch)";
 				return "url(#pattern2)"
-			}else if(country_awards_info[i].Program == "0"){
+			}else if(d.properties.award_info.program == "null"){
 				return "url(#diagonalHatch)";
 			}
 		})
 		.style("fill",function(d,i){
 			return d3.select(this).attr("basecolor");
 		})	
-		//.style("fill",function(d){return "url(#diagonalHatch)";})	
-				
-		//.style("opacity","0.5")
 		.on("click", function(d){
 			console.log(d);	
 		})
@@ -4385,7 +4909,12 @@ var b2 = path.bounds(country_centroid[0]),
 		} )
 		.on("mouseout",function(d){
 			d3.select(this).style("fill",function(c){return d3.select(this).attr("basecolor");});
-		})	
+		})
+		
+		efforts.append("title")
+		.text(function(d){return "Dept_Tpop: "+d.properties.award_info.Dept_Tpop + " Program: "+d.properties.award_info.program;});
+		
+		
 	}
 
 	
@@ -5051,7 +5580,7 @@ var linegraph = global_indicators_2.append("path")
 		  
 		var key = all_inds_key.append("svg")
 		.attr("width",175)
-		.attr("height",200);
+		.attr("height",300);
 			//.attr("id","countryChartKey");
 			
 	var key_labels = key.selectAll("g")
@@ -5224,11 +5753,17 @@ var linegraph = global_indicators_2.append("path")
 			//change opacity of shapes
 			efforts.each(function(){
 				d3.select(this).attr("opacity",op);
+				if(op==0){
+					d3.select(this).style("pointer-events","none");
+				}else{
+					d3.select(this).style("pointer-events","all");
+				}
 			});	
 		});
 		
 		
-		var da = partnersbyCountrybyLinebyPartner.filter(function(c){return c.key == country_title;})[0].values;
+		var da = partnersbyCountrybyLinebyPartner_country.filter(function(c){return c.key == country_title;})[0].values;
+		
 		
 		//console.log(da);
 		//console.log(partnersbyLinebyPartner);
@@ -5238,13 +5773,16 @@ var linegraph = global_indicators_2.append("path")
 		
 		
 			//var bchart_colors = ["steelblue","orange","green"];
-			var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
+			//var bchart_colors =["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"];
+			//var bchart_colors =["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"];
+			//var bchart_colors = ["#1b9e77","#e6ab02","#7570b3"];
 		
 		
 			var award_efforts = d3.select("#awardData").selectAll("svg")
 			.data(da)
 			.enter()
 			.append("svg")
+			.attr("height",function(d){return 50+d.values.length*10;})
 			.attr("id",function(d,i){return "line_"+i;})
 			.attr("class","award_effort2");
 		
@@ -5266,8 +5804,8 @@ var linegraph = global_indicators_2.append("path")
 			.attr("transform", function(d,i){return "translate(0,"+(i*15+30)+")";});
 		
 			line_partners.append("rect")
-			.attr("width","8px")
-			.attr("height","8px")
+			.attr("width","10px")
+			.attr("height","10px")
 			.attr("id",function(d){
 				var l = d.values[0].values[0].line_of_effort;
 				return l+"_"+d.key;
@@ -5275,10 +5813,29 @@ var linegraph = global_indicators_2.append("path")
 			.attr("basecolor",function(d,i,j){
 				var n = j[i].parentNode.id.replace("line_","");
 				//console.log(n);
-				return bchart_colors[n];
+				var k = l_o_efs.indexOf(d.values[0].values[0].line_of_effort);
+				
+				return (k!=-1)?fills_tb[k].url():bchart_colors[n];//bchart_colors[n];
+				
 			})
 			.attr("fill",function(d){
 				return d3.select(this).attr("basecolor");
+			})
+			.on("mouseover",function(d){
+				//console.log(d.values[0].values);
+				d3.select(this).style("cursor","pointer");
+				d3.select(this).style("fill",hover_color);
+				d.values[0].values.forEach(function(f){
+					console.log(f.HASC);
+					d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).style("fill",hover_color);
+				})
+			})
+			.on("mouseout",function(d){
+				d3.select(this).style("cursor","default");
+				d3.select(this).style("fill",d3.select(this).attr("basecolor"));
+				d.values[0].values.forEach(function(f){
+					d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).style("fill",function(e){return d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).attr("basecolor");});
+				})
 			});
 		
 			line_partners.append("text")
@@ -5305,9 +5862,11 @@ var linegraph = global_indicators_2.append("path")
 	    graph_height = 150 - graph_margin.top - graph_margin.bottom;
 	
 		//d3.select("#subnationalData").selectAll("*").remove();
-		d3.select("#subnationalData").selectAll("*").remove();
+		//d3.select("#subnationalData").selectAll("*").remove();
+		//d3.select("#subnationalData").selectAll("*").remove();
 		
 		if(sm_indicator=="paho"){
+		d3.select("#subnationalData").selectAll("*").remove();	
 		NAdiv = d3.select("#subnationalData").append("div")
 			.attr("id","subNAdiv")
 			.attr("class","NA")
@@ -5318,13 +5877,27 @@ var linegraph = global_indicators_2.append("path")
 			.text("NOT AVAILABLE");*/
 		}else{	
 		
+			if(dist_charts!=undefined){
+				d3.select("#districtData").selectAll("*").remove();	
+			}else{
+				d3.select("#subnationalData").append("div")
+				.attr("id","districtData");
+			}
+				
+				//console.log("null div?");
+				//console.log(d3.select("#districtData"));	
+			//d3.select("#districtData").selectAll("svg").remove();	
+			/*d3.select("#subnationalData").append("div")
+			.attr("id","districtData");*/
 		
+			/*d3.select("#subnationalData").append("div")
+			.attr("id","districtData");*/
 		/*d3.select("#subnationalData").append("text")
 		.text("SUBNATIONAL")
 		.attr("class","subtitle");*/
 		
-		d3.select("#subnationalData").append("div")
-		.attr("id","districtData");
+		/*d3.select("#subnationalData").append("div")
+		.attr("id","districtData");*/
 		
 		//console.log(byCountrybyIndbyRegion);
 	
@@ -5432,10 +6005,15 @@ var linegraph = global_indicators_2.append("path")
 		
 		var fips = d.properties.fips;
 	
+		//console.log(d3.select("#districtData").scrollTop);
+	
 		//d3.select("#subnationalData").selectAll("*").remove();
-		d3.select("#subnationalData").selectAll("*").remove();
+		//d3.select("#subnationalData").selectAll("*").remove();
+		
+		d3.select("#districtData").selectAll("*").remove();
 		
 		if(sm_indicator=="paho"){
+		d3.select("#subnationalData").selectAll("*").remove();	
 		NAdiv = d3.select("#subnationalData").append("div")
 			.attr("id","subNAdiv")
 			.attr("class","NA")
@@ -5487,8 +6065,8 @@ var linegraph = global_indicators_2.append("path")
 			);
 		})
 		
-		d3.select("#subnationalData").append("div")
-		.attr("id","districtData");
+		/*d3.select("#subnationalData").append("div")
+		.attr("id","districtData");*/
 		
 		//move this earlier to save compute time. 
 		dist_charts = d3.select("#districtData")
@@ -5748,8 +6326,8 @@ function drawSmallMultiples(){
 		.text("NOT AVAILABLE");*/
 	}else{	
 		
-		console.log(sm_indicator);
-		console.log(country_byDatebyRegion);	
+		//console.log(sm_indicator);
+		//console.log(country_byDatebyRegion);	
 	
 	sm_view = d3.select("#mapview").append("div")
 	//mapview_svg.append("div")
@@ -5848,7 +6426,8 @@ function drawSmallMultiples(){
 		draw_sm_legend();
 		
 	}//end else
-		
+	
+	 //layerAwards_sm();
 		//layer awards	
 	}
 	
@@ -6162,7 +6741,7 @@ function retrieveFootnotes(){
 	//https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml
 	
 	d3.csv("https://docs.google.com/spreadsheets/d/18xaJk0uObdu5WNgd2yMSxzgyS3Oz2oJ5qBMEkR0z1QI/export?format=csv", function(error,data){
-		console.log(data);
+		//console.log(data);
 		addMarkers(data);
 	})
 }
