@@ -160,7 +160,7 @@
 {"pid":160,"Dept_Tpop":317923,"Country":"Nicaragua","Department":"Leon","Municpality":"Santa Rosa del Peñon","Municpality_plain":"Santa Rosa del Penon","HASC":"NI.LE.SR","data_date":"1/1/17"},
 {"pid":161,"Dept_Tpop":319132,"Country":"Nicaragua","Department":"Matagalpa","Municpality":"Sébaco","Municpality_plain":"Sebaco","HASC":"NI.MT.SE","data_date":"1/1/17"},
 {"pid":162,"Dept_Tpop":317923,"Country":"Nicaragua","Department":"Leon","Municpality":"Telica","Municpality_plain":"Telica","HASC":"NI.LE.TE","data_date":"1/1/17"},
-{"pid":163,"Dept_Tpop":319132,"Country":"Nicaragua","Department":"Matagalpa","Municpality":"Tuma La Dalia","Municpality_plain":"Tuma La Dalia","HASC":"","data_date":"1/1/17"},
+{"pid":163,"Dept_Tpop":319132,"Country":"Nicaragua","Department":"Matagalpa","Municpality":"Tuma La Dalia","Municpality_plain":"Tuma La Dalia","HASC":"NI.MT.TD","data_date":"1/1/17"},
 {"pid":164,"Dept_Tpop":178521,"Country":"Nicaragua","Department":"Chinandega","Municpality":"Chinandega","Municpality_plain":"Chinandega","HASC":"NI.CI.CN","data_date":"1/1/17"},
 {"pid":165,"Dept_Tpop":125000,"Country":"Nicaragua","Department":"Granada","Municpality":"Granada","Municpality_plain":"Granada","HASC":"NI.GR.GR","data_date":"1/1/17"},
 {"pid":166,"Dept_Tpop":317923,"Country":"Nicaragua","Department":"Leon","Municpality":"Leon","Municpality_plain":"Leon","HASC":"NI.LE.LE","data_date":"1/1/17"},
@@ -168,4 +168,4 @@
 {"pid":168,"Dept_Tpop":73897,"Country":"Nicaragua","Department":"Rivas","Municpality":"Rivas","Municpality_plain":"Rivas","HASC":"NI.RI.RI","data_date":"1/1/17"},
 {"pid":169,"Dept_Tpop":319132,"Country":"Nicaragua","Department":"Matagalpa","Municpality":"San Isidro","Municpality_plain":"San Isidro","HASC":"NI.MT.SI","data_date":"1/1/17"},
 {"pid":170,"Dept_Tpop":35000,"Country":"Nicaragua","Department":"Madriz","Municpality":"Somoto","Municpality_plain":"Somoto","HASC":"NI.MD.SO","data_date":"1/1/17"},
-{"pid":171,"Dept_Tpop":236513,"Country":"Nicaragua","Department":"Jinotega","Municpality":"Wiwili","Municpality_plain":"Wiwili","HASC":"","data_date":"1/1/17"}]
+{"pid":171,"Dept_Tpop":236513,"Country":"Nicaragua","Department":"Jinotega","Municpality":"Wiwili","Municpality_plain":"Wiwili","HASC":"NI.JI.WI","data_date":"1/1/17"}]

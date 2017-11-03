@@ -158,7 +158,7 @@ var colors = ["#db8869",
 "#93632b"];
 
 
-var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela",/*"Paraguay",*/"Caribbean Regional"];//"Cuba","French Guiana","Guadeloupe","Martinique"/*,"Puerto Rico"*/,"Saint Barthelemy","Saint Martin"];
+var priority_countries = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala", "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Guyana",/*"Paraguay",*/"Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia","Trinidad and Tobago","Saint Kitts and Nevis"];//"Cuba","French Guiana","Guadeloupe","Martinique"/*,"Puerto Rico"*/,"Saint Barthelemy","Saint Martin"];
 
 var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left"},{country:"El Salvador",dx:-50,dy:7,t_align:"left"},{country:"Dominican Republic",dx:0,dy:-10,t_align:"left"},{country:"Honduras",dx:0,dy:-10,t_align:"left"},
 {country:"Guatemala",dx:-40,dy:-15,t_align:"left"},{country:"Colombia",dx:-15,dy:0,t_align:"left"},{country:"Nicaragua",dx:0,dy:10,t_align:"left"},{country:"Peru",dx:-20,dy:0,t_align:"left"},{country:"Ecuador",dx:-15,dy:0,t_align:"left"},
@@ -169,6 +169,8 @@ var south = ["Colombia", "Peru", "Venezuela"];
 var caribbean = ["Dominican Republic", "Jamaica", "Haiti"];
 
 var Caribbean_regional = ["Cuba","Dominican Republic","French Guiana","Guadeloupe","Haiti","Martinique","Puerto Rico","Saint Barthelemy","Saint Martin"];
+
+var CR = ["Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia"];
 
 //var regional_assoc = [{key:"HN"}]
 var hover_color = "#536878";//"#a1d99b";//"tomato";
@@ -2060,9 +2062,19 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 			}else{
 				return global_path.centroid(d)[0];
 			}*/
-				return global_path.centroid(d)[0]+country_labels.filter(function(z){return z.country == d.properties.ADMIN;})[0].dx;	
+				if(country_labels.filter(function(z){return z.country == d.properties.ADMIN;})[0]!=undefined){
+				return global_path.centroid(d)[0]+country_labels.filter(function(z){return z.country == d.properties.ADMIN;})[0].dx;
+				}else{
+					return global_path.centroid(d)[0];
+				}	
 		})
-		.attr("y",function(d){return global_path.centroid(d)[1]+3+country_labels.filter(function(z){return z.country == d.properties.ADMIN;})[0].dy;})
+		.attr("y",function(d){
+			if(country_labels.filter(function(z){return z.country == d.properties.ADMIN;})[0]!=undefined){
+			return global_path.centroid(d)[1]+3+country_labels.filter(function(z){return z.country == d.properties.ADMIN;})[0].dy;
+		}else{
+			return global_path.centroid(d)[1];
+		}
+		})
 		//.attr("y",function(d){return global_path.centroid(d)[1]+3;})
 		.text(function(d){return d.properties.ADMIN;});
 		
@@ -2128,7 +2140,14 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 pp.selectAll("svg")
 		  //.data(vv, function(vv){return partnersbyLine.values.filter(function(v){return v.values.key == vv.properties.ADMIN;})[0];})
 		  //.data(partnersbyCountrybyLinebyPartner.filter(function(d,i,j){return d.key == j[i].parentNode.id.replace("gl_bchart_","");}))	  
-		  .data(function(d){return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;})
+		  .data(function(d){
+			  //return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;
+			  if(partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0]!=undefined){
+			  return partnersbyCountrybyLinebyPartner.filter(function(v){return v.key == d.properties.ADMIN;})[0].values;
+		  	}else{
+		  		return [];
+		  	}
+		  })
 		  .enter()
 		  .append("rect")	  	  	  
 		  .attr("x",function(d,i,j){//
@@ -2348,7 +2367,7 @@ global_svg.append("text")
 		.text(function(d){return d.username + ": "+ d.comment;})
 		.attr("class", "postText");*/
 		
-		
+		//d3.select("#gl_messageBoard").attr("transform", "translate(0,100)");
 	}
 	
 	
@@ -2674,7 +2693,14 @@ global_svg.append("text")
 		//console.log(globalbycountry);
 		
 		x.domain(d3.extent(dat[0].values, function(v) {return v.date; }));
-		y.domain([d3.min(dat, function(v){return d3.min(v.values,function(g){return g.autochthonous_cases_confirmed;});}),d3.max(dat, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});})]);
+		
+		var min = d3.min(dat, function(v){return d3.min(v.values,function(g){return g.autochthonous_cases_confirmed;});});
+		var max = d3.max(dat, function(v){return d3.max(v.values,function(g){return g.autochthonous_cases_confirmed;});});
+		if(min!=max){
+		y.domain([min,max]);
+		}else{
+			y.domain([0,max*2]);
+		}
 		//d3.min(dat, function(v){return d3.min(v.values,function(g){return g.autochthonous_cases_confirmed;});})
 		//var gl_inds = d3.select("#newConfirmedData").append("div");
 		
@@ -2818,6 +2844,16 @@ global_svg.append("text")
 		//console.log(globalbycountry);
 		
 		x.domain(d3.extent(dat[0].values, function(v) {return v.date; }));
+		y.domain([0,d3.max(dat, function(v){return d3.max(v.values,function(g){return g.new_autochthonous_cases_confirmed;});})]);
+		/*var min = d3.min(dat, function(v){return d3.max(v.values,function(g){return g.new_autochthonous_cases_confirmed;});});
+		var max = d3.max(dat, function(v){return d3.max(v.values,function(g){return g.new_autochthonous_cases_confirmed;});});
+		if(min!=max){
+		y.domain([0,max]);
+		}else{
+			y.domain([0,max*2]);
+		}*/
+		
+		
 		y.domain([0,d3.max(dat, function(v){return d3.max(v.values,function(g){return g.new_autochthonous_cases_confirmed;});})]);
 		
 		//var gl_inds = d3.select("#newConfirmedData").append("div");
@@ -3348,7 +3384,7 @@ var xaxis = global_indicators_3.append("g")
 		  
 		  if(country_title=="Colombia"){
 		  	country_map.setView([4.5, -74],5);
-			sm_indicator = "zika_suspected";
+			sm_indicator = "zika_suspected_pregnant";
 		  }else if(country_title=="El Salvador"){
 		  	country_map.setView([14, -89],7);
 			bc_dy = 25;
@@ -3778,7 +3814,9 @@ var b2 = path.bounds(country_centroid[0]),
 		post.append("text")
 		.text(function(d){return d.username + ": "+ d.comment;})
 		.attr("class", "postText");*/
-	}
+		
+		d3.select("#messageBoard").attr("transform", "translate(0,100)");
+}
 	
 	
 	function drawMessageForm(){
@@ -4505,6 +4543,7 @@ function povMap(color_pov, x_pov){
 	}
 	
 function povChart(color_pov,x_pov){
+
 var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		c_width = 200 - c_margin.left - c_margin.right,
 	 	c_height = 75 - c_margin.top - c_margin.bottom;
@@ -4525,6 +4564,15 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
   	  .attr("x",-20)
   	  .attr("y",-10)
   	  .text("% Pop over national poverty line");
+	  
+  	if(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}).length==0){
+		pc_svg.append("div")
+		.attr("class","NAdiv")
+		.append("text")
+  	    .text("NOT AVAILABLE")
+		.attr("class","NAtext");
+		
+  	}else{
 	   
    var x = d3.scaleBand().rangeRound([0, c_width]).padding(0.1),
        y = d3.scaleLinear().rangeRound([c_height, 0]);
@@ -4569,7 +4617,8 @@ var c_margin = {top: 20, right: 10, bottom: 10, left: 20},
 		d3.select("#pov_map"+d.key.replace(".","")).style("fill",function(d){return d3.select("#pov_map"+d.properties.code_hasc.replace(".","")).attr("basecolor"); });
    		}
    	});
-	}
+}
+}
 	
 	
 	
@@ -5698,6 +5747,9 @@ function drawSmallMultiples(){
 	  /*country_indicators.append("text")
 		.text("NOT AVAILABLE");*/
 	}else{	
+		
+		console.log(sm_indicator);
+		console.log(country_byDatebyRegion);	
 	
 	sm_view = d3.select("#mapview").append("div")
 	//mapview_svg.append("div")
