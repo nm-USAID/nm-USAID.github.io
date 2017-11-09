@@ -134,37 +134,38 @@ var text = meter.append("text")
   //  .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));	
   
 var t1 = textures.lines()
-  .size(7)
+  .size(8)
   .stroke("white")
   .thicker()
   .strokeWidth(0.5);
  
 var t5 = textures.lines()
-  .size(7)
+  .size(8)
   .lighter()
   .stroke("white");  
  
 var t4 = textures.lines()
-  .size(3)
+  .size(4)
   .orientation("vertical")
-  .strokeWidth(0.75)
+  .strokeWidth(0.5)
   .stroke("white")
   .shapeRendering("crispEdges");
   
 var t2 = textures.circles()
-  .size(7)
+  .size(8)
   .thicker()
-  .radius(0.75)
+  .radius(1)
   .fill("white");
   
 var t3 = textures.paths()
-  .size(11)
+  .size(12)
   .d("caps")
   .lighter()
   .stroke("white");
+  //.strokeWidth(0.5);
   
  var t6 = textures.paths()
-  .size(7)
+  .size(8)
   .d("crosses")
   .lighter()
   .thicker()
@@ -1006,22 +1007,52 @@ var popmap_zoom = d3.zoom()
 			console.log(data);
 		});*/	
 //load data
+	function convert_PAHO(d){
+		d.autochthonous_cases_suspected = +d.autochthonous_cases_suspected;
+		d.autochthonous_cases_confirmed = +d.autochthonous_cases_confirmed;
+		d.incidence_rate = + d.incidence_rate;
+		d.death_among_zika_cases = +d.death_among_zika_cases;
+		d.confirmed_congenital_syndrome = +d.confirmed_congenital_syndrome;
+		d.pop_x_1000 = +d.pop_x_1000;
+		return d; 
+	}
+	
+	function convert_MOH(d){
+		if(d.value == "NA"){
+			d.value = null;
+		}
+		d.value = +d.value;
+		return d; 
+	}
+	
+	function census(d){
+		d.population = +d.population;
+		return d; 
+	}
+	
+	
+	
+	
 queue()
 	.defer(d3.json, "data_info.json")
 	.defer(d3.json, "admin_0_countries_filtered.json")
 	.defer(d3.json, "admin_1_states_provinces_filtered.json")
-    .defer(d3.json, "el_salvador_epi.json")
-	.defer(d3.json, "countryData.json")
+    //.defer(d3.json, "el_salvador_epi.json")
+	.defer(d3.csv, "https://docs.google.com/spreadsheets/d/1I1jlaXgUaFGCC2RO6d9bbfDcWDwxj1Dl9kmUFIlxyEc/export?format=csv&id=1I1jlaXgUaFGCC2RO6d9bbfDcWDwxj1Dl9kmUFIlxyEc&gid=102970676")
+	//.defer(d3.json, "countryData.json")
 	.defer(d3.json, "populated_places_filtered.json")
 	.defer(d3.json, "poverty4.json")
 	.defer(d3.json, "usaidawards.json")
 	.defer(d3.json,"IPPFClinics.json")
-	.defer(d3.json, "globalData10_14.json")
-	.defer(d3.json, "Partners10_17.json")
+	//.defer(d3.json, "globalData10_14.json")
+	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1I1jlaXgUaFGCC2RO6d9bbfDcWDwxj1Dl9kmUFIlxyEc/export?format=csv&id=1")
+	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1I1jlaXgUaFGCC2RO6d9bbfDcWDwxj1Dl9kmUFIlxyEc/export?format=csv&id=1I1jlaXgUaFGCC2RO6d9bbfDcWDwxj1Dl9kmUFIlxyEc&gid=1338770452")
+	//.defer(d3.json, "Partners10_17.json")
 	.defer(d3.json, "PAHO_subnational_cleaned.json")
 	.defer(d3.json, "award_info_assist.json")
 	.defer(d3.json, "adm2_shapes.json")
-	.defer(d3.json, "epidata10_17b.json")
+	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1I1jlaXgUaFGCC2RO6d9bbfDcWDwxj1Dl9kmUFIlxyEc/export?format=csv&id=1I1jlaXgUaFGCC2RO6d9bbfDcWDwxj1Dl9kmUFIlxyEc&gid=1237068263")
+	//.defer(d3.json, "epidata10_17b.json")
 	.defer(d3.json, "fips2.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/export?format=csv")
 	.defer(d3.json, "rainfall_national.json")
@@ -1046,11 +1077,23 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, epidata/*SVLdata*/, censusdata/*countrydata*/, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, /*epidataSVLdata,*/ censusdata, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all){	
 	  if (error) throw error;	
 	   
 	  
 	  data_info = dat_info;
+	  
+	  globaldata.forEach(function(d,i){
+		  d = convert_PAHO(d);
+	  });
+	  epidata_all.forEach(function(d,i){
+		  d = convert_MOH(d);
+	  });
+	  censusdata.forEach(function(d,i){
+		  d = census(d);
+	  });
+	  
+	  //console.log(epidata_all);
 	  
 	  //console.log(awards_detail);
 	  //console.log(geodata_admin0);
@@ -1061,6 +1104,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 		  d.shape = 
 	  });*/
 	  
+		  //epidata_all = epidata_all.filter(function(d){return d.fips != undefined;});
 		  epidata_all = epidata_all.filter(function(d){return d.location.split("-").length < 3;});
 		  
 		  //console.log(epidata_all.filter(function(d){return d.}));
@@ -1188,6 +1232,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 		  //console.log(parseYear(d.report_date));
 	  });
 	  
+	  
 	  //sort by report data
 	  //epidata.sort(function(a,b){return a.report_date - b.report_date;});
 	  
@@ -1244,7 +1289,10 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 				  //console.log(strip(d.country)+" "+strip(d.amd1_name));
 			  }
 			 
-	  })
+	  });
+	  
+	  epidata_all = epidata_all.filter(function(d){return d.fips != null;});
+	  
 	  
 	  var epibycountrybyfips = d3.nest()
 	  .key(function(d){return d.country;})
@@ -1389,10 +1437,12 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  .key(function(d){return d.data_field;})
 	  .entries(epidata_all);
 	  
-	  var byRegion_svl = d3.nest()
+	  //console.log(byRegion);
+	  
+	  /*var byRegion_svl = d3.nest()
 	  .key(function(d){return d.fips;})
 	  .key(function(d){return d.data_field;})
-	  .entries(epidata);
+	  .entries(epidata);*/
 	  
 	  //console.log(byRegion);
 	  
@@ -1402,7 +1452,8 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  .key(function(d){return d.fips;})
 	  .entries(epidata_all.filter(function(v){return v.location_type != "country";}));//v.fips.indexOf("00") == -1;}));
   
-	  var totalbyRegionbyYear = d3.nest()
+	
+	  /*var totalbyRegionbyYear = d3.nest()
 	  .key(function(d){return d.fips;})
 	  .key(function(d){return d.data_field;})
 	  .key(function(d){return d.year;})
@@ -1413,7 +1464,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  .key(function(d){return d.report_date;})
 	  .key(function(d){return d.fips;})
 	  .key(function(d){return d.data_field;})
-	  .entries(epidata);
+	  .entries(epidata);*/
 	  
 	  var byCountrybyDatebyRegion = d3.nest()
 	  .key(function(d){return d.country;})
@@ -4120,7 +4171,16 @@ var b2 = path.bounds(country_centroid[0]),
 	    path_leaflet = d3.geoPath().projection(transform);
 		
 	
-		mapview_svg = d3.select(country_map.getPanes().overlayPane).append("svg").attr("id","overview_svg").attr("class","mapview_svg").attr("pointer-events","visible");
+		mapview_svg = d3.select(country_map.getPanes().overlayPane)
+		.append("svg")
+	 //responsive SVG needs these 2 attributes and no width and height attr
+	    //.attr("preserveAspectRatio", "xMinYMin meet")
+	    //.attr("viewBox", "0 0 500 400")
+	    //class to make it responsive
+	    //.classed("svg-content-responsive", true) 
+		//.attr("id","overview_svg")
+		.attr("class","mapview_svg")
+		.attr("pointer-events","visible");
 		//g = mapview_svg.append("g").attr("class", "leaflet-zoom-hide");
 	
 	/*mapview_svg = d3.select("#mapview").append("svg")
@@ -4787,7 +4847,8 @@ efforts = awards_shp.selectAll("path")
 		.data(country_awards_shapes)
 		.enter()
 		.append("path")
-		.attr("id", function(d,i){console.log("award_"+d.properties.HASC_2.replace(".","_")); return "award_"+d.properties.HASC_2.replace(".","_").replace(".","_");})
+		.attr("id", function(d,i){//console.log("award_"+d.properties.HASC_2.replace(".","_")); 
+		return "award_"+d.properties.HASC_2.replace(".","_").replace(".","_");})
 		.style("pointer-events","all")
 		.attr("d",path_leaflet)
 		.style("stroke","white")
@@ -5548,6 +5609,7 @@ var linegraph = global_indicators_2.append("path")
   	    	.x(function(d) { return x(d.report_date); })
   	    	.y(function(d) { //console.log(d.report_date+" "+d.cum_cases); 
   				//return y(d.cum_cases); });
+				//console.log(d.value);
 				return y(d.value); });
 				
 				var dd = byRegion.filter(function(v){return v.key == FIPS0;});	
