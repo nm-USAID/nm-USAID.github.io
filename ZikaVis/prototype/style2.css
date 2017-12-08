@@ -294,6 +294,15 @@ body {
 	background:none;
 }
 
+#overview_container{
+	   /* display: inline-block;
+	    position: relative;
+	    width: 100%;
+	    padding-bottom: 100%; 
+	    vertical-align: top;
+	    overflow: hidden;*/
+}
+
 #smlegend{
 	position:absolute;
 	margin-top:225px;
@@ -580,15 +589,19 @@ body {
 }
 
 .mapview_svg{
-	position:absolute;
-	width:2500px;
-	height:2500px;
+	display: inline-block;
+	    position: absolute;
+	    top: 10px;
+	    left: 0;
+	/*position:absolute;
+	width:100%;
+	height:auto;*/
 	/*background:white;*/
 }
 
 .overview_svg{
 	width:100%;
-	height:100%;
+	height:auto;
 }
 
 .sm_mults_svg{
@@ -1024,6 +1037,55 @@ cursor:pointer;
     /*-moz-box-shadow: 2px 2px 11px #666;*/
     -webkit-box-shadow: 2px 2px 11px #666;
 	word-wrap: break-word;		
+}
+
+.footnoteSymbol{
+	font: 15px serif;	
+	text-align:left;
+}
+
+.footnoteSymbol2{
+	font: 10px serif;	
+	text-align:center;
+	stroke:white;
+}
+
+.footnoteSymbol2:hover;{
+	cursor:pointer;
+	stroke:white;
+	stroke-width:2px;
+}
+
+
+
+.footnoteSymbol:hover{
+	cursor:pointer;
+	stroke:white;
+	stroke-width:2px;
+}
+
+.labelLine{
+	stroke-width:0.5px;
+	stroke:grey;	
+}
+.nullLine{
+	stroke-width:0px;
+	stroke:grey;	
+}
+
+.svg-container {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%; /* aspect ratio */
+    vertical-align: top;
+    overflow: hidden;
+}
+.svg-content-responsive {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 0;
 }
 
 /*div.tooltip {
