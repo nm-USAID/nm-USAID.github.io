@@ -1413,7 +1413,7 @@ queue()
 	.defer(d3.json, "award_info7.json")
 	.defer(d3.json, "adm2_all.json")
 	.defer(d3.csv, "https://docs.google.com/spreadsheets/d/1AZfbEiYCuLqbNUr2rd-WdmAsS6qZ5x8LsTkg7EusxjA/export?format=csv&id=1AZfbEiYCuLqbNUr2rd-WdmAsS6qZ5x8LsTkg7EusxjA&gid=268608510")
-	.defer(d3.json, "merge.json")
+	//.defer(d3.json, "merge.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/126Bf_7QZ-_KiUERy8ktQhH7UavD27IrpT4z8IiGuDnc/export?format=csv")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
@@ -1434,7 +1434,7 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, /*epidataSVLdata,*/ censusdata, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all,footnoteData, regional_adm, discrepancy_data){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, /*epidataSVLdata,*/ censusdata, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all,footnoteData, /*regional_adm,*/ discrepancy_data){	
 	  if (error) throw error;	
 	   
 	  
