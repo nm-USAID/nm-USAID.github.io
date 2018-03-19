@@ -54,6 +54,97 @@ function postToGoogleC(){
 };
 
 function postToGoogleG(){
+    var lat = $('#lat').val();
+    var lng = $('#lng').val();
+	var zoom = $('#zoom').val();
+	var zoomLevel = $('#zoomLevel').val();
+	var ucountry = $('#ucountry').val();
+	var usubregion = $('#usubregion').val();
+	var region = $('#region').val();
+	var time = $('#time').val();
+	//var type = $('.type:checked').val();
+	var type = $('input[name="type"]:checked').map(function(){ return this.value; }).get();
+	var pipeline = $('input[name="pipeline"]:checked').map(function(){ return this.value; }).get();
+	var indicators = $('input[name="indicators"]:checked').map(function(){ return this.value; }).get();//$('#indicators').val();
+	var stype = $('input[name="stype"]:checked').val();
+	//var pipeline = $('.pipeline:checked').val();
+	var how = $('input[name="how"]:checked').val(); 
+	//console.log(how);
+	//console.log(type.join());
+	//console.log(pipeline.join());
+	var description = $('#description').val();
+	
+	
+	var popupContent="<strong>Region: </strong>"+region+"<br>"+
+	"<strong>Description: </strong>"+description+"<br>"+
+	"<strong>Error type: </strong>"+stype+"<br>"+
+	"<strong>Discrepancy type: </strong>"+type+"<br>"+
+	"<strong>Affected indicators: </strong>"+indicators+"<br>"+
+	"<strong>where in the pipeline: </strong>"+pipeline+"<br>"+
+	"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+how+"</strong><br>";
+	
+	
+    if ((lat !== "") && (lng !== "") && (zoom !== "") && (region !== "") /*&& (time !== "") && (type !== "") && (indicators !== "") && (pipeline !== "") && (how !== "") && (description !== "")*/) {
+        $.ajax({
+            url: "https://docs.google.com/forms/d/e/1FAIpQLSdD5tynmE1ofq9brkhBgQt5xatoH0fAh07aaMK08V0hEkJpHQ/formResponse",
+            data: { "entry.1332359340" : lat, 
+					"entry.404697926": lng, 
+					"entry.1302319013" : zoom,
+					"entry.1940074961" : region,
+					"entry.1323627979" : time,
+					"entry.1701345902" : type.join(),
+					"entry.1529505701" : indicators.join(),
+					"entry.1252844767" : pipeline.join(),
+					"entry.271199962" : how,
+					"entry.247808391" : description,
+					"entry.97543607" : zoomLevel,
+					"entry.806743707" : ucountry,
+					"entry.1346257199" : usubregion,
+					"entry.1805140761" : stype,
+					},
+            type: "POST",
+            dataType: "xml",
+            statusCode: {
+                0: function (){
+					
+                    $('#lat').val("");
+                    $('#lng').val("");
+					$('#zoom').val("");
+					$('#region').val("");
+					$('#time').val("");
+					$('input[name="type"]:checked').val("");
+					$('#indicators').val("");
+					$('input[name="pipeline"]:checked').val("");
+					$('input[name="how"]:checked').val("");
+					$('#description').val("");
+                    //Success message
+                },
+                200: function (){
+                    $('#lat').val("");
+                    $('#lng').val("");
+					$('#zoom').val("");
+					$('#region').val("");
+					$('#time').val("");
+					$('input[name="type"]:checked').val("");
+					$('#indicators').val("");
+					$('input[name="pipeline"]:checked').val("");
+					$('input[name="how"]:checked').val("");
+					$('#description').val("");
+                    //Success Message
+                }
+            }
+        });
+		//if(tempMarker!=undefined){tempMarker.closePopup();}
+		updateTempMarkerAll(popupContent)
+		//setTimeout(retrieveFootnotes,3000)
+    }
+    else {
+		
+        //Error message
+    }
+};
+
+function postToGoogleAll(){
     var comment = $('#comment').val();
 	var country = $('#country').val();
     var lat = $('#lat').val();
@@ -90,6 +181,10 @@ function postToGoogleG(){
         //Error message
     }
 };
+
+
+
+
 
 //https://docs.google.com/spreadsheets/d/e/2PACX-1vR0s8uAHDAqWdg1Kb3iK4rFbFuXOW2IjVtD3WV_RLSb5PDfvc0f2UA8YIbbn3ZYq3ve8AooO-nuIwjY/pubhtml&output=csv
 //https://docs.google.com/spreadsheets/d/1sIihpy3w0_-PG5l7JMVjlygtb60A50UWvTpCKqmj-R0/edit#gid=0

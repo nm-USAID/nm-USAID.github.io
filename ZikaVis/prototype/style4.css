@@ -4,7 +4,15 @@ body {
 	background:#d4dadc;
 	background:#abd3de;
 	background:white;*/
-	background:#d4dadc;
+	/*
+	blue -- #bad3db; #bad3dbE6
+	lightgrey -- #d4dadc; #d4dadcE6 
+	rgba(212,218,220,0.9)
+	rgb(186,211,219,0.9)
+	esri -- #d0cfd4; #d0cfd4E6 */
+	--main-map-color:#d4dadc;
+	--main-map-color-trans:#d4dadcE6;
+	background:var(--main-map-color);
 }
 
 .axis--x path {
@@ -95,7 +103,7 @@ body {
 	background:#d4dadc;
 	background:#abd3de;
 	background:white;*/
-	background:#d4dadc;
+	background:var(--main-map-color);
 }
 
 #banner{
@@ -340,7 +348,7 @@ body {
     border-style: solid;
     border-width: 0.5px;	
     border-color: white;
-	background:rgba(212,218,220,0.9);
+	background:var(--main-map-color-trans);
 	padding:5px;
 	margin-top:125px;
 	margin-left:10px;
@@ -364,12 +372,12 @@ body {
 #rsView{
 	position:absolute;
 	float:left;
-	width:525px;
+	width:395px;
 	height:325px;
     border-style: solid;
     border-width: 0.5px;	
     border-color: white;
-	background:rgba(212,218,220,0.85);	
+	background:var(--main-map-color-trans);	
 	margin-left:775px;
 	margin-top:200px;
 	font: 10px sans-serif;
@@ -382,7 +390,7 @@ body {
 
 #chartview{
 	float:left;
-	width:520px;
+	width:390px;
 	height:325px;
     border-style: none;
     border-width: 0.5px;	
@@ -432,7 +440,7 @@ body {
     border-color: grey;
 	padding:5px;
 	margin:4px;
-	background:white;
+	background:none;
 }
 
 #epiData{
@@ -447,7 +455,7 @@ body {
 #pahoData{
 	float:left;
 	position:absolute;
-	width:500px;
+	width:385px;
 	height:150px;
     border-style: none;
     border-width: 0.5px;	
@@ -455,14 +463,14 @@ body {
 	margin:4px;
 	margin-top:20px;
 	padding:5px;
-	background:white;
+	background:var(--main-map-color);
 	
 }
 
 #nationalData{
 	float:left;
 	position:absolute;
-	width:500px;
+	width:385px;
 	height:150px;
     border-style: none;
     border-width: 0.5px;	
@@ -470,13 +478,13 @@ body {
 	margin:4px;
 	margin-top:20px;
 	padding:5px;
-	background:white;
+	background:var(--main-map-color);
 }
 
 #subnationalData{
 	float:left;
 	position:absolute;
-	width:500px;
+	width:385px;
 	height:150px;
     border-style: none;
     border-width: 0.5px;	
@@ -484,7 +492,7 @@ body {
 	margin:4px;
 	margin-top:20px;
 	padding:5px;
-	background:white;
+	background:var(--main-map-color);
 }
 
 #popmap{
@@ -496,7 +504,11 @@ body {
     border-color: grey;
 	margin:2px;
 	padding:2px;
-	background:white;
+	background:none;
+}
+
+#popmap path{
+	stroke:grey;
 }
 
 #povmap{
@@ -508,7 +520,7 @@ body {
     border-color: grey;
 	margin:4px;
 	padding:2px;
-	background:white;
+	background:none;
 }
 #povchart{
 	float:left;
@@ -517,15 +529,15 @@ body {
     border-color: grey;
 	margin:2px;
 	padding:2px;
-	background:white;
+	background:none;
 }
 
 #countryChartKey{
 	float:left;
-	width:205px;
+	width:100px;
 	height:140px;
 	cursor: pointer;
-	overflow-y:scroll;
+	overflow:scroll;
 }
 
 .key_labels:hover{
@@ -643,10 +655,11 @@ body {
 	height:100%;
 }
 .patternFill{
-	stroke:white;
+	stroke:grey;
 	stroke-width:0.1;
 	fill:none;
 }
+
 /*.minimap{
 	float:left;
 	width:100px;
@@ -745,7 +758,7 @@ body {
     border-width: 0.5px;	
     border-color: white;
 	/*background:#d4dadc;*/
-	background:rgba(212,218,220,0.9);
+	background:var(--main-map-color-trans);
 	padding:5px;
 	margin-top:125px;
 	margin-left:10px;
@@ -834,7 +847,7 @@ body {
     border-width: 0.5px;	
     border-color: white;
 	/*background:#d4dadc;*/
-	background:rgba(212,218,220,0.85);	
+	background:var(--main-map-color-trans);	
 	margin-left:775px;
 	margin-top:40px;
 	font: 10px sans-serif;
@@ -851,7 +864,7 @@ body {
     border-width: 0.5px;	
     border-color: white;
 	/*background:#d4dadc;*/
-	background:rgba(212,218,220,0.85);	
+	background:var(--main-map-color-trans);	
 	margin-left:775px;
 	margin-top:200px;
 	font: 10px sans-serif;
@@ -861,11 +874,11 @@ body {
 
 #c_new_confirmed{
 	float:left;
-	width:240px;
+	width:180px;
 }
 #c_cum_confirmed{
 	float:left;
-	width:240px;
+	width:180px;
 }
 
 .small_charts{
@@ -1259,10 +1272,6 @@ cursor:pointer;
 	cursor:pointer;	
 }
 
-/*.leaflet-control-container { 
-	position: absolute; right: 200px;
-}*/
-
 
 .leaflet-marker-icon{
 	pointer-events:none;
@@ -1405,6 +1414,47 @@ cursor:pointer;
 	stroke-width:2px;
 	cursor:pointer;
 }
+
+/*highlights region on click*/
+.leaflet-marker-icon.leaflet-mouse-marker.leaflet-zoom-animated.leaflet-interactive{
+	pointer-events:none;
+	cursor:pointer;
+}
+
+.leaflet-draw-actions.leaflet-draw-actions-bottom{
+	z-index:5;
+}
+
+.leaflet-popup-content{
+	overflow:scroll;
+	max-height:325px;
+	pointer-events:all;
+	/*width:300px;*/
+}
+
+
+
+.leaflet-top.leaflet-left{ 
+	position: absolute; 
+	left: 800px;
+	top: 50px;
+}
+
+.leaflet-top.leaflet-right{ 
+	position: absolute; 
+	right: 450px;
+	top: 50px;
+}
+
+.leaflet-bottom.leaflet-left { 
+	position: absolute; 
+	left:200px;
+	bottom: 300px;
+}
+
+/*.leaflet-marker-icon.leaflet-zoom-animated.leaflet-interactive{
+	pointer-events:none;
+}*/
 
 /*div.tooltip {
     position: absolute;
