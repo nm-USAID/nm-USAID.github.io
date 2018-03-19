@@ -448,12 +448,14 @@ function updateData() {
 	d3.csv("https://docs.google.com/spreadsheets/d/126Bf_7QZ-_KiUERy8ktQhH7UavD27IrpT4z8IiGuDnc/export?format=csv", function(error,data){
 	new_annotations = data;
 	
+	if(global_data!=undefined){
 	if(data.length > global_data.length){
 		console.log("another!");
 		updateMarkers(data);
 		global_featureGroup.clearLayers();
 		
 	}
+}
 	
 	});
 	
@@ -3684,12 +3686,12 @@ pht_btn = d3.select("#global_container").append("div")
 												  var dates;
 												  
 												  
-												  underlyingSubregion=ADM1_lookup.filter(function(d){return d.key == underlyingCountry;})[0].region;
+												  underlyingSubregion="temp";//ADM1_lookup.filter(function(d){return d.key == underlyingCountry;})[0].region;
 				  								
 												  var checkboxIndicators = '';
 												
 												  if(cview){
-													  dates = c_choropleth_date;
+													  //dates = c_choropleth_date;
 													  console.log(country_indicators_template);
 													  country_indicators_template.forEach(function(c,i){
 														  if(c==c_choroplethIndicator){
@@ -3715,10 +3717,11 @@ pht_btn = d3.select("#global_container").append("div")
 													  });
 												  }
 									
-													  
+												  zoomVal = 2;
+												  zoomLevel = 2;
 												
 												
-												  //console.log(underlyingRegion);
+												 console.log(underlyingRegion);
 												//console.log(zoomVal);
 				  								//console.log(coords);
 												placeMarker = false;
@@ -3758,10 +3761,10 @@ pht_btn = d3.select("#global_container").append("div")
 				     			  		          '</div>'+
 				     			  		          '<input style="display: none;" type="text" id="lat" name="lat" value="'+coords.lat.toFixed(6)+'" />'+
 				     			  		          '<input style="display: none;" type="text" id="lng" name="lng" value="'+coords.lng.toFixed(6)+'" />'+
-												  '<input style="display: none;" type="text" id="time" name="time" value="'+dates+'" />'+
+												  '<input style="display: none;" type="text" id="time" name="time" value="tmp" />'+
 												  '<input style="display: none;" type="text" id="zoom" name="zoom" value="'+zoomVal+'" />'+
 												  '<input style="display: none;" type="text" id="zoomLevel" name="zoomLevel" value="'+zoomLevel+'" />'+
-												  '<input style="display: none;" type="text" id="ucountry" name="ucountry" value="'+underlyingCountry+'" />'+
+												  '<input style="display: none;" type="text" id="ucountry" name="ucountry" value="tmp" />'+
 												  '<input style="display: none;" type="text" id="usubregion" name="usubregion" value="'+underlyingSubregion+'" />'+
 				     			  		          '<div class="form-group">'+
 				     			  		            '<div style="text-align:center;" class="col-xs-4"><button type="submit" value="submit" name="M2UYVd">Submit</button></div>'+

@@ -69,10 +69,22 @@ function postToGoogleG(){
 	var stype = $('input[name="stype"]:checked').val();
 	//var pipeline = $('.pipeline:checked').val();
 	var how = $('input[name="how"]:checked').val(); 
-	//console.log(how);
-	//console.log(type.join());
-	//console.log(pipeline.join());
 	var description = $('#description').val();
+	
+	console.log(lat);
+	console.log(lng);
+	console.log(zoom);
+	console.log(zoomLevel);
+	console.log(ucountry);
+	console.log(usubregion);
+	console.log(region);
+	console.log(time);
+	console.log(how);
+	console.log(type);
+	console.log(pipeline);
+	console.log(indicators);
+	console.log(stype);
+	console.log(description);
 	
 	
 	var popupContent="<strong>Region: </strong>"+region+"<br>"+
@@ -84,7 +96,7 @@ function postToGoogleG(){
 	"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+how+"</strong><br>";
 	
 	
-    if ((lat !== "") && (lng !== "") && (zoom !== "") && (region !== "") /*&& (time !== "") && (type !== "") && (indicators !== "") && (pipeline !== "") && (how !== "") && (description !== "")*/) {
+    if ((lat !== "") && (lng !== "") && (zoom !== "") /*&& (region !== "") && (time !== "") && (type !== "") && (indicators !== "") && (pipeline !== "") && (how !== "") && (description !== "")*/) {
         $.ajax({
             url: "https://docs.google.com/forms/d/e/1FAIpQLSdD5tynmE1ofq9brkhBgQt5xatoH0fAh07aaMK08V0hEkJpHQ/formResponse",
             data: { "entry.1332359340" : lat, 
@@ -93,7 +105,7 @@ function postToGoogleG(){
 					"entry.1940074961" : region,
 					"entry.1323627979" : time,
 					"entry.1701345902" : type.join(),
-					"entry.1529505701" : indicators.join(),
+					"entry.1529505701" : indicators,
 					"entry.1252844767" : pipeline.join(),
 					"entry.271199962" : how,
 					"entry.247808391" : description,
