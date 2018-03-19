@@ -1572,9 +1572,12 @@ queue()
 	.defer(d3.csv, "https://docs.google.com/spreadsheets/d/1AZfbEiYCuLqbNUr2rd-WdmAsS6qZ5x8LsTkg7EusxjA/export?format=csv&id=1AZfbEiYCuLqbNUr2rd-WdmAsS6qZ5x8LsTkg7EusxjA&gid=268608510")
 	.defer(d3.json, "regions.json")
 	.defer(d3.csv,"https://docs.google.com/spreadsheets/d/126Bf_7QZ-_KiUERy8ktQhH7UavD27IrpT4z8IiGuDnc/export?format=csv")
-	.defer(d3.json, "adm0.json")
-	.defer(d3.json, "adm1.json")
-	.defer(d3.json, "adm2.json")
+	//.defer(d3.json, "adm0.json")
+	//.defer(d3.json, "adm1.json")
+	//.defer(d3.json, "adm2.json")
+	.defer(d3.json, "adm0_t.json")
+	.defer(d3.json, "adm1_t.json")
+	.defer(d3.json, "adm2_t.json")
 	/*.defer(function(f){
 		d3.json("rainfall_national.json").on("progress",function(p){
 			console.log('progress');
@@ -1594,7 +1597,7 @@ queue()
 		  })*/
 	.await(ready);	
 		
-function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, /*epidataSVLdata,*/ censusdata, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all,footnoteData, regional_adm, discrepancy_data,adm0g,adm1g,adm2g){	
+function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*adm1data*/, /*epidataSVLdata,*/ censusdata, pop_pls, poverty, awards, IPPFclinics, globaldata, partners, paho_sub, award_info, adm2_shapes,epidata_all,fips,comments_data,rainfall,awards_detail,adm2_all,footnoteData, regional_adm, discrepancy_data,/*adm0g,adm1g,adm2g,*/adm0t,adm1t,adm2t){	
 	  if (error) throw error;	
 	   
 	  
@@ -1607,7 +1610,16 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  //console.log(regional_adm);
 	  //console.log(adm2_shapes);
 	  
+	  var adm0g = topojson.feature(adm0t,adm0t.objects.adm0);
+	  var adm1g = topojson.feature(adm1t,adm1t.objects.adm1);
+	  var adm2g = topojson.feature(adm2t,adm2t.objects.adm2);
+	  
 	  //console.log(adm0g);
+	  //console.log("topo");
+	  //console.log(AF);
+	  
+	  //topojson.feature(adm2_shapes,adm2_shapes.objects.COL_adm2).features
+	  
 	  //console.log(adm1g);
 	  //console.log(fips);
 	  //console.log(adm2g);
