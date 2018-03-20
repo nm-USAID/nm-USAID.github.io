@@ -274,6 +274,7 @@ var priority_countries = ["Belize","Haiti","El Salvador","Dominican Republic", "
 // "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela"];
  
  var got_data = [ 
+// "Colombia",
  "Dominican Republic",
  "Ecuador",
  "El Salvador",
@@ -1345,7 +1346,8 @@ var popmap_zoom = d3.zoom()
 					"<strong>Discrepancy type: </strong>"+nad[i].values[j].discrepancy_type+"<br>"+
 					"<strong>Affected indicators: </strong>"+nad[i].values[j].indicators+"<br>"+
 					"<strong>where in the pipeline: </strong>"+nad[i].values[j].pipeline+"<br>"+
-					"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>";
+					"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>"+
+					"<strong>Level of certainty around this error: </strong>"+nad[i].values[j].certainty+"</strong><br>";
 					if(nad[i].values[j].lat != "" && nad[i].values[j].lng != ""){
 						_marker = L.marker([+nad[i].values[j].lat,+nad[i].values[j].lng],{icon:blueIcon}).bindPopup(popupContent);
 						marker_layers[i].addLayer(_marker);
@@ -1493,7 +1495,8 @@ var popmap_zoom = d3.zoom()
 						"<strong>Discrepancy type: </strong>"+nad[i].values[j].discrepancy_type+"<br>"+
 						"<strong>Affected indicators: </strong>"+nad[i].values[j].indicators+"<br>"+
 						"<strong>where in the pipeline: </strong>"+nad[i].values[j].pipeline+"<br>"+
-						"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>";
+						"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>"+
+						"<strong>Level of certainty around this error: </strong>"+nad[i].values[j].certainty+"</strong><br>";
 						if(nad[i].values[j].lat != "" && nad[i].values[j].lng != ""){
 							_marker = L.marker([+nad[i].values[j].lat,+nad[i].values[j].lng],{icon:blueIcon}).bindPopup(popupContent);
 							marker_layers[i].addLayer(_marker);
@@ -3938,7 +3941,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 												  
 				     			  				  var popupContent = '<form target="_self" onsubmit="" action="javascript: postToGoogleG()">'+
 				     			  		          '<div class="form-group">'+
-												  		'<strong>Flag Error</strong><br>(scroll down for additional form fields)<br><br>'+
+												  		'<strong>Flag Error</strong><br>knowledge of errors will vary, please fill out the following to the best of your knowledge<br>(scroll down for additional form fields)<br><br>'+
 												  		'<strong>Region:</strong><input type="text" id="region" name="region" value="'+underlyingRegion+'"><br>'+
 												        //'<strong>Time period:</strong><input type="text" id="time" name="time"><br>'+
 												  		'<br><strong>Description:</strong><br>'+
@@ -3954,9 +3957,9 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 												  		//'<input type="checkbox" id="type1" class="type" name="type" value="inconsistency"> <strong>Inconsistency:</strong> an idiosyncrasy of a specific region’s data generation pipeline, or a characteristic of the pipeline that varies across countries.<br>'+
   														//'<input type="checkbox" id="type2" class="type" name="type" value="greydata"> <strong>Grey data:</strong> reputed data that is omitted at some stage of the data generation pipeline.<br>'+ 
 												  		//'<input type="checkbox" id="type3" class="type" name="type" value="adjustment"> <strong>Retrospective adjustments:</strong>  downstream updates to previously reported data.<br>'+
-												  		'<input type="checkbox" id="type1" class="type" name="type" value="inconsistency"> Inconsistency '+
-  														'<input type="checkbox" id="type2" class="type" name="type" value="greydata"> Grey data <br>'+ 
-												  		'<input type="checkbox" id="type3" class="type" name="type" value="adjustment"> Retrospective adjustments '+
+												  		'<input type="checkbox" id="type1" class="type" name="type" value="inconsistency"> errors due to inconsistencies in data acquisition or reporting across regions (e.g. indicator definitions), or to region-specific factors/events <br>'+
+  														'<input type="checkbox" id="type2" class="type" name="type" value="greydata"> unofficial data/data ommitted as some stage of the surveillance system (detection,recording, collection...etc) <br>'+ 
+												  		'<input type="checkbox" id="type3" class="type" name="type" value="adjustment"> errors due to updates to the data made retrospectively <br>'+
 														'<br><br><strong>Which stage(s) of the surveillance system does this error impact?</strong><br>'+
 												  		'<input type="checkbox" id="pipeline1" class="pipeline" name="pipeline" value="detection"> detection '+
   														'<input type="checkbox" id="pipeline2" class="pipeline" name="pipeline" value="recording"> recording '+ 
@@ -3964,9 +3967,13 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
   														'<input type="checkbox" id="pipeline4" class="pipeline" name="pipeline" value="processing"> processing '+ 
 												 	 	'<input type="checkbox" id="pipeline5" class="pipeline" name="pipeline" value="reporting"> reporting'+ 
 												  		'<br><br><strong>How would you adjust the official data to reflect this?</strong><br>'+
-												  		'<input type="radio" id="how" class="how" name="how" value="higher">value(s) should be <strong>higher</strong><br> '+
-												  		'<input type="radio" id="how" class="how" name="how" value="lower">value(s) should be <strong>lower</strong><br>'+
-												  		'<input type="radio" id="how" class="how" name="how" value="unknown"><strong>unknown</strong><br>'+
+												  		'<input type="radio" id="how1" class="how" name="how" value="higher">value(s) should be <strong>higher</strong><br> '+
+												  		'<input type="radio" id="how2" class="how" name="how" value="lower">value(s) should be <strong>lower</strong><br>'+
+												  		'<input type="radio" id="how3" class="how" name="how" value="unknown"><strong>unknown</strong><br>'+
+												  		'<br><br><strong>How certain are you of the existance of this error?</strong><br>'+
+												  		'<input type="radio" id="certainty1" class="certainty" name="certainty" value="low">just a hunch<br> '+
+												  		'<input type="radio" id="certainty2" class="certainty" name="certainty" value="medium">fairly certain, but do not have all the details<br>'+
+												  		'<input type="radio" id="certainty3" class="certainty" name="certainty" value="high">certain<br>'+
 				     			  		          '</div>'+
 				     			  		          '<input style="display: none;" type="text" id="lat" name="lat" value="'+coords.lat.toFixed(6)+'" />'+
 				     			  		          '<input style="display: none;" type="text" id="lng" name="lng" value="'+coords.lng.toFixed(6)+'" />'+

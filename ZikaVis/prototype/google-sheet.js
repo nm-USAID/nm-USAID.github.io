@@ -69,6 +69,7 @@ function postToGoogleG(){
 	var stype = $('input[name="stype"]:checked').val();
 	//var pipeline = $('.pipeline:checked').val();
 	var how = $('input[name="how"]:checked').val(); 
+	var certainty = $('input[name="certainty"]:checked').val(); 
 	var description = $('#description').val();
 	
 	console.log(lat);
@@ -85,6 +86,7 @@ function postToGoogleG(){
 	console.log(indicators);
 	console.log(stype);
 	console.log(description);
+	console.log(certainty);
 	
 	
 	var popupContent="<strong>Region: </strong>"+region+"<br>"+
@@ -94,6 +96,7 @@ function postToGoogleG(){
 	"<strong>Affected indicators: </strong>"+indicators+"<br>"+
 	"<strong>where in the pipeline: </strong>"+pipeline+"<br>"+
 	"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+how+"</strong><br>";
+	"<strong>Level of certainty around this error: </strong>"+certainty+"</strong><br>";
 	
 	
     if ((lat !== "") && (lng !== "") && (zoom !== "") /*&& (region !== "") && (time !== "") && (type !== "") && (indicators !== "") && (pipeline !== "") && (how !== "") && (description !== "")*/) {
@@ -113,6 +116,7 @@ function postToGoogleG(){
 					"entry.806743707" : ucountry,
 					"entry.1346257199" : usubregion,
 					"entry.1805140761" : stype,
+					"entry.1160354319": certainty,
 					},
             type: "POST",
             dataType: "xml",
