@@ -1584,11 +1584,11 @@ var popmap_zoom = d3.zoom()
 	  function showGlobal(){
   		//global_footnotes.addTo(global_map);
 		if(cview){marker_layers[1].addTo(global_map);}
-		if(gview){marker_layers[0].addTo(global_map);}
+		if(gview){marker_layers[0].addTo(global_map);PAHO_global_footnotes.addTo(global_map);}
 		if(rview){marker_layers[2].addTo(global_map);}	
 		
 		
-		PAHO_global_footnotes.addTo(global_map);
+		//PAHO_global_footnotes.addTo(global_map);
   		global_featureGroup.addTo(global_map);
   		global_drawControl.addTo(global_map);
 	  }
@@ -1605,8 +1605,7 @@ var popmap_zoom = d3.zoom()
 		if(gview){marker_layers[0].removeFrom(global_map);}
 		if(rview){marker_layers[2].removeFrom(global_map);}
 		
-		
-  	  	global_footnotes.removeFrom(global_map);
+		PAHO_global_footnotes.removeFrom(global_map);
   		global_featureGroup.removeFrom(global_map);
   		global_drawControl.remove();
 	  }
@@ -1816,7 +1815,8 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 			when:"",
 			which_indicators:"",
 			zoom_level:"5",
-			date:d.date
+			date:d.date,
+			zoomLevel:2
 	  	});
 		}
 	  });
@@ -4318,6 +4318,10 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				 if(marker_layers[1]!=undefined)marker_layers[1].addTo(global_map);
 				 if(marker_layers[2]!=undefined)marker_layers[2].removeFrom(global_map);
 				 PAHO_global_footnotes.removeFrom(global_map);
+			 	
+				 if(discrepancyMode!=0){
+				 	if(marker_layers[0]!=undefined)marker_layers[1].removeFrom(global_map);
+				 }
 				 
 				 console.log("switching to sub-country view!");
 			 
@@ -4364,6 +4368,21 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				//legend_all.remove();
 				//update_c_choropleths();
 				//gl_update_legends();
+				
+				//update d_points
+				//if(discrepancyMode!=0){
+					d_points.each(function(d){
+						if(d.dataObj.zoomLevel==3){
+							d3.select(this).style("opacity",gl_op);
+							d3.select(this).style("pointer-events","all");
+						}else{
+							d3.select(this).style("opacity",0);
+							d3.select(this).style("pointer-events","none");
+						}
+						
+					});
+					//}
+				
 			
 			 }else if(gview){
 				 
@@ -4374,6 +4393,11 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				 if(marker_layers[1]!=undefined)marker_layers[1].removeFrom(global_map);
 				 if(marker_layers[2]!=undefined)marker_layers[2].removeFrom(global_map);
 				 PAHO_global_footnotes.addTo(global_map);
+				 
+				 if(discrepancyMode!=0){
+				 	if(marker_layers[0]!=undefined)marker_layers[0].removeFrom(global_map);
+					PAHO_global_footnotes.removeFrom(global_map);
+				 }
 			
 					if(zoomLevel==3){
 				//if moving from sub-national level 
@@ -4418,13 +4442,32 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				
 				legend_all.remove();
 				gl_update_legends();
+				
+				
+				//if(discrepancyMode!=0){
+					d_points.each(function(d){
+						if(d.dataObj.zoomLevel==2){
+							d3.select(this).style("opacity",gl_op);
+							d3.select(this).style("pointer-events","all");
+						}else{
+							d3.select(this).style("opacity",0);
+							d3.select(this).style("pointer-events","none");
+						}
+						
+					});
+					//}
 		 	
 			 }else if(rview){
 				console.log("switching to regional view!");
+				
 				 if(marker_layers[0]!=undefined)marker_layers[0].removeFrom(global_map);
 				 if(marker_layers[0]!=undefined)marker_layers[1].removeFrom(global_map);
 				 if(marker_layers[0]!=undefined)marker_layers[2].addTo(global_map);
 				 PAHO_global_footnotes.removeFrom(global_map);
+				 
+				 if(discrepancyMode!=0){
+				 	if(marker_layers[0]!=undefined)marker_layers[2].removeFrom(global_map);
+				 }
 				
 				global_map.setView([-15, -50], 3.75);
 				 
@@ -4469,6 +4512,21 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				 
  				legend_all.remove();
  				gl_update_legends();
+				
+				//if(discrepancyMode!=0){
+					d_points.each(function(d){
+						console.log(d);
+						if(d.dataObj.zoomLevel==1){
+							d3.select(this).style("opacity",gl_op);
+							d3.select(this).style("pointer-events","all");
+						}else{
+							d3.select(this).style("opacity",0);
+							d3.select(this).style("pointer-events","none");
+						}
+						
+					});
+					//}
+				
 			 }
 		 }		 
 	 
@@ -6492,7 +6550,7 @@ var yaxis = scatterplot_svg.append("g")
 				}
 				});
 				
-				if(discrepancyMode==1){
+				if(discrepancyMode==1 && gview){
 					//add footnotes!!
 					
 					//console.log(dat[0].values);
