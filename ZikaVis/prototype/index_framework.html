@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>Zika Mapping - Footnotes</title>
-<link rel="stylesheet" type="text/css" href="style4.css">
+<link rel="stylesheet" type="text/css" href="style5.css">
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCukYnSkgIttWhAzy_U2YpbhsxU6wS0pbY" async defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
@@ -270,8 +270,36 @@ var dstrokecolors = ["#048bb4","rgba(0,  50,  108, 1)","rgba(1,  99,  0, 1)","rg
 
 var priority_countries = ["Belize","Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala","Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela","Guyana","Paraguay","Brazil","Panama","Costa Rica","Barbados","Dominica","Antigua and Barbuda","Guyana","Grenada","Saint Vincent and the Grenadines","Saint Lucia","Trinidad and Tobago","Saint Kitts and Nevis"];//"Cuba","French Guiana","Guadeloupe","Martinique"/*,"Puerto Rico"*/,"Saint Barthelemy","Saint Martin"];
 
-var got_data = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala",
- "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela"];
+//var got_data = ["Haiti","El Salvador","Dominican Republic", "Honduras","Guatemala",
+// "Colombia", "Nicaragua", "Peru", "Ecuador", "Jamaica", "Venezuela"];
+ 
+ var got_data = [ 
+ "Colombia",
+ "Dominican Republic",
+ "Ecuador",
+ "El Salvador",
+ "Guatemala",
+ "Haiti",
+ "Honduras",
+ "Jamaica",
+ "Nicaragua",
+ "Peru",
+ "Venezuela"];
+ 
+ 
+ var got_data2 = [  
+ "Colombia",
+ "Dominican Republic",
+	 "Ecuador",
+ "El Salvador",
+ "Guatemala",
+ "Haiti",
+ "Honduras",
+ "Jamaica",
+ "Nicaragua",
+ "Peru",
+ "Venezuela"];
+ 
 
 var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left",inline:false},{country:"El Salvador",dx:-40,dy:20,t_align:"left",inline:false},{country:"Dominican Republic",dx:10,dy:0,t_align:"right",inline:false},{country:"Honduras",dx:0,dy:-10,t_align:"left",inline:false},
 {country:"Guatemala",dx:-50,dy:5,t_align:"left",inline:false},{country:"Colombia",dx:-15,dy:0,t_align:"left",inline:false},{country:"Nicaragua",dx:0,dy:10,t_align:"left",inline:false},{country:"Peru",dx:-20,dy:0,t_align:"left",inline:false},{country:"Ecuador",dx:-15,dy:0,t_align:"left",inline:false},
@@ -383,6 +411,7 @@ var discrepancyMode = 0;
 var discrepancy_histogram;
 var dptMode = "truevalue";
 var PAHO_global_footnotes;
+var marker_layers;
 var PAHO_global_footnotes_objs = [];
 var discrepancyTrueValue;
 var discrepancyPipeline;
@@ -482,7 +511,10 @@ d3.select("#gl_middleview").append("div")
 	
 d3.select("#gl_banner").append("h1")
 	.attr("class","banner")
-	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");	
+	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");
+	
+d3.select("#gl_middleview").append("div")
+	.attr("id","viewtabs");		
 
 d3.select("#gl_middleview").append("div")
 	.attr("id","gl_awardview");		
@@ -1206,14 +1238,18 @@ var popmap_zoom = d3.zoom()
 			global_data = data;//discrepancy_data_filtered;//data;
 			//console.log(data);
 			
-			nested_annotation_data = d3.nest()
+			/*nested_annotation_data = d3.nest()
 			.key(function(d){return d.subregion;})
 			.key(function(d){return d.country;})
 			.key(function(d){return d.zoomL;})
+			.entries(data);*/
+			
+			nad = d3.nest()
+			.key(function(d){return d.zoomLevel;})
 			.entries(data);
 			
-			//console.log(nested_annotation_data);
 			
+			//console.log(nad);
 		
 			greenIcon = new L.Icon({
 			  iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
@@ -1297,9 +1333,36 @@ var popmap_zoom = d3.zoom()
 				global_footnotes.addLayer(_marker);
 				}
 			}
-			global_footnotes.addTo(global_map);
+			//global_footnotes.addTo(global_map);
 			
 			
+			marker_layers = [];
+			for(i=0;i<nad.length;i++){
+				marker_layers.push(new L.LayerGroup());
+				for(j=0;j<nad[i].values.length;j++){
+					var popupContent="<strong>Region: </strong>"+nad[i].values[j].region+"<br>"+
+					"<strong>Description: </strong>"+nad[i].values[j].description+"<br>"+
+					"<strong>Error type: </strong>"+nad[i].values[j].stype+"<br>"+
+					"<strong>Discrepancy type: </strong>"+nad[i].values[j].discrepancy_type+"<br>"+
+					"<strong>Affected indicators: </strong>"+nad[i].values[j].indicators+"<br>"+
+					"<strong>where in the pipeline: </strong>"+nad[i].values[j].pipeline+"<br>"+
+					"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>";
+					if(nad[i].values[j].lat != "" && nad[i].values[j].lng != ""){
+						_marker = L.marker([+nad[i].values[j].lat,+nad[i].values[j].lng],{icon:blueIcon}).bindPopup(popupContent);
+						marker_layers[i].addLayer(_marker);
+					}	
+				}
+				//marker_layers[i].addTo(global_map);
+			}
+			if(cview){
+				marker_layers[3].addTo(global_map);
+			}
+			if(gview){
+				marker_layers[0].addTo(global_map);
+			}
+			if(rview){
+				marker_layers[1].addTo(global_map);
+			}
 			
 			/*global_footnotes = L.MarkerClusterGroup();//L.FeatureGroup();
 						for(i=0;i<global_data.length;i++){
@@ -1394,16 +1457,14 @@ var popmap_zoom = d3.zoom()
 				global_data = data;//discrepancy_data_filtered;//data;
 				//console.log(data);
 			
-				nested_annotation_data = d3.nest()
-				.key(function(d){return d.subregion;})
-				.key(function(d){return d.country;})
-				.key(function(d){return d.zoomL;})
+				nad = d3.nest()
+				.key(function(d){return d.zoomLevel;})
 				.entries(data);
 			
 				//console.log(nested_annotation_data);
 		
 				//global_footnotes = new L.LayerGroup();//L.FeatureGroup();
-				global_footnotes.clearLayers();
+				/*global_footnotes.clearLayers();
 				
 				for(i=0;i<global_data.length;i++){
 					//console.log(global_data[i]);
@@ -1422,7 +1483,36 @@ var popmap_zoom = d3.zoom()
 					global_footnotes.addLayer(_marker);
 					}
 				}
-				global_footnotes.addTo(global_map);
+				global_footnotes.addTo(global_map);*/
+				marker_layers = [];
+				for(i=0;i<nad.length;i++){
+					marker_layers.push(new L.LayerGroup());
+					for(j=0;j<nad[i].values.length;j++){
+						var popupContent="<strong>Region: </strong>"+nad[i].values[j].region+"<br>"+
+						"<strong>Description: </strong>"+nad[i].values[j].description+"<br>"+
+						"<strong>Error type: </strong>"+nad[i].values[j].stype+"<br>"+
+						"<strong>Discrepancy type: </strong>"+nad[i].values[j].discrepancy_type+"<br>"+
+						"<strong>Affected indicators: </strong>"+nad[i].values[j].indicators+"<br>"+
+						"<strong>where in the pipeline: </strong>"+nad[i].values[j].pipeline+"<br>"+
+						"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>";
+						if(nad[i].values[j].lat != "" && nad[i].values[j].lng != ""){
+							_marker = L.marker([+nad[i].values[j].lat,+nad[i].values[j].lng],{icon:blueIcon}).bindPopup(popupContent);
+							marker_layers[i].addLayer(_marker);
+						}	
+					}
+					//marker_layers[i].addTo(global_map);
+				}
+				if(cview){
+					marker_layers[1].addTo(global_map);
+				}
+				if(gview){
+					marker_layers[0].addTo(global_map);
+				}
+				if(rview){
+					marker_layers[2].addTo(global_map);
+				}
+		
+
 		}	
 		
 		  
@@ -1490,7 +1580,12 @@ var popmap_zoom = d3.zoom()
 	  }
 	  
 	  function showGlobal(){
-  		global_footnotes.addTo(global_map);
+  		//global_footnotes.addTo(global_map);
+		if(cview){marker_layers[1].addTo(global_map);}
+		if(gview){marker_layers[0].addTo(global_map);}
+		if(rview){marker_layers[2].addTo(global_map);}	
+		
+		
 		PAHO_global_footnotes.addTo(global_map);
   		global_featureGroup.addTo(global_map);
   		global_drawControl.addTo(global_map);
@@ -1503,7 +1598,12 @@ var popmap_zoom = d3.zoom()
 	  }
 	  
 	  function hideGlobal(){
-		PAHO_global_footnotes.removeFrom(global_map);
+		//PAHO_global_footnotes.removeFrom(global_map);
+		if(cview){marker_layers[1].removeFrom(global_map);}
+		if(gview){marker_layers[0].removeFrom(global_map);}
+		if(rview){marker_layers[2].removeFrom(global_map);}
+		
+		
   	  	global_footnotes.removeFrom(global_map);
   		global_featureGroup.removeFrom(global_map);
   		global_drawControl.remove();
@@ -2993,18 +3093,119 @@ choropleth4_ht = d3.scaleThreshold()//d3.scaleLog()
 	 
 	 
 function commentBtns(){
+//	
+var views = d3.select("#global_container").append("div")
+	.attr("id","viewtabs")
+	.attr("class","vbuttons")
+	.style("margin-left","-5px")
+	.style("margin-top","25px");
+	
+	var rviewbtn = views.append("div")
+	.attr("class","viewbutton")
+	.text("regional view");
+	
+	rviewbtn.on("click",function(){
+		//only do if not already countryview
+		if(!rview){
+			rviewbtn.style("background",mapcolor);
+			cviewbtn.style("background","white");
+			scviewbtn.style("background","white");
+			gview = false;
+			cview = false;
+			rview = true;
+			changeView();
+		}
+	});
+	
+	var cviewbtn = views.append("div")
+	.attr("class","viewbutton")
+	.text("country view")
+	.style("background",mapcolor);
+	
+	cviewbtn.on("click",function(){
+		//only do if not already countryview
+		if(!gview){
+			rviewbtn.style("background","white");
+			cviewbtn.style("background",mapcolor);
+			scviewbtn.style("background","white");
+			gview = true;
+			cview = false;
+			rview = false;
+			changeView();
+		}
+	});
+	
+	
+	var scviewbtn = views.append("div")
+	.attr("class","viewbutton")
+	.text("sub-country view (select country ->->)")
+	.style("background","white");
+	
+	scviewbtn.on("click",function(){
+		//only do if not already countryview
+		if(!cview){
+			rviewbtn.style("background","white");
+			cviewbtn.style("background","white");
+			scviewbtn.style("background",mapcolor);
+			gview = false;
+			cview = true;
+			rview = false;
+			
+			var sel = d3.select("#selectCountry").node().value;
+			console.log(sel);
+			
+			var ADM0 = ADM0_A3_lookup.filter(function(v){return v.key == sel;})[0].value;
+			
+			setCountry(ADM0);
+			changeView();
+			//gl_reset();
+		}
+	});
+	
+
+var selectCountry = views.append("select")
+	.attr("class","viewbutton")
+	.attr("id","selectCountry")
+	.text("Sub-country view (select country)")
+	.on("change",selectChange);
+	
+	/*selectCountry.append("option")
+	.attr("value","all")
+	.text("Sub-country view (select country)");*/
+	
+	selectCountry.selectAll("option")
+	.data(got_data)
+	.enter()
+	.append("option")
+	.attr("value",function(d){return d;})
+	.text(function(d){return d;});
+	
+	function selectChange(){
+		var sel = d3.select("#selectCountry").node().value;
+		console.log(sel);
+		//if already in country view
+		if(cview){
+		var ADM0 = ADM0_A3_lookup.filter(function(v){return v.key == sel;})[0].value;
+		setCountry(ADM0);
+		changeView();
+		//var view = ADM1_lookup.filter(function(v){return v.value == ADM0;})[0];
+		//global_map.setView([view.lat, view.lng],view.zoom);
+		
+		}
+	}
+	
 
 var ch1 = d3.select("#global_container").append("div")
 	.attr("id","checkbox1")
 	.attr("class","checkboxes")
 	.style("margin-left","10px")
-	.style("margin-top","40px");
+	.style("margin-top","60px");
 	
 var ch2 = d3.select("#global_container").append("div")
 	.attr("id","checkbox2")
 	.attr("class","checkboxes")
 	.style("margin-left","10px")
-	.style("margin-top","60px");	
+	.style("margin-top","75px");	
 	
 	
 commentsCheckbox = ch1//d3.select("#global_container")
@@ -3077,14 +3278,14 @@ commentsOff_btn = d3.select("#global_container").append("div")
 	
 //per hundred thousand	
 	
-tot_btn = d3.select("#global_container").append("div")
+tot_btn = views.append("div")//d3.select("#global_container").append("div")
 	.attr("id","perTotal")
 	.style("background",mapcolor);
 	//.attr("class","toggle");
 
 	tot_btn.text("total cases");	
 
-pht_btn = d3.select("#global_container").append("div")
+pht_btn = views.append("div")//d3.select("#global_container").append("div")
 	.attr("id","perHT");
 	//.attr("class","toggle");	
 
@@ -3114,6 +3315,11 @@ pht_btn = d3.select("#global_container").append("div")
 		  update_c_basecolor();
 	  	}
 	gl_updateCountries();
+	
+	if(!gview){
+		PAHO_global_footnotes.removeFrom(global_map);
+	}
+	
 	//updateSMs();
 	});
 	
@@ -3145,6 +3351,9 @@ pht_btn = d3.select("#global_container").append("div")
   	}
 	  gl_updateCountries();
  	 //updateSMs();
+ 	if(!gview){
+ 		PAHO_global_footnotes.removeFrom(global_map);
+ 	}
  	});		
 	
 	
@@ -3685,9 +3894,10 @@ pht_btn = d3.select("#global_container").append("div")
 												  
 												  var dates;
 												  
-												  
-												  underlyingSubregion="temp";//ADM1_lookup.filter(function(d){return d.key == underlyingCountry;})[0].region;
-				  								
+												 
+												  underlyingSubregion="";//ADM1_lookup.filter(function(d){return d.key == underlyingCountry;})[0].region;
+											      
+												
 												  var checkboxIndicators = '';
 												
 												  if(cview){
@@ -3717,8 +3927,8 @@ pht_btn = d3.select("#global_container").append("div")
 													  });
 												  }
 									
-												  zoomVal = 2;
-												  zoomLevel = 2;
+												  //zoomVal = 2;
+												  
 												
 												
 												 console.log(underlyingRegion);
@@ -3784,7 +3994,73 @@ pht_btn = d3.select("#global_container").append("div")
    		 global_map.on('viewreset', gl_reset);
    		 global_map.on('zoom',gl_reset);
 		 
- 		function gl_reset() {
+		 function gl_reset(){
+			 var cZoom = global_map.getZoom();
+			 if(cview){
+				 console.log("yep");
+				 regions.style("opacity",gl_op);
+				 regions.style("pointer-events","all");
+ 				if(cZoom >= countryZoomVal+0.5 && subregions != null){
+ 						subregions.style("opacity",gl_op); 
+ 						subregions.style("pointer-events","all");
+ 						regions.style("stroke-width",2);
+ 						regions.style("pointer-events","none");
+ 				}else if(zoomVal > cZoom){
+ 					if(cZoom < countryZoomVal+0.5 && subregions != null){
+ 						subregions.style("opacity",0);
+ 						subregions.style("pointer-events","none");
+ 						regions.style("stroke-width",0.25);
+ 						regions.style("pointer-events","all");
+ 					}
+ 				}
+			 	
+			 }else if(gview){
+			 	
+			 }else if(rview){
+			 	
+				
+			 }
+			 
+			 zoomVal = global_map.getZoom();
+			 
+		    var bounds = global_path.bounds(geodata_admin0),//country_adm1_features[0]),
+				 topLeft = bounds[0],
+				 bottomRight = bounds[1];
+				 global_svg.attr("width", bottomRight[0] - topLeft[0])
+				        .attr("height", bottomRight[1] - topLeft[1])
+				        .style("left", topLeft[0] + "px")
+				        .style("top", topLeft[1] + "px");  
+			 
+	  		global_features.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");	  
+	  		global_land.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	 		global_subregions.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	  		gl_countries.attr('d',global_path);
+	 		gl_subregions.attr('d',global_path);
+	 		discrepancy_points.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	 		d_points.attr("transform",function(d){
+	 				return "translate("+global_map.latLngToLayerPoint(d.LatLng).x+","+global_map.latLngToLayerPoint(d.LatLng).y+")";
+	 			});
+		
+	  		
+			global_bcharts.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	  		global_labels.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	  		global_bcharts.selectAll("g").attr("transform", function(d) { return "translate(" +global_path.centroid(d)+ ")";});
+			//global_labels.selectAll("text").attr("x", function(d) { return global_path.centroid(d)[0];});
+	  		//global_labels.selectAll("text").attr("y", function(d) { return global_path.centroid(d)[1]+5;});
+	  		  
+	 		if(regions!=null){
+	 		features.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	 		regions.attr('d',global_path);
+	 		awards_shp.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	 		efforts.attr('d',global_path);
+	 		subfeatures.attr("transform", "translate(" + -topLeft[0] + "," + -topLeft[1] + ")");
+	 		subregions.attr('d',global_path);
+			}
+		 }
+		 
+		 
+		 
+ 		function gl_reset2() {
 			
 			if(commentsCheckbox.property("checked")){
 			d3.select("#discrepancyView").style("opacity",1);
@@ -3812,12 +4088,12 @@ pht_btn = d3.select("#global_container").append("div")
 				global_bcharts.style("opacity",0);
 				d3.select("#gl_chartview").style("opacity",0);
 				d3.select("#gl_chartview").style("pointer-events","none");
-				d3.select("#gl_awardview").style("opacity",0);
+				/*d3.select("#gl_awardview").style("opacity",0);
 				d3.select("#gl_awardview").style("pointer-events","none");
 				d3.select("#gl_awardview").style("opacity",0);
 				d3.select("#gl_awardview").style("pointer-events","none");
 				d3.select("#gl_awardview").style("opacity",0);
-				d3.select("#gl_awardview").style("pointer-events","none");
+				d3.select("#gl_awardview").style("pointer-events","none");*/
 				
 				/*if(ht){
 				glegend_ht.remove();
@@ -4019,6 +4295,176 @@ pht_btn = d3.select("#global_container").append("div")
 		 
 	 }
    		 //global_map.on('pan',gl_reset);
+		 
+		 
+		 
+		 function changeView(){
+		
+			 //231
+		 
+			d3.select("#perTotal").style("pointer-events","all");
+			d3.select("#perHT").style("pointer-events","all");
+			d3.select("#commentsOn").style("pointer-events","all");
+			d3.select("#commentsOff").style("pointer-events","all");
+		 
+			 if(cview){
+				 if(marker_layers[0]!=undefined)marker_layers[0].removeFrom(global_map);
+				 if(marker_layers[1]!=undefined)marker_layers[1].addTo(global_map);
+				 if(marker_layers[2]!=undefined)marker_layers[2].removeFrom(global_map);
+				 PAHO_global_footnotes.removeFrom(global_map);
+				 
+				 console.log("switching to sub-country view!");
+			 
+				 if(zoomLevel==2){
+	  				gl_countries.style("opacity",0);
+	 				global_bcharts.style("opacity",0);
+	 				d3.select("#gl_chartview").style("opacity",0);
+	 				d3.select("#gl_chartview").style("pointer-events","none");
+					d3.select("#gl_awardview").style("opacity",0);
+					d3.select("#gl_awardview").style("pointer-events","none");
+				 	
+				 }else if(zoomLevel==1){
+					gl_subregions.style("opacity",0);
+					gl_subregions.style("pointer-events","none");
+	 				d3.select("#gl_chartview").style("opacity",0);
+	 				d3.select("#gl_chartview").style("pointer-events","none");
+					d3.select("#gl_awardview").style("opacity",0);
+					d3.select("#gl_awardview").style("pointer-events","none");
+				 }
+			 
+			 
+ 				if(regions != null){
+					regions.style("opacity",gl_op);
+					regions.style("pointer-events","all");
+				}if(efforts != null){
+					efforts.style("opacity",gl_op);
+					efforts.style("pointer-events","all");
+				}
+				
+				if(zoomLevel==3){
+					console.log("Already");
+					regions.style("opacity",1);
+					regions.style("pointer-events","all");
+				}
+				
+				
+					d3.select("#rsView").style("opacity",1);
+					d3.select("#rsView").style("pointer-events","all");
+					if(awardsOn)d3.select("#awardview").style("opacity",1);
+					if(awardsOn)d3.select("#awardview").style("pointer-events","all");
+		 	
+				zoomLevel = 3;
+				
+				//legend_all.remove();
+				//update_c_choropleths();
+				//gl_update_legends();
+			
+			 }else if(gview){
+				 
+				 global_map.setView([-15, -50], 3.75);
+				 
+				 console.log("switching to country view!");
+				 if(marker_layers[0]!=undefined)marker_layers[0].addTo(global_map);
+				 if(marker_layers[1]!=undefined)marker_layers[1].removeFrom(global_map);
+				 if(marker_layers[2]!=undefined)marker_layers[2].removeFrom(global_map);
+				 PAHO_global_footnotes.addTo(global_map);
+			
+					if(zoomLevel==3){
+				//if moving from sub-national level 
+	 				gl_countries.style("opacity",gl_op);
+				
+					d3.select("#gl_chartview").style("opacity",1);
+					d3.select("#gl_chartview").style("pointer-events","all");
+					if(awardsCheckbox.property("checked"))global_bcharts.style("opacity",1);
+					if(awardsOn)d3.select("#gl_awardview").style("opacity",1);
+					if(awardsOn)d3.select("#gl_awardview").style("pointer-events","all");
+			
+	 				if(regions != null){
+						console.log("yes");
+						regions.style("opacity",0);
+						regions.style("pointer-events","none");
+					}if(subregions !=null){
+						subregions.style("opacity",0);
+						subregions.style("pointer-events","none");
+					}if(efforts != null){
+						console.log("yes");
+						efforts.style("opacity",0);
+						efforts.style("pointer-events","none");
+					}
+					
+					d3.select("#rsView").style("opacity",0);
+					d3.select("#rsView").style("pointer-events","none");
+					d3.select("#awardview").style("opacity",0);
+					d3.select("#awardview").style("pointer-events","none");
+				
+				}else if(zoomLevel==1){
+				//if moving from regional level 
+						gl_subregions.style("opacity",0);
+						gl_subregions.style("pointer-events","none");
+						gl_countries.style("opacity",gl_op);
+						gl_countries.style("pointer-events","all");
+						
+					}
+			
+				//update zoomLevel
+				zoomLevel=2;  
+				draw_global_chartview();
+				
+				legend_all.remove();
+				gl_update_legends();
+		 	
+			 }else if(rview){
+				console.log("switching to regional view!");
+				 if(marker_layers[0]!=undefined)marker_layers[0].removeFrom(global_map);
+				 if(marker_layers[0]!=undefined)marker_layers[1].removeFrom(global_map);
+				 if(marker_layers[0]!=undefined)marker_layers[2].addTo(global_map);
+				 PAHO_global_footnotes.removeFrom(global_map);
+				
+				global_map.setView([-15, -50], 3.75);
+				 
+	 			gl_subregions.style("opacity",gl_op);
+	 			gl_subregions.style("pointer-events","all");
+			 
+			 
+				 if(zoomLevel==3){
+	 				d3.select("#gl_chartview").style("opacity",1);
+	 				d3.select("#gl_chartview").style("pointer-events","all");
+	 				if(awardsCheckbox.property("checked"))global_bcharts.style("opacity",1);
+					if(awardsOn)d3.select("#gl_awardview").style("opacity",1);
+	 				if(awardsOn)d3.select("#gl_awardview").style("pointer-events","all");
+				
+					//if(regions != null)regions.style("opacity",0);
+					
+	 				if(regions != null){
+						regions.style("opacity",0);
+						regions.style("pointer-events","none");
+					}if(subregions !=null){
+						subregions.style("opacity",0);
+						subregions.style("pointer-events","none");
+					}if(efforts != null){
+						efforts.style("opacity",0);
+						efforts.style("pointer-events","none");
+					}
+					
+	  				d3.select("#rsView").style("opacity",0);
+	  				d3.select("#rsView").style("pointer-events","none");
+	  				d3.select("#awardview").style("opacity",0);
+	  				d3.select("#awardview").style("pointer-events","none"); 
+			 	
+				 }else if(zoomLevel==2){
+	  				gl_countries.style("opacity",0);
+	 				gl_countries.style("pointer-events","none");
+				 }
+			 
+				 
+			 
+				 zoomLevel = 1;
+				 draw_global_chartview();
+				 
+ 				legend_all.remove();
+ 				gl_update_legends();
+			 }
+		 }		 
 	 
 	 
 //draw global mapview
@@ -4060,7 +4506,14 @@ pht_btn = d3.select("#global_container").append("div")
 			 .on("mouseout",function(d){
 				 d3.select(this).style("fill",function(d){return d3.select(this).attr("basecolor");});
 				 restorecharts();
-			 });
+			 })
+ 			.on("click",function(d){
+				if(placeMarker){
+	 				console.log(d);
+	 				underlyingRegion = d.properties.SUBREGION;
+	 				underlyingCountry = "";
+	 			}
+ 			});
 			 
 			 gl_subregions.style("opacity",0);
 			 gl_subregions.style("pointer-events","none");
@@ -4164,7 +4617,7 @@ pht_btn = d3.select("#global_container").append("div")
 			}
 			}
 		})
-		.on("dblclick", function(d){
+		/*.on("dblclick", function(d){
 			if(priority_countries.indexOf(d.properties.ADMIN)!=-1 && got_data.indexOf(d.properties.ADMIN)!=-1){
 				
 				d3.select("#global_container").style("pointer-events","none");
@@ -4181,15 +4634,8 @@ pht_btn = d3.select("#global_container").append("div")
 				setCountry(ADM0);
 			//d3.select("#popup").moveToFront();
 			//hideGlobalFootnotes();
-			/*global_featureGroup.eachLayer(function(layer){
-				layer.setOpacity(0);
-			});*/
-			
-		 /*if(overview_tab.selected){
-			 d3.select("#overview").style("opacity",1);
-		 }*/		
 			}
-		})
+		})*/
 		.on("click",function(d){
 			d3.event.preventDefault();
 			//console.log("yay!!!");
@@ -4703,6 +5149,14 @@ pht_btn = d3.select("#global_container").append("div")
 		draw_global_awards(da[0].values);
 		}
 		
+		d3.selectAll("input[name='selind']").on("change", function(){
+			gl_choroplethIndicator = this.value;
+			console.log("indicator selection");
+			console.log(this.value);
+			//gl_updateCountries();
+			update_choropleths();
+		});	
+		
 	}
 	
 	function filterCaribbean(){
@@ -4757,6 +5211,15 @@ pht_btn = d3.select("#global_container").append("div")
 		}
 	}
 		draw_global_awards(partnersbyLinebyPartner);
+		
+		d3.selectAll("input[name='selind']").on("change", function(){
+			gl_choroplethIndicator = this.value;
+			console.log("indicator selection");
+			console.log(this.value);
+			//gl_updateCountries();
+			update_choropleths();
+		});	
+		
 	}
 	
 	
@@ -6338,9 +6801,14 @@ var yaxis = scatterplot_svg.append("g")
 		});
 		
 		//update regions
+		 var formatDate = d3.timeFormat("%m/%e/%y");
+		 //console.log(max_date);
+		
 		gl_subregions.each(function(d){	
 			var cp = regionalData.filter(function(v){return v.key == d.properties.SUBREGION;})[0].values;
-			var c = cp.filter(function(v){return v.key < max_date;});
+			//console.log(cp);
+			var c = cp.filter(function(v){return formatDate(new Date(v.key)) <= formatDate(max_date);});
+			//console.log(c);
 			if(c[0]!=undefined){
 				var color;
 				if(ht){
@@ -6348,7 +6816,7 @@ var yaxis = scatterplot_svg.append("g")
 				}else{
 					color = regional_choropleth(c[c.length-1].value[gl_choroplethIndicator]);		
 				}
-				if(d3.select("#gl_country"+d.properties.ADM0_A3).attr("selected")!=1){
+				if(d3.select(this).attr("selected")!=1){
 					d3.select(this).attr("basecolor",color); 
 					d3.select(this).style("fill",d3.select(this).attr("basecolor"));
 				}
@@ -6360,7 +6828,7 @@ var yaxis = scatterplot_svg.append("g")
 	function gl_updateCountries(){	
 		//countries
 		//var indicator = "autochthonous_cases_confirmed";
-		console.log(gl_choroplethIndicator);
+		//console.log(gl_choroplethIndicator);
 		
 		gl_countries.each(function(d){
 			var c = globaldata.filter(function(v){return v.country == d.properties.ADMIN;});
@@ -6510,8 +6978,10 @@ var yaxis = scatterplot_svg.append("g")
 			discrepancy_histogram[0].values.filter(function(f){return f.name == "adjustment";})[0].count++;
 		}
 	});
-	PAHO_global_footnotes.addTo(global_map);
 	
+	if(gview){
+	PAHO_global_footnotes.addTo(global_map);
+	}
 	//this is a problem...gotta find the workaround can't grab last then. have to find the closest previous date
 	//console.log(newdate);
 	//console.log(formatDate(new Date(newdate)));
@@ -7338,6 +7808,14 @@ var xaxis = global_indicators_3.append("g")
 			  d3.select("#smlegend").remove();
 		  }
 		  
+		  
+		  /*if(regions!=null){
+			  regions.selectAll("*").remove();
+		  }if(subregions!=null){
+		  	 
+		  }if(efforts!=null){
+		  	
+		  }*/
 		
 		if(footnote_data !=undefined){
 		footnotes.removeFrom(country_map);
@@ -7406,8 +7884,8 @@ var xaxis = global_indicators_3.append("g")
 		
 		c_choropleth_date = new Date(country_byDatebyRegion[country_byDatebyRegion.length-1].key);
 		
-		legend_all.remove();
-		gl_update_legends();
+		//legend_all.remove();
+		//gl_update_legends();
 		//console.log(country_epi);
 		
 		var view = ADM1_lookup.filter(function(v){return v.value == adm0;})[0];
