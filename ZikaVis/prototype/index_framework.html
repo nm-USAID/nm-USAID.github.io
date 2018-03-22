@@ -236,6 +236,7 @@ var _r = 0;	//regional
 	
 var choropleth_date;
 var c_choropleth_date;
+var c_d_data;
 var clegend;
 var clegend_ht;	
 var infoImage2;
@@ -2400,6 +2401,12 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 	  .key(function(d){return d.data_field;})
 	  .entries(epidata_all);
 	  
+	  
+	  var byCountrybyIndbyDate = d3.nest()
+	  .key(function(d){return d.country;})
+	  .key(function(d){return d.data_field;})
+	  .key(function(d){return d.report_date;})
+	  .entries(epidata_all.filter(function(v){return v.location_type != "country";}));
 
 	  
 	  
@@ -7946,11 +7953,15 @@ var xaxis = global_indicators_3.append("g")
 		bc_dy = 0; 
 		
 		
-		c_choropleth_date = new Date(country_byDatebyRegion[country_byDatebyRegion.length-1].key);
+		
+		
 		
 		//legend_all.remove();
 		//gl_update_legends();
 		//console.log(country_epi);
+		
+		//console.log(country_byDatebyRegion);
+		//console.log(byCountrybyIndbyDate);
 		
 		var view = ADM1_lookup.filter(function(v){return v.value == adm0;})[0];
 		global_map.setView([view.lat, view.lng],view.zoom);
@@ -7962,16 +7973,28 @@ var xaxis = global_indicators_3.append("g")
 			indstmp.push(c.key);
 		})
 		
-		
-		
-		//console.log("DATE STUFF");
-		var d_data = country_byDatebyRegion.filter(function(c){return formatDate(new Date(c.key)) == formatDate(new Date(c_choropleth_date));})[0].values;
-		//console.log(d_data);
-		
-		
 		country_indicators_template = indstmp;
 		
-		c_choroplethIndicator = d_data[0].values[0].key;
+		//remember, all is first!!
+		c_choroplethIndicator = indstmp[1];
+		
+		
+		//get latest date with data for indstmp[1]
+		var country_byIndbyDate = byCountrybyIndbyDate.filter(function(d){return d.key == country_title;})[0].values[0].values;
+				
+				
+				
+		c_choropleth_date = new Date(country_byIndbyDate[country_byIndbyDate.length-1].key);
+		
+		//console.log(c_choropleth_date);
+		//console.log(country_byDatebyRegion);
+		
+		//console.log("DATE STUFF");
+		c_d_data = country_byDatebyRegion.filter(function(c){return formatDate(new Date(c.key)) == formatDate(new Date(c_choropleth_date));})[0].values;
+		
+		//console.log(d_data);
+		
+		//c_choroplethIndicator = d_data[0].values[0].key;
 		//console.log(c_choroplethIndicator);
 		//console.log(country_epi);
 		
@@ -8631,9 +8654,10 @@ var b2 = path.bounds(country_centroid[0]),
 				}*/
 				var dd_data = d_data.filter(function(c){return c.key == d.properties.fips;})[0];
 				//console.log(dd_data);
+				//console.log(c_choroplethIndicator);
 				if(dd_data!=undefined){
 					var ddd_data = dd_data.values.filter(function(g){return g.key == c_choroplethIndicator;})[0].values[0];
-				//	console.log(ddd_data);
+					//console.log(ddd_data);
 				if(ht){
 					return country_choropleth_ht(ddd_data.value/(ddd_data.pop/1000));
 				}else{
