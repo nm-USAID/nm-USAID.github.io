@@ -7462,7 +7462,15 @@ var yaxis = scatterplot_svg.append("g")
 			var dd_data = d_data.values.filter(function(c){return c.key == d.properties.fips;})[0];
 			var ddd_data;
 			if(dd_data!=undefined){
-				ddd_data = dd_data.values.filter(function(g){return g.key == c_choroplethIndicator;})[0].values[0];
+				var ddd_data_0 = dd_data.values.filter(function(g){return g.key == c_choroplethIndicator;})[0];
+				if(ddd_data_0!=undefined){
+				 ddd_data = ddd_data_0.values[0];
+				}else{
+					return undefined;
+				}
+				
+				
+				//ddd_data = dd_data.values.filter(function(g){return g.key == c_choroplethIndicator;})[0].values[0];
 			}
 			
 			
@@ -8918,8 +8926,14 @@ var b2 = path.bounds(country_centroid[0]),
 				//console.log(dd_data);
 				//console.log(c_choroplethIndicator);
 				if(dd_data!=undefined){
-					var ddd_data = dd_data.values.filter(function(g){return g.key == c_choroplethIndicator;})[0].values[0];
-					//console.log(ddd_data);
+					//console.log(dd_data);
+					//console.log(c_choroplethIndicator);
+					var ddd_data_0 = dd_data.values.filter(function(g){return g.key == c_choroplethIndicator;})[0];
+					if(ddd_data_0!=undefined){
+					var ddd_data = ddd_data_0.values[0];
+					}else{
+						return "gray";
+					}
 				if(ht){
 					return country_choropleth_ht(ddd_data.value/(ddd_data.pop/1000));
 				}else{
@@ -10322,9 +10336,11 @@ var linegraph = global_indicators_2.append("path")
 				}
 			});	
 		});*/
-		
-		
-		var da = partnersbyCountrybyLinebyPartner_country.filter(function(c){return c.key == country_title;})[0].values;
+		var da;
+		var da_0 = partnersbyCountrybyLinebyPartner_country.filter(function(c){return c.key == country_title;})[0];
+		if(da_0!=undefined){
+		da = partnersbyCountrybyLinebyPartner_country.filter(function(c){return c.key == country_title;})[0].values;
+		}
 		
 		
 		//console.log(da);
