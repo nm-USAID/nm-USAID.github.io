@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <title>Zika Mapping - Footnotes</title>
-<link rel="stylesheet" type="text/css" href="style5.css">
+<link rel="stylesheet" type="text/css" href="style6.css">
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCukYnSkgIttWhAzy_U2YpbhsxU6wS0pbY" async defer></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
@@ -137,7 +137,7 @@ var text = meter.append("text")
 //var map = new L.Map("map", {center: [37.8, -96.9], zoom: 4})
   //  .addLayer(new L.TileLayer("http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"));	
   
-  var texcolor = "black";
+  var texcolor = "white";
 
 var t1 = textures.lines()
   .size(8)
@@ -244,6 +244,7 @@ var infoImage3;
 var zoomVal;
 var zoomLevel = 2;
 var mapcolor = "#d4dadc";//"#d0cfd4";
+var divmode;
 	
 var ht = false;
 	
@@ -252,9 +253,28 @@ var bchart_colors = ["#e7298a","#377eb8","#4daf4a","#984ea3","#ffff99"];
 var level_colors = ["#252525","#636363","#d9d9d9","#253494"];	
 	
 var colors = ["#3a44c7","#1f78b4",/*"#b2df8a"*/"#335317","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
-var dcolors = ["#a6cee3","#377eb8","#4daf4a","#ff7f00","#984ea3"];
-var d2colors = ["rgba(166, 205, 227, 0.8)","rgba(55, 126, 184, 0.8)","rgba(77, 175, 74, 0.8)","rgba(255, 127, 0, 0.8)","rgba(152, 78, 163, 0.8)"];
-var dstrokecolors = ["#048bb4","rgba(0,  50,  108, 1)","rgba(1,  99,  0, 1)","rgba(179,  51,  0, 1)","rgba(76,  2,  87, 1)"];
+//var dcolors = [/*"#a6cee3",*/"#377eb8","#4daf4a","#ff7f00","#984ea3"];
+var dcolors = ["#1b9e77",
+"#d95f02",
+"#7570b3",
+"#e7298a",
+"#66a61e"];
+
+var d2colors = ["#1b9e77",
+"#d95f02",
+"#7570b3",
+"#e7298a",
+"#66a61e"];
+
+var dstrokecolors=[
+"#126b50",
+"#a64902",
+"#535080",
+"#b5216d",
+	"#477315"];
+
+//[/*"rgba(166, 205, 227, 0.8)",*/"rgba(55, 126, 184, 0.8)","rgba(77, 175, 74, 0.8)","rgba(255, 127, 0, 0.8)","rgba(152, 78, 163, 0.8)"];
+//var dstrokecolors = [/*"#048bb4",*/"rgba(0,  50,  108, 1)","rgba(1,  99,  0, 1)","rgba(179,  51,  0, 1)","rgba(76,  2,  87, 1)"];
 /*var colors = ["#db8869",
 "#7566c9",
 "#55b14b",
@@ -302,12 +322,20 @@ var priority_countries = ["Belize","Haiti","El Salvador","Dominican Republic", "
  "Venezuela"];
  
 
+//var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left",inline:false},{country:"El Salvador",dx:-40,dy:20,t_align:"left",inline:false},{country:"Dominican Republic",dx:10,dy:0,t_align:"right",inline:false},{country:"Honduras",dx:0,dy:-10,t_align:"left",inline:false},
+//{country:"Guatemala",dx:-50,dy:5,t_align:"left",inline:false},{country:"Colombia",dx:-15,dy:0,t_align:"left",inline:false},{country:"Nicaragua",dx:0,dy:10,t_align:"left",inline:false},{country:"Peru",dx:-20,dy:0,t_align:"left",inline:false},{country:"Ecuador",dx:-15,dy:0,t_align:"left",inline:false},
+//{country:"Jamaica",dx:-15,dy:-10,t_align:"left",inline:false},{country:"Venezuela",dx:-15,dy:0,t_align:"left",inline:false},{country:"Paraguay",dx:-15,dy:0,t_align:"left",inline:false},{country:"Guyana",dx:-15,dy:0,t_align:"left",inline:false},{country:"Belize",dx:0,dy:-10,t_align:"left",inline:false},
+//{country:"Brazil",dx:-15,dy:0,t_align:"left",inline:false},{country:"Panama",dx:-20,dy:20,t_align:"left",inline:false},{country:"Costa Rica",dx:-45,dy:10,t_align:"left",inline:false},{country:"Caribbean Regional",dx:0,dy:0,t_align:"left",inline:false},
+//{country:"Barbados",dx:5,dy:-3,t_align:"left",inline:true, lngth:45},{country:"Dominica",dx:5,dy:-2,t_align:"left",inline:true,lngth:40},{country:"Antigua and Barbuda",dx:5,dy:5,t_align:"left",inline:true,lngth:84},{country:"Grenada",dx:15,dy:6,t_align:"left",inline:true,lngth:40},
+//{country:"Saint Vincent and the Grenadines",dx:15,dy:6,t_align:"left",inline:true,lngth:142},{country:"Saint Lucia",dx:8,dy:-6,t_align:"left",inline:true,lngth:50},{country:"Trinidad and Tobago",dx:5,dy:0,t_align:"left",inline:true,lngth:82},{country:"Saint Kitts and Nevis",dx:10,dy:-5,t_align:"left",inline:true,lngth:83},
+ //{country:"E/S Caribbean",dx:0,dy:0,t_align:"left",inline:false},{country:"Surinam",dx:0,dy:0,t_align:"left",inline:false}];
+
 var country_labels = [{country:"Haiti",dx:-15,dy:-10,t_align:"left",inline:false},{country:"El Salvador",dx:-40,dy:20,t_align:"left",inline:false},{country:"Dominican Republic",dx:10,dy:0,t_align:"right",inline:false},{country:"Honduras",dx:0,dy:-10,t_align:"left",inline:false},
 {country:"Guatemala",dx:-50,dy:5,t_align:"left",inline:false},{country:"Colombia",dx:-15,dy:0,t_align:"left",inline:false},{country:"Nicaragua",dx:0,dy:10,t_align:"left",inline:false},{country:"Peru",dx:-20,dy:0,t_align:"left",inline:false},{country:"Ecuador",dx:-15,dy:0,t_align:"left",inline:false},
 {country:"Jamaica",dx:-15,dy:-10,t_align:"left",inline:false},{country:"Venezuela",dx:-15,dy:0,t_align:"left",inline:false},{country:"Paraguay",dx:-15,dy:0,t_align:"left",inline:false},{country:"Guyana",dx:-15,dy:0,t_align:"left",inline:false},{country:"Belize",dx:0,dy:-10,t_align:"left",inline:false},
 {country:"Brazil",dx:-15,dy:0,t_align:"left",inline:false},{country:"Panama",dx:-20,dy:20,t_align:"left",inline:false},{country:"Costa Rica",dx:-45,dy:10,t_align:"left",inline:false},{country:"Caribbean Regional",dx:0,dy:0,t_align:"left",inline:false},
-{country:"Barbados",dx:5,dy:-3,t_align:"left",inline:true, lngth:45},{country:"Dominica",dx:5,dy:-2,t_align:"left",inline:true,lngth:40},{country:"Antigua and Barbuda",dx:5,dy:5,t_align:"left",inline:true,lngth:84},{country:"Grenada",dx:15,dy:6,t_align:"left",inline:true,lngth:40},
-{country:"Saint Vincent and the Grenadines",dx:15,dy:6,t_align:"left",inline:true,lngth:142},{country:"Saint Lucia",dx:8,dy:-6,t_align:"left",inline:true,lngth:50},{country:"Trinidad and Tobago",dx:5,dy:0,t_align:"left",inline:true,lngth:82},{country:"Saint Kitts and Nevis",dx:10,dy:-5,t_align:"left",inline:true,lngth:83},
+{country:"Barbados",dx:5,dy:-3,t_align:"left",inline:true, lngth:0},{country:"Dominica",dx:5,dy:-2,t_align:"left",inline:true,lngth:0},{country:"Antigua and Barbuda",dx:5,dy:5,t_align:"left",inline:true,lngth:0},{country:"Grenada",dx:15,dy:6,t_align:"left",inline:true,lngth:0},
+{country:"Saint Vincent and the Grenadines",dx:15,dy:6,t_align:"left",inline:true,lngth:0},{country:"Saint Lucia",dx:8,dy:-6,t_align:"left",inline:true,lngth:0},{country:"Trinidad and Tobago",dx:5,dy:0,t_align:"left",inline:true,lngth:0},{country:"Saint Kitts and Nevis",dx:10,dy:-5,t_align:"left",inline:true,lngth:0},
  {country:"E/S Caribbean",dx:0,dy:0,t_align:"left",inline:false},{country:"Surinam",dx:0,dy:0,t_align:"left",inline:false}];
 
 var central = ["El Salvador", "Honduras","Guatemala", "Nicaragua", "Ecuador"];
@@ -543,15 +571,18 @@ d3.select("#gl_chartview").append("div")
 	
 d3.select("#global_container").append("div")
 	.attr("id","discrepancyView");	
+		
+divmode = d3.select("#discrepancyView").append("div")
+	.attr("id","mode");			
 	
 var DiscTitle = d3.select("#discrepancyView").append("div")
-	.attr("id","epiDataTitle")
+	.attr("id","discrTitle")
 	.attr("class","chartTitle");
-	
 	
 	DiscTitle.append("text")
 	.attr("class","chartTitleText")
-	.text("DISCREPANCY DATA");	
+	.text("DISCREPANCY DATA");
+		
 	
 var WEDtitle = d3.select("#gl_epiData").append("div")
 	.attr("id","epiDataTitle")
@@ -1321,11 +1352,13 @@ var popmap_zoom = d3.zoom()
 				//console.log(global_data[i]);
 				var popupContent="<strong>Region: </strong>"+global_data[i].region+"<br>"+
 				"<strong>Description: </strong>"+global_data[i].description+"<br>"+
+				"<strong>Affected indicators: </strong>"+global_data[i].indicators+"<br>"+
 				"<strong>Error type: </strong>"+global_data[i].stype+"<br>"+
 				"<strong>Discrepancy type: </strong>"+global_data[i].discrepancy_type+"<br>"+
-				"<strong>Affected indicators: </strong>"+global_data[i].indicators+"<br>"+
-				"<strong>where in the pipeline: </strong>"+global_data[i].pipeline+"<br>"+
-				"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+global_data[i].true_value+"</strong><br>";
+				"<strong>Where in the pipeline: </strong>"+global_data[i].pipeline+"<br>"+
+				"<strong>Which epi report(s) does this error impact? </strong>all reports<br>"+
+				"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+global_data[i].true_value+"</strong><br>"+
+				"<strong>Level of confidence in the error </strong>just a hunch<br>";
 				
 				
 			  	if(global_data[i].lat != "" && global_data[i].lng != "" && global_data[i].description != ""){
@@ -1343,12 +1376,13 @@ var popmap_zoom = d3.zoom()
 				for(j=0;j<nad[i].values.length;j++){
 					var popupContent="<strong>Region: </strong>"+nad[i].values[j].region+"<br>"+
 					"<strong>Description: </strong>"+nad[i].values[j].description+"<br>"+
+					"<strong>Affected indicators: </strong>"+nad[i].values[j].indicators+"<br>"+
 					"<strong>Error type: </strong>"+nad[i].values[j].stype+"<br>"+
 					"<strong>Discrepancy type: </strong>"+nad[i].values[j].discrepancy_type+"<br>"+
-					"<strong>Affected indicators: </strong>"+nad[i].values[j].indicators+"<br>"+
 					"<strong>where in the pipeline: </strong>"+nad[i].values[j].pipeline+"<br>"+
+					"<strong>Which epi report(s) does this error impact? </strong>all reports<br>"+
 					"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>"+
-					"<strong>Level of certainty around this error: </strong>"+nad[i].values[j].certainty+"</strong><br>";
+					"<strong>Level of confidence around this error: </strong>"+nad[i].values[j].certainty+"</strong><br>";
 					if(nad[i].values[j].lat != "" && nad[i].values[j].lng != ""){
 						_marker = L.marker([+nad[i].values[j].lat,+nad[i].values[j].lng],{icon:blueIcon}).bindPopup(popupContent);
 						marker_layers[i].addLayer(_marker);
@@ -1813,6 +1847,7 @@ function ready(error, dat_info, geodata_admin0/*admin0data*/, geodata_admin1/*ad
 			region_name:dd.value,
 			time_period:"",
 			true_value:"",
+			stype:"",
 			when:"",
 			which_indicators:"",
 			zoom_level:"5",
@@ -3948,7 +3983,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 												  
 				     			  				  var popupContent = '<form target="_self" onsubmit="" action="javascript: postToGoogleG()">'+
 				     			  		          '<div class="form-group">'+
-												  		'<strong>Flag Error</strong><br>knowledge of errors will vary, please fill out the following to the best of your knowledge<br>(scroll down for additional form fields)<br><br>'+
+												  		'<strong>Flag Error</strong><br>knowledge of errors will vary, please fill out the following to the best of your knowledge.<br>(scroll down for additional form fields)<br><br>'+
 												  		'<strong>Region:</strong><input type="text" id="region" name="region" value="'+underlyingRegion+'"><br>'+
 												        //'<strong>Time period:</strong><input type="text" id="time" name="time"><br>'+
 												  		'<br><strong>Description:</strong><br>'+
@@ -3965,8 +4000,8 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
   														//'<input type="checkbox" id="type2" class="type" name="type" value="greydata"> <strong>Grey data:</strong> reputed data that is omitted at some stage of the data generation pipeline.<br>'+ 
 												  		//'<input type="checkbox" id="type3" class="type" name="type" value="adjustment"> <strong>Retrospective adjustments:</strong>  downstream updates to previously reported data.<br>'+
 												  		'<input type="checkbox" id="type1" class="type" name="type" value="inconsistency"> errors due to inconsistencies in data acquisition or reporting across regions (e.g. indicator definitions), or to region-specific factors/events <br>'+
-  														'<input type="checkbox" id="type2" class="type" name="type" value="greydata"> unofficial data/data ommitted as some stage of the surveillance system (detection,recording, collection...etc) <br>'+ 
-												  		'<input type="checkbox" id="type3" class="type" name="type" value="adjustment"> errors due to updates to the data made retrospectively <br>'+
+  														'<input type="checkbox" id="type2" class="type" name="type" value="greydata"> unofficial data/data omitted at some stage of the surveillance system (detection,recording, collection...etc) <br>'+ 
+												  		'<input type="checkbox" id="type3" class="type" name="type" value="adjustment"> errors due to updates made retrospectively to the data'+
 														'<br><br><strong>Which stage(s) of the surveillance system does this error impact?</strong><br>'+
 												  		'<input type="checkbox" id="pipeline1" class="pipeline" name="pipeline" value="detection"> detection '+
   														'<input type="checkbox" id="pipeline2" class="pipeline" name="pipeline" value="recording"> recording '+ 
@@ -3977,7 +4012,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 												  		'<input type="radio" id="how1" class="how" name="how" value="higher">value(s) should be <strong>higher</strong><br> '+
 												  		'<input type="radio" id="how2" class="how" name="how" value="lower">value(s) should be <strong>lower</strong><br>'+
 												  		'<input type="radio" id="how3" class="how" name="how" value="unknown"><strong>unknown</strong><br>'+
-												  		'<br><br><strong>How certain are you of the existance of this error?</strong><br>'+
+												  		'<br><br><strong>How certain are you of the existence of this error?</strong><br>'+
 												  		'<input type="radio" id="certainty1" class="certainty" name="certainty" value="low">just a hunch<br> '+
 												  		'<input type="radio" id="certainty2" class="certainty" name="certainty" value="medium">fairly certain, but do not have all the details<br>'+
 												  		'<input type="radio" id="certainty3" class="certainty" name="certainty" value="high">certain<br>'+
@@ -3999,7 +4034,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				     								  autoPan:true,
 													  autoPanPadding:[100,0]
 													  //autoClose:false
-													  //minWidth:475,
+													  //minWidth:325
 				     			  		            }).openPopup();
 				     			  		      }); 							  
 						  
@@ -4380,7 +4415,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				//if(discrepancyMode!=0){
 					d_points.each(function(d){
 						if(d.dataObj.zoomLevel==3){
-							d3.select(this).style("opacity",gl_op);
+							d3.select(this).style("opacity",1);
 							d3.select(this).style("pointer-events","all");
 						}else{
 							d3.select(this).style("opacity",0);
@@ -4454,7 +4489,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 				//if(discrepancyMode!=0){
 					d_points.each(function(d){
 						if(d.dataObj.zoomLevel==2){
-							d3.select(this).style("opacity",gl_op);
+							d3.select(this).style("opacity",1);
 							d3.select(this).style("pointer-events","all");
 						}else{
 							d3.select(this).style("opacity",0);
@@ -4524,7 +4559,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 					d_points.each(function(d){
 						console.log(d);
 						if(d.dataObj.zoomLevel==1){
-							d3.select(this).style("opacity",gl_op);
+							d3.select(this).style("opacity",1);
 							d3.select(this).style("pointer-events","all");
 						}else{
 							d3.select(this).style("opacity",0);
@@ -5519,10 +5554,10 @@ line_partners.append("path")
 	}
 	
 	function draw_discrepancyview(){
-		var mode = d3.select("#discrepancyView").append("div")
-		.attr("id","mode");
+		//var mode = d3.select("#discrepancyView").append("div")
+		//.attr("id","mode");
 		
-		var Imode = mode.append("div").attr("id","infoMode")
+		var Imode = divmode.append("div").attr("id","infoMode")
 		.style("background","grey")
 		.on("click",function(){
 			if(discrepancyMode!=0)showFootnotes();
@@ -5530,7 +5565,7 @@ line_partners.append("path")
 			discrepancy_points.style("opacity",0);
 			Imode.style("background","grey");
 			DNmode.style("background","white");
-			DCmode.style("background","white");
+			//DCmode.style("background","white");
 		});
 		
 		var Isvg = Imode.append("svg")
@@ -5548,7 +5583,7 @@ line_partners.append("path")
 			.attr("font-size", "12px")
 			.attr("fill", "black");*/
 		
-			var Dmode = mode.append("div").attr("id","dataMode");
+			var Dmode = divmode.append("div").attr("id","dataMode");
 			
 		
 		var DNmode = Dmode.append("div").attr("id","dataMode_node")
@@ -5559,12 +5594,12 @@ line_partners.append("path")
 				discrepancy_points.style("pointer-events","all");
 				Imode.style("background","white");
 				DNmode.style("background","grey");
-				DCmode.style("background","white");
+				//DCmode.style("background","white");
 			});
 		
 		var DNsvg = DNmode.append("svg")
 			.attr("width",15)
-			.attr("height",10);
+			.attr("height",20);
 			
 			DNsvg.selectAll("circle")
 			.data([{cx:8,cy:6.5},{cx:10,cy:3},{cx:12,cy:6}])
@@ -5576,7 +5611,7 @@ line_partners.append("path")
 			.style("fill","#303030");
 			
 		
-		var DCmode = Dmode.append("div").attr("id","dataMode_cluster")
+		/*var DCmode = Dmode.append("div").attr("id","dataMode_cluster")
 			.on("click",function(){
 				if(discrepancyMode==0)hideFootnotes();
 				discrepancyMode = 2;
@@ -5599,7 +5634,7 @@ line_partners.append("path")
 			.attr("cx", function(d){return d.cx;})
 			.attr("cy", function(d){return d.cy;})
 			.attr("r",3)
-			.style("fill","#303030");
+			.style("fill","#303030");*/
 			
 			draw_discrepancy_charts();
 			draw_discrepancy_points();
@@ -5676,16 +5711,16 @@ line_partners.append("path")
 	      //.attr("id",function(d){return "gl_country"+d.properties.ADM0_A3;})
 	    //.attr("d",global_path.pointRadius(3))
 		var bullseye = d_points.selectAll("circle")
-		.data([1,2,3,4,5])
+		.data([1,2,3,4,5,6])
 		.enter()
 		.append("circle")	
-		.attr("r",function(d){return 6+d*2;})
+		.attr("r",function(d){return 5+d*2;})
 		.attr("cx",0)
 		.attr("cy",0)
 		.attr("fill",function(d,i){if(i==0){return "steelblue";}else{return "none";}})
 		//.style("filter", "url(#drop-shadow)")
 		.attr("stroke","white")
-		.attr("stroke-width",function(d,i){if(i==0){return 1;}else{return 2;}});
+		.attr("stroke-width",function(d,i){if(i==0){return 1;}else{return 3;}});
 			  
 		  /*var arc1 = d3.arc()
 			.innerRadius(0)
@@ -5732,19 +5767,35 @@ line_partners.append("path")
 				//if(discrepancy_histogram[0].values.filter(function(e){return e.name == d.dataObj.discrepancy_type[0];})[0]!=undefined)
 				//n=discrepancy_histogram[0].values.filter(function(e){return e.name == d.dataObj.discrepancy_type[0];})[0].cI;
 				//if(d.dataObj.discrepancy_type.length>1)m=discrepancy_histogram[0].values.filter(function(e){return e.name == d.dataObj.discrepancy_type[1];})[0].cI;
-				
+				//console.log("yes");
+				//console.log(d.dataObj.discrepancy_type);
 				//circle
 				d3.select(this).selectAll("circle").each(function(f,i){
+				
 					if(d.dataObj.discrepancy_type.length > i){
+						d3.select(this).attr("r",5+i*2);
 						if(discrepancy_histogram[0].values.filter(function(e){return e.name == d.dataObj.discrepancy_type[i];})[0]!=undefined)
 						var l=discrepancy_histogram[0].values.filter(function(e){return e.name == d.dataObj.discrepancy_type[i];})[0].cI;
 						if(i==0){d3.select(this).attr("fill",d2colors[l%d2colors.length]);
-						d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);}else{
+						d3.select(this).attr("stroke",d2colors[l%d2colors.length]);
+						d3.select(this).attr("stroke-width",2);
+						//if(d.dataObj.discrepancy_type.length==1){d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);}
+					}else{
+						    d3.select(this).attr("stroke-width",3);
 							d3.select(this).attr("stroke",dcolors[l%dcolors.length]);}
+					}else if(d.dataObj.discrepancy_type.length == i){ //outerborder
+						var l=discrepancy_histogram[0].values.filter(function(e){return e.name == d.dataObj.discrepancy_type[i-1];})[0].cI;
+						//console.log(l);
+						d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);
+						d3.select(this).attr("r",5+(i)*2-0.5);
+						d3.select(this).attr("stroke-width",1);
 					}else{
 						//clear circle
 						d3.select(this).attr("stroke","none");
 					}
+					
+					
+					
 				});
 				
 				
@@ -5754,13 +5805,24 @@ line_partners.append("path")
 				//if(d.dataObj.pipeline.length>1)m=discrepancy_histogram[1].values.filter(function(e){return e.name == d.dataObj.pipeline[1];})[0].cI;
 				
 				d3.select(this).selectAll("circle").each(function(f,i){
+					d3.select(this).attr("r",5+i*2);
 					if(d.dataObj.pipeline.length > i){
 						if(discrepancy_histogram[1].values.filter(function(e){return e.name == d.dataObj.pipeline[i];})[0]!=undefined)
 						var l=discrepancy_histogram[1].values.filter(function(e){return e.name == d.dataObj.pipeline[i];})[0].cI;
 						if(i==0){d3.select(this).attr("fill",d2colors[l%d2colors.length]);
-						d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);}else{
-							d3.select(this).attr("stroke",dcolors[l%dcolors.length]);}
+						d3.select(this).attr("stroke",d2colors[l%d2colors.length]);
+						d3.select(this).attr("stroke-width",2);
+						//d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);
 					}else{
+							d3.select(this).attr("stroke-width",3);
+							d3.select(this).attr("stroke",dcolors[l%dcolors.length]);}
+						}else if(d.dataObj.pipeline.length == i){ //outerborder
+							var l=discrepancy_histogram[1].values.filter(function(e){return e.name == d.dataObj.pipeline[i-1];})[0].cI;
+							//console.log(l);
+							d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);
+							d3.select(this).attr("r",5+(i)*2-0.5);
+							d3.select(this).attr("stroke-width",1);
+						}else{
 						//clear circle
 						d3.select(this).attr("stroke","none");
 					}
@@ -5787,7 +5849,39 @@ line_partners.append("path")
 					}
 				});
 				
-			}
+			}else if(dptMode=="stype"){
+							//if(discrepancy_histogram[2].values.filter(function(e){return e.name == d.dataObj.true_value;})[0]!=undefined)
+							//n=discrepancy_histogram[2].values.filter(function(e){return e.name == d.dataObj.true_value;})[0].cI;
+				
+							d3.select(this).selectAll("circle").each(function(f,i){
+								if(d.dataObj.true_value.length > i){
+									var l=0;
+									//console.log(d.dataObj.true_value[i]);
+									if(discrepancy_histogram[3].values.filter(function(e){return e.name == d.dataObj.true_value[i];})[0]!=undefined){
+									l=discrepancy_histogram[3].values.filter(function(e){return e.name == d.dataObj.true_value[i];})[0].cI;
+									}
+									//console.log(l);
+									if(i==0)d3.select(this).attr("fill",d2colors[l%d2colors.length]);
+									d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);
+								}else{
+									//clear circle
+									d3.select(this).attr("stroke","none");
+								}
+							});
+				
+						}
+						
+						
+						d_points.each(function(d){
+							if(d.dataObj.zoomLevel==zoomLevel){
+								d3.select(this).style("opacity",1);
+								d3.select(this).style("pointer-events","all");
+							}else{
+								d3.select(this).style("opacity",0);
+								d3.select(this).style("pointer-events","none");
+							}
+						
+						});			
 			//d3.select(this).selectAll("circle").attr("fill",d2colors[n%d2colors.length]);//dcolors[n%dcolors.length]);
 			//d3.select(this).selectAll("circle").attr("stroke",dstrokecolors[n%dstrokecolors.length]);
 			//if(m!=0){d3.select(this).attr("stroke",dcolors[m%dcolors.length]);}else{d3.select(this).attr("stroke","none");}
@@ -5829,7 +5923,7 @@ line_partners.append("path")
 		
 	   dtypesvg.append("g")
 	         .attr("class", "axis")
-		.call(d3.axisLeft(y).ticks(5));
+		.call(d3.axisLeft(y).ticks(4));
 	   
 	   dtypesvg.append("g")
 			.attr("class", "axis")
@@ -5919,7 +6013,7 @@ line_partners.append("path")
 	   	
 	   dtvsvg.append("g")
 	         .attr("class", "axis")
-		.call(d3.axisLeft(y).ticks(5));
+		.call(d3.axisLeft(y).ticks(4));
 		
 	   dtvsvg.append("g")
 			.attr("class", "axis")
@@ -5944,6 +6038,51 @@ line_partners.append("path")
 	   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
 			.attr("height",function(d){return height - y(d.count);});
 			
+		//stype
+			discrepancySType = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
+			discrepancySType.append("input").attr("type","radio").attr("name","discr_ind").attr("value","truevalue").attr("checked",true);
+			var dstsvg = discrepancySType.append("svg")
+			.attr("id","discrepancy_truevalue_chart")	  
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform","translate(" + margin.left + "," + margin.top + ")");
+		
+			x = d3.scaleBand().range([0, width*0.75]).padding(0.1);
+		   	x.domain(discrepancy_histogram[3].values.map(function(d) { return d.name; }));
+			y.domain([0, d3.max(discrepancy_histogram[3].values,function(d){return d.count})]); 
+	   	
+		   dstsvg.append("g")
+		         .attr("class", "axis")
+			.call(d3.axisLeft(y).ticks(4));
+		
+		   dstsvg.append("g")
+				.attr("class", "axis")
+	      		.attr("transform", "translate(0," + height + ")")
+			.call(d3.axisBottom(x))
+		.selectAll("text")	
+	        .style("text-anchor", "end")
+	        .attr("dx", "-.8em")
+	        .attr("dy", ".15em")
+	        .attr("transform", function(d) {
+	            return "rotate(-35)" 
+	            });
+		
+			dstsvg.selectAll(".bar")
+		 	.data(discrepancy_histogram[3].values)
+		   	.enter().append("rect")
+		   	.attr("id",function(d){ 
+		   		return "bb"+d.name;})
+		 	.attr("x", function(d){return x(d.name);}) 
+		 	.attr("y", function(d){return y(d.count);})
+			.attr("width", x.bandwidth())
+		   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
+				.attr("height",function(d){return height - y(d.count);});
+			//	
+		
+		
+		
+			
 			
 			d3.selectAll("input[name='discr_ind']").on("change", function(){
 				dptMode=this.value;
@@ -5958,12 +6097,14 @@ line_partners.append("path")
 		
 		discrepancy_histogram = [{key:"discrepancy_type", values:[{name:"inconsistency", count:0, cI:0},{name:"greydata",count:0,cI:1},{name:"adjustment",count:0,cI:2}]},
 		{key:"pipeline",values:[{name:"detection",count:0,cI:0},{name:"recording",count:0,cI:1},{name:"collection",count:0,cI:2},{name:"processing",count:0,cI:3},{name:"reporting",count:0,cI:4}]},
-		{key:"true_value",values:[{name:"higher",count:0,cI:0},{name:"lower",count:0,cI:1},{name:"unknown",count:0,cI:2}]}];
+		{key:"true_value",values:[{name:"higher",count:0,cI:0},{name:"lower",count:0,cI:1},{name:"unknown",count:0,cI:2}]},
+		{key:"stype",values:[{name:"systematic",count:0,cI:0},{name:"random",count:0,cI:1}]}];
 		
 		discrepancy_data_filtered.forEach(function(d){
 			d.discrepancy_type = d.discrepancy_type.split(","); 
 			d.pipeline = d.pipeline.split(",");
-			d.true_value = d.true_value.split(","); 
+			d.true_value = d.true_value.split(",");
+			d.stype = d.stype.split(","); 
 			
 			var res;
 			
@@ -5977,9 +6118,12 @@ line_partners.append("path")
 			});
 				res = discrepancy_histogram[2].values.filter(function(f){return f.name == d.true_value;})[0];
 				if(res!=undefined)res.count++;
+				
+				res = discrepancy_histogram[3].values.filter(function(f){return f.name == d.stype;})[0];
+				if(res!=undefined)res.count++;
 		});
 		
-		//console.log(histogram);
+		console.log(discrepancy_histogram);
 		
   	 /* discrepancyByType = d3.nest()
   	  .key(function(d){return d.discrepancy_type;})
@@ -6002,15 +6146,10 @@ line_partners.append("path")
 		var margin = {top: 10, right: 10, bottom: 30, left: 60},
 	  	  width = 125 - margin.left - margin.right,
 	  	  height = 100 - margin.top - margin.bottom;
-		  
-		  
-		  /*var x = d3.scaleBand().range([0, width]).padding(0.1),
-		  	  y = d3.scaleLinear().range([height, 0]);*/
+		 
 		  
 		  var x = d3.scaleLinear().range([0,width]);
 		  var y = d3.scaleBand().range([height,0]).padding(0.1);
-			  
-		   	//x.domain(country_povbyfips.filter(function(d){return d.key.indexOf(".") != -1;}).map(function(d) { return d.key; }));  
 		   	
 		
 		discrepancyType = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
@@ -6049,8 +6188,17 @@ line_partners.append("path")
 	   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
 		.attr("width",function(d){return x(d.count);});
 			
+			
+margin = {top: 10, right: 10, bottom: 30, left: 60},
+	  	  width = 125 - margin.left - margin.right,
+	  	  height = 100 - margin.top - margin.bottom;
+		 
+		  
+		  x = d3.scaleLinear().range([0,width]);
+		  y = d3.scaleBand().range([height,0]).padding(0.1);	
+			
 		
-		discrepancyPipeline = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
+		discrepancyPipeline = d3.select("#discrepancyView").append("div").attr("class","discr_charts1");
 		discrepancyPipeline.append("input").attr("type","radio").attr("name","discr_ind").attr("value","pipeline");
 		var dpsvg = discrepancyPipeline.append("svg")
 		//.attr("class","discr_charts")
@@ -6098,6 +6246,14 @@ line_partners.append("path")
 	   	.style("fill","steelblue")	
 	   	.attr("height",function(d){return height - y(d.count);})*/	
 		
+		margin = {top: 10, right: 10, bottom: 30, left: 60},
+	  	  width = 125 - margin.left - margin.right,
+	  	  height = 100 - margin.top - margin.bottom;
+		 
+		  
+		  x = d3.scaleLinear().range([0,width]);
+		  y = d3.scaleBand().range([height,0]).padding(0.1);
+		
 		
 		discrepancyTrueValue = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
 		discrepancyTrueValue.append("input").attr("type","radio").attr("name","discr_ind").attr("value","true_value");
@@ -6131,6 +6287,42 @@ line_partners.append("path")
 	   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
 		.attr("width",function(d){return x(d.count);});
 		
+		
+		//stype
+		discrepancySType = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
+		discrepancySType.append("input").attr("type","radio").attr("name","discr_ind").attr("value","stype");
+		var dstsvg = discrepancySType.append("svg")
+		//.attr("class","discr_charts")
+		.attr("id","discrepancy_stype_chart")	  
+		.attr("width", width + margin.left + margin.right)
+		.attr("height", height + margin.top + margin.bottom)
+		.append("g")
+		.attr("transform","translate(" + margin.left + "," + margin.top + ")");
+		
+	   	y.domain(discrepancy_histogram[3].values.map(function(d) { return d.name; }));
+		x.domain([0, d3.max(discrepancy_histogram[3].values,function(d){return d.count})]); 
+	   	
+	   dtvsvg.append("g")
+	         .attr("class", "axis")
+		.call(d3.axisLeft(y));
+	   dtvsvg.append("g")
+			.attr("class", "axis")
+      		.attr("transform", "translate(0," + height + ")")
+		.call(d3.axisBottom(x).ticks(5));
+		
+		dtvsvg.selectAll(".bar")
+	 	.data(discrepancy_histogram[3].values)
+	   	.enter().append("rect")
+	   	.attr("id",function(d){ 
+	   		return "bb"+d.name;})
+	 	.attr("y", function(d){return y(d.name);}) 
+	 	.attr("x", 1)
+		.attr("height", y.bandwidth())
+	   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
+		.attr("width",function(d){return x(d.count);});
+		
+		
+		
 	}
 	
 	
@@ -6139,8 +6331,8 @@ line_partners.append("path")
 		
 		compute_histogram();
 		
-		var margin = {top: 10, right: 10, bottom: 50, left: 30},
-	  	  width = 110 - margin.left - margin.right,
+		var margin = {top: 10, right: 10, bottom: 55, left: 35},
+	  	  width = 95 - margin.left - margin.right,
 	  	  height = 100 - margin.top - margin.bottom;
 		  
 		  
@@ -6150,6 +6342,7 @@ line_partners.append("path")
 		
 		var discrepancyType = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
 		discrepancyType.append("input").attr("type","radio").attr("name","discr_ind").attr("value","type");
+		discrepancyType.append("text").text(" Source Type");
 		var dtypesvg = discrepancyType.append("svg")
 		//.attr("class","discr_charts")
 		.attr("id","discrepancy_type_chart")	  
@@ -6174,10 +6367,10 @@ line_partners.append("path")
 		.call(d3.axisBottom(x))
 		.selectAll("text")	
             .style("text-anchor", "end")
-            .attr("dx", "-.8em")
+            .attr("dx", "-.5em")
             .attr("dy", ".15em")
             .attr("transform", function(d) {
-                return "rotate(-35)" 
+                return "rotate(-45)" 
                 });
 		
 		
@@ -6192,9 +6385,18 @@ line_partners.append("path")
 	   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
 	   	.attr("height",function(d){return height - y(d.count);})
 			
+			margin = {top: 10, right: 10, bottom: 55, left: 25};
+			width = 110 - margin.left - margin.right;
+  	  	  height = 100 - margin.top - margin.bottom;
+		  
+		  
+  		  x = d3.scaleBand().range([0, width]).padding(0.1);
+  		  	  y = d3.scaleLinear().range([height, 0]);	
+			
 		
-		var discrepancyPipeline = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
+		var discrepancyPipeline = d3.select("#discrepancyView").append("div").attr("class","discr_charts1");
 		discrepancyPipeline.append("input").attr("type","radio").attr("name","discr_ind").attr("value","pipeline");
+		discrepancyPipeline.append("text").text(" Pipeline");
 		var dpsvg = discrepancyPipeline.append("svg")
 		//.attr("class","discr_charts")
 		.attr("id","discrepancy_pipeline_chart")	  
@@ -6219,10 +6421,10 @@ line_partners.append("path")
 		.call(d3.axisBottom(x))
 		.selectAll("text")	
      	   .style("text-anchor", "end")
-      	  .attr("dx", "-.8em")
+      	  .attr("dx", "-.5em")
       	  .attr("dy", ".15em")
       	  .attr("transform", function(d) {
-            return "rotate(-35)" 
+            return "rotate(-45)" 
             }); 
 		
 		dpsvg.selectAll(".bar")
@@ -6236,9 +6438,20 @@ line_partners.append("path")
 	   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
 	   	.attr("height",function(d){return height - y(d.count);})
 			
+			
+			
+			margin = {top: 10, right: 10, bottom: 55, left: 25};
+			width = 85 - margin.left - margin.right;
+  	  	  height = 100 - margin.top - margin.bottom;
+		  
+		  
+  		  x = d3.scaleBand().range([0, width]).padding(0.1);
+  		  	  y = d3.scaleLinear().range([height, 0]);		
+			
 		
 		var discrepancyTrueValue = d3.select("#discrepancyView").append("div").attr("class","discr_charts");
 		discrepancyTrueValue.append("input").attr("type","radio").attr("name","discr_ind").attr("value","truevalue").attr("checked",true);
+		discrepancyTrueValue.append("text").text(" True Value");
 		var dtvsvg = discrepancyTrueValue.append("svg")
 		//.attr("class","discr_charts")
 		.attr("id","discrepancy_truevalue_chart")	  
@@ -6261,10 +6474,10 @@ line_partners.append("path")
 		.call(d3.axisBottom(x))
 	.selectAll("text")	
         .style("text-anchor", "end")
-        .attr("dx", "-.8em")
+        .attr("dx", "-.5em")
         .attr("dy", ".15em")
         .attr("transform", function(d) {
-            return "rotate(-35)" 
+            return "rotate(-45)" 
             });
 		
 		dtvsvg.selectAll(".bar")
@@ -6277,6 +6490,55 @@ line_partners.append("path")
 		.attr("width", x.bandwidth())
 	   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
 			.attr("height",function(d){return height - y(d.count);});
+			
+			
+			
+			margin = {top: 10, right: 10, bottom: 55, left: 30};
+			width = 75 - margin.left - margin.right;
+  	  	  height = 100 - margin.top - margin.bottom;
+			
+		//stype
+			var discrepancySType = d3.select("#discrepancyView").append("div").attr("class","discr_charts2");
+			discrepancySType.append("input").attr("type","radio").attr("name","discr_ind").attr("value","stype").attr("checked",true);
+			discrepancySType.append("text").text(" Error Type");
+			var dstsvg = discrepancySType.append("svg")
+			//.attr("class","discr_charts")
+			.attr("id","discrepancy_stype_chart")	  
+			.attr("width", width + margin.left + margin.right)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+			.attr("transform","translate(" + margin.left + "," + margin.top + ")");
+		
+			x = d3.scaleBand().range([0, width*0.75]).padding(0.1);
+		   	x.domain(discrepancy_histogram[3].values.map(function(d) { return d.name; }));
+			y.domain([0, d3.max(discrepancy_histogram[3].values,function(d){return d.count})]); 
+	   	
+		   dstsvg.append("g")
+		         .attr("class", "axis")
+			.call(d3.axisLeft(y).ticks(5));
+		
+		   dstsvg.append("g")
+				.attr("class", "axis")
+	      		.attr("transform", "translate(0," + height + ")")
+			.call(d3.axisBottom(x))
+		.selectAll("text")	
+	        .style("text-anchor", "end")
+	        .attr("dx", "-.5em")
+	        .attr("dy", ".15em")
+	        .attr("transform", function(d) {
+	            return "rotate(-45)" 
+	            });
+		
+			dstsvg.selectAll(".bar")
+		 	.data(discrepancy_histogram[3].values)
+		   	.enter().append("rect")
+		   	.attr("id",function(d){ 
+		   		return "bb"+d.name;})
+		 	.attr("x", function(d){return x(d.name);}) 
+		 	.attr("y", function(d){return y(d.count);})
+			.attr("width", x.bandwidth())
+		   	.style("fill",function(d,i){return dcolors[i%dcolors.length];})	
+				.attr("height",function(d){return height - y(d.count);});	
 			
 			
 			d3.selectAll("input[name='discr_ind']").on("change", function(){
@@ -7252,7 +7514,7 @@ var yaxis = scatterplot_svg.append("g")
 		//console.log(globalbycountry);
 		
 			
-  	  var margin = {top: 20, right: 10, bottom: 30, left: 50},
+  	  var margin = {top: 25, right: 10, bottom: 30, left: 50},
       	width = 175 - margin.left - margin.right,
       	height = 100 - margin.top - margin.bottom;
 		
@@ -7341,8 +7603,8 @@ var yaxis = scatterplot_svg.append("g")
 		
 	global_indicators_3.append("text")
 		.attr("class","chart_labels")
-		.attr("x",-10)
-		.attr("y",-10)
+		.attr("x",-25)
+		.attr("y",-18)
 		.text(function(d){return d;});
 		
 		linegraph = global_indicators_3.selectAll("path")
@@ -7490,7 +7752,7 @@ var yaxis = scatterplot_svg.append("g")
 						}else if(i==0 || dat[0].values[i-1].footnotes[0] == undefined){ //show first visible or first after a break
 							return "*";
 						}else{
-							return ".";
+							return "";//"."
 						}
 					}else{
 						return "";
@@ -7643,7 +7905,7 @@ var xaxis = global_indicators_3.append("g")
 	.ticks(5)
 	.tickFormat(d3.timeFormat("%-m/%y")))		
 	.selectAll("text")	
-    .attr("dy", ".15em");
+    .attr("dy", ".35em");
 		
 		
 		global_indicators.forEach(function(d,i){
