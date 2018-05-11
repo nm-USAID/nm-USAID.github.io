@@ -250,8 +250,7 @@ var ht = false;
 	
 //var bchart_colors =["#66c2a5","#fc8d62","#8da0cb","#e78ac3","#a6d854"];	
 var bchart_colors = ["#e7298a","#377eb8","#4daf4a","#984ea3","#ffff99"];
-//var level_colors = ["#252525","#636363","#d9d9d9","#253494"];	
-var level_colors = ["#252525","#636363","#bfbfbf","#253494"];
+var level_colors = ["#252525","#636363","#bfbfbf","#253494"];	
 	
 var colors = ["#3a44c7","#1f78b4",/*"#b2df8a"*/"#335317","#33a02c","#fb9a99", "#e31a1c","#fdbf6f","#ff7f00","#cab2d6"];
 //var dcolors = [/*"#a6cee3",*/"#377eb8","#4daf4a","#ff7f00","#984ea3"];
@@ -541,7 +540,7 @@ d3.select("#gl_middleview").append("div")
 	
 d3.select("#gl_banner").append("h1")
 	.attr("class","banner")
-	.text("VISUALIZING USAID EFFORTS TO COMBAT ZIKA");
+	.text("VISUALIZING GLOBAL HEALTH EFFORTS TO COMBAT ZIKA");
 	
 d3.select("#gl_middleview").append("div")
 	.attr("id","viewtabs");		
@@ -698,7 +697,7 @@ d3.select("#rsView").append("div")
 	.attr("id","chartview");
 	
 d3.select("#global_container").append("div")
-	.attr("id","awardview");	
+	.attr("id","awardview");
 	
 	d3.select("#awardview").style("pointer-events","none");	
 	
@@ -802,7 +801,7 @@ subNatTab.dispatch("click");
 d3.select("#awardview").append("div")
 	.attr("id","awardData")
 	.append("text")
-	.text("USAID Partnerships")
+	.text("Partnerships")
 	.attr("class","awardsTitle");	
 
 }
@@ -1031,7 +1030,7 @@ pht_btn = d3.select("#buttons").append("div")
 d3.select("#awardview").append("div")
 	.attr("id","awardData")
 	.append("text")
-	.text("USAID Partnerships")
+	.text("Partnerships")
 	.attr("class","awardsTitle");	
 	
 	
@@ -5377,7 +5376,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 	
 		awardsTitle.append("text")
 		.attr("class","chartTitleText")
-		.text("USAID Partnerships");	
+		.text("Partnerships");	
 	
 		var infoImage4 = awardsTitle.append("svg")
 		.attr("width",15)
@@ -5430,7 +5429,7 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 		});
 		
 		award_efforts.append("text")
-		.text(function(d){return d.key.replace("and","&");})
+		.text(function(d,i){return "Line of Effort_"+(i+1)/*d.key.replace("and","&")*/;})
 		.attr("y","10px");
 		/*.attr("fill",function(d,i,j){
 			var n = j[i].parentNode.id.replace("line_","");
@@ -5570,10 +5569,12 @@ line_partners.append("path")
 			});
 		});*/
 		
+		var alpha = ["A","B","C","D","E","F","G","H","I","J"];
+		
 		line_partners.append("text")
 		.attr("x","15px")
 		.attr("y","8px")
-		.text(function(d){return d.key;});
+		.text(function(d,i){return alpha[i]/*d.key*/;});
 		
 	}
 	
@@ -10332,7 +10333,7 @@ var linegraph = global_indicators_2.append("path")
 		
 		
 		headline.append("text")
-		.text("USAID AWARDS")
+		.text("Partnerships")
 		.attr("class","award_subtitle");
 		
 		/*var checkbox = d3.select("#awardData").append("svg")
@@ -10399,7 +10400,7 @@ var linegraph = global_indicators_2.append("path")
 			.attr("class","award_effort2");
 		
 			award_efforts.append("text")
-			.text(function(d){return d.key.replace("and","&");})
+			.text(function(d,i){return "Line of Effort_"+(i+1)/*d.key.replace("and","&")*/;})
 			.attr("y","20px");
 			/*.attr("fill",function(d,i,j){
 				var n = j[i].parentNode.id.replace("line_","");
@@ -10449,11 +10450,13 @@ var linegraph = global_indicators_2.append("path")
 					d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).style("fill",function(e){return d3.select("#award_"+f.HASC.replace(".","_").replace(".","_")).attr("basecolor");});
 				})
 			});
+			
+			var alpha = ["A","B","C","D","E","F","G","H","I","J"];
 		
 			line_partners.append("text")
 			.attr("x","20px")
 			.attr("y","10px")
-			.text(function(d){return d.key;});
+			.text(function(d,i){return alpha[i]/*d.key*/;});
 		
 	}
 	
