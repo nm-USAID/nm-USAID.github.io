@@ -5587,6 +5587,9 @@ line_partners.append("path")
 			if(discrepancyMode!=0)showFootnotes();
 			discrepancyMode = 0;
 			discrepancy_points.style("opacity",0);
+			discrepancy_points.style("pointer-events","none");
+			d_points.selectAll("circle").style("pointer-events","none");
+			
 			Imode.style("background","grey");
 			DNmode.style("background","white");
 			//DCmode.style("background","white");
@@ -5614,8 +5617,13 @@ line_partners.append("path")
 			.on("click",function(){
 				if(discrepancyMode==0)hideFootnotes();
 				discrepancyMode = 1;
+				
 				discrepancy_points.style("opacity",1);
 				discrepancy_points.style("pointer-events","all");
+				
+				//turn_on_d_points();
+				update_dpt_color();	
+				
 				Imode.style("background","white");
 				DNmode.style("background","grey");
 				//DCmode.style("background","white");
@@ -5684,6 +5692,12 @@ line_partners.append("path")
 	                });
 	                return data;
 	            }
+	
+	
+	function turn_on_d_points(){
+					
+			update_dpt_color();		
+	}
 	
 	
 	function draw_discrepancy_points(){
@@ -5772,10 +5786,17 @@ line_partners.append("path")
 		
 		update_dpt_color();
 		
+		//d_points.selectAll("circle").style("pointer-events","none");
+		
 		//because discrepancyMode default is I
 		if(discrepancyMode!=1){
+			d_points.selectAll("circle").style("pointer-events","none");
 			discrepancy_points.style("opacity",0);
 			discrepancy_points.style("pointer-events","none");
+			/*d_points.each(function(d){
+					d3.select(this).style("opacity",0);
+					d3.select(this).style("pointer-events","none");
+			});*/
 		}
 		
 	}
@@ -5795,6 +5816,8 @@ line_partners.append("path")
 				//console.log(d.dataObj.discrepancy_type);
 				//circle
 				d3.select(this).selectAll("circle").each(function(f,i){
+					
+					d3.select(this).style("pointer-events","all");
 				
 					if(d.dataObj.discrepancy_type.length > i){
 						d3.select(this).attr("r",5+i*2);
@@ -5806,16 +5829,19 @@ line_partners.append("path")
 						//if(d.dataObj.discrepancy_type.length==1){d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);}
 					}else{
 						    d3.select(this).attr("stroke-width",3);
-							d3.select(this).attr("stroke",dcolors[l%dcolors.length]);}
+							d3.select(this).attr("stroke",dcolors[l%dcolors.length]);
+						}
 					}else if(d.dataObj.discrepancy_type.length == i){ //outerborder
 						var l=discrepancy_histogram[0].values.filter(function(e){return e.name == d.dataObj.discrepancy_type[i-1];})[0].cI;
 						//console.log(l);
 						d3.select(this).attr("stroke",dstrokecolors[l%dstrokecolors.length]);
 						d3.select(this).attr("r",5+(i)*2-0.5);
 						d3.select(this).attr("stroke-width",1);
+						
 					}else{
 						//clear circle
 						d3.select(this).attr("stroke","none");
+						d3.select(this).style("pointer-events","none");
 					}
 					
 					
@@ -5829,6 +5855,9 @@ line_partners.append("path")
 				//if(d.dataObj.pipeline.length>1)m=discrepancy_histogram[1].values.filter(function(e){return e.name == d.dataObj.pipeline[1];})[0].cI;
 				
 				d3.select(this).selectAll("circle").each(function(f,i){
+					
+					d3.select(this).style("pointer-events","all");
+					
 					d3.select(this).attr("r",5+i*2);
 					if(d.dataObj.pipeline.length > i){
 						if(discrepancy_histogram[1].values.filter(function(e){return e.name == d.dataObj.pipeline[i];})[0]!=undefined)
@@ -5849,6 +5878,7 @@ line_partners.append("path")
 						}else{
 						//clear circle
 						d3.select(this).attr("stroke","none");
+						d3.select(this).style("pointer-events","none");
 					}
 				});
 				
@@ -5858,6 +5888,9 @@ line_partners.append("path")
 				//n=discrepancy_histogram[2].values.filter(function(e){return e.name == d.dataObj.true_value;})[0].cI;
 				
 				d3.select(this).selectAll("circle").each(function(f,i){
+					
+					d3.select(this).style("pointer-events","all");
+					
 					if(d.dataObj.true_value.length > i){
 						var l=0;
 						//console.log(d.dataObj.true_value[i]);
@@ -5870,6 +5903,7 @@ line_partners.append("path")
 					}else{
 						//clear circle
 						d3.select(this).attr("stroke","none");
+						d3.select(this).style("pointer-events","none");
 					}
 				});
 				
@@ -5878,6 +5912,9 @@ line_partners.append("path")
 							//n=discrepancy_histogram[2].values.filter(function(e){return e.name == d.dataObj.true_value;})[0].cI;
 				
 							d3.select(this).selectAll("circle").each(function(f,i){
+								
+								d3.select(this).style("pointer-events","all");
+								
 								if(d.dataObj.true_value.length > i){
 									var l=0;
 									//console.log(d.dataObj.true_value[i]);
@@ -5890,6 +5927,7 @@ line_partners.append("path")
 								}else{
 									//clear circle
 									d3.select(this).attr("stroke","none");
+									d3.select(this).style("pointer-events","none");
 								}
 							});
 				
@@ -5903,6 +5941,7 @@ line_partners.append("path")
 							}else{
 								d3.select(this).style("opacity",0);
 								d3.select(this).style("pointer-events","none");
+								d3.select(this).selectAll("circle").style("pointer-events","none");
 							}
 						
 						});			
@@ -6934,7 +6973,7 @@ var yaxis = scatterplot_svg.append("g")
 					
 					
 					footnotes.append("title")
-					.text(function(d){/*console.log(d);*/ if(d.footnotes[0]!=undefined){return d.footnotes[0][0].note;}});
+					.text(function(d){if(d.footnotes[0]!=undefined){return d.footnotes[0][0].note;}});
 					
 					
 				}				
