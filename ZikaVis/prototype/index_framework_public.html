@@ -1533,7 +1533,7 @@ var popmap_zoom = d3.zoom()
 						"<strong>Affected indicators: </strong>"+nad[i].values[j].indicators+"<br>"+
 						"<strong>where in the pipeline: </strong>"+nad[i].values[j].pipeline+"<br>"+
 						"<strong>How should the values be adjusted: </strong> value(s) should be <strong>"+nad[i].values[j].true_value+"</strong><br>"+
-						"<strong>Level of certainty around this error: </strong>"+nad[i].values[j].certainty+"</strong><br>";
+						"<strong>Level of confidence around this error: </strong>"+nad[i].values[j].certainty+"</strong><br>";
 						if(nad[i].values[j].lat != "" && nad[i].values[j].lng != ""){
 							_marker = L.marker([+nad[i].values[j].lat,+nad[i].values[j].lng],{icon:blueIcon}).bindPopup(popupContent);
 							marker_layers[i].addLayer(_marker);
@@ -4014,10 +4014,10 @@ pht_btn = views.append("div")//d3.select("#global_container").append("div")
 												  		'<input type="radio" id="how1" class="how" name="how" value="higher">value(s) should be <strong>higher</strong><br> '+
 												  		'<input type="radio" id="how2" class="how" name="how" value="lower">value(s) should be <strong>lower</strong><br>'+
 												  		'<input type="radio" id="how3" class="how" name="how" value="unknown"><strong>unknown</strong><br>'+
-												  		'<br><br><strong>How certain are you of the existence of this error?</strong><br>'+
+												  		'<br><br><strong>How confident are you of the existence of this error?</strong><br>'+
 												  		'<input type="radio" id="certainty1" class="certainty" name="certainty" value="low">just a hunch<br> '+
-												  		'<input type="radio" id="certainty2" class="certainty" name="certainty" value="medium">fairly certain, but do not have all the details<br>'+
-												  		'<input type="radio" id="certainty3" class="certainty" name="certainty" value="high">certain<br>'+
+												  		'<input type="radio" id="certainty2" class="certainty" name="certainty" value="medium">fairly confident, but do not have all the details<br>'+
+												  		'<input type="radio" id="certainty3" class="certainty" name="certainty" value="high">confident<br>'+
 				     			  		          '</div>'+
 				     			  		          '<input style="display: none;" type="text" id="lat" name="lat" value="'+coords.lat.toFixed(6)+'" />'+
 				     			  		          '<input style="display: none;" type="text" id="lng" name="lng" value="'+coords.lng.toFixed(6)+'" />'+

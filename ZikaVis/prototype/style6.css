@@ -1532,7 +1532,7 @@ cursor:pointer;
 }
 
 .leaflet-popup-content{
-	overflow-y:none;
+	overflow-y:scroll;
 	max-height:290px;
 	pointer-events:all;
 }
